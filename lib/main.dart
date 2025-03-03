@@ -5,8 +5,19 @@ import 'package:jarvis/View/Welcome/welcome_screen.dart';
 import 'package:jarvis/utils/theme.dart';
 import 'package:provider/provider.dart';
 
+import 'ViewModel/ai-chat-list.dart';
+import 'ViewModel/message-home-chat.dart';
+
 void main() {
-  runApp(MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => MessageModel()),
+        ChangeNotifierProvider(create: (context) => AIChatList()),
+      ],
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

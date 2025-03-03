@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-//import 'package:jarvis/View/HomeChat/home.dart';
+import 'package:jarvis/View/HomeChat/home.dart';
 import 'package:jarvis/View/Register/register_screen.dart';
 import 'package:jarvis/constants/colors.dart';
 import 'package:jarvis/constants/image_strings.dart';
@@ -85,10 +85,10 @@ class LoginScreen extends StatelessWidget {
                             child: ElevatedButtonCustom(
                               text: loginString.toUpperCase(),
                               onPressed: () {
-                                // Navigator.pushReplacement(
-                                //     context,
-                                //     MaterialPageRoute(
-                                //         builder: (context) => HomeChat()));
+                                Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => HomeChat()));
                               },
                             ),
                           ),
