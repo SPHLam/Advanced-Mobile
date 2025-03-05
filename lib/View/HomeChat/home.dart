@@ -5,6 +5,7 @@ import '../BottomSheet/custom_bottom_sheet.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../../ViewModel/message-home-chat.dart';
+import '../EmailChat/email.dart';
 import 'Widgets/BottomNavigatorBarCustom/custom-bottom-navigator-bar.dart';
 import '../../ViewModel/ai-chat-list.dart';
 
@@ -263,7 +264,10 @@ class _HomeChatState extends State<HomeChat> {
                           IconButton(
                             icon: const Icon(Icons.email),
                             onPressed: () {
-
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => EmailComposer()),
+                              );
                             },
                           ),
                         ],
