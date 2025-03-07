@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:jarvis/View/HomeChat/Widgets/Menu/menu.dart';
 import '../../core/Widget/dropdown-button.dart';
 import '../BottomSheet/custom_bottom_sheet.dart';
 import 'package:image_picker/image_picker.dart';
@@ -151,6 +152,7 @@ class _HomeChatState extends State<HomeChat> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
+      drawer: Menu(),
       body: Column(
         children: [
           SafeArea(
