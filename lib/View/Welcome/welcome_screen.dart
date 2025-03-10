@@ -22,10 +22,9 @@ class WelcomeScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: isDarkMode ? secondaryColor : primaryColor,
       body: Center(
-        // Để căn giữa nội dung theo chiều ngang
         child: Container(
           padding: EdgeInsets.all(tDefaultSize),
-          width: width * 0.9, // Giới hạn độ rộng của nội dung
+          width: width * 0.9,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -45,7 +44,7 @@ class WelcomeScreen extends StatelessWidget {
               Column(
                 children: [
                   SizedBox(
-                    width: double.infinity, // Đảm bảo nút có độ rộng tối đa
+                    width: double.infinity,
                     child: OutlinedButtonCustom(
                       onPressed: () {
                         Navigator.pushReplacement(

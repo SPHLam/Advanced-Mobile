@@ -5,7 +5,7 @@ const String emailString = "Email";
 const String passwordString = "Password";
 const String forgetPasswordString = "Forget Password?";
 const String loginWithGoogleString = "Login with Google";
-const String fullnameString = "Fullname";
+const String fullNameString = "Full Name";
 const String phoneNumberString = "Phone Number";
 
 // Welcome Screen
