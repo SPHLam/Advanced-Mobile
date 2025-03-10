@@ -7,20 +7,20 @@ import '../../constants/sizes.dart';
 class OutlinedButtonCustom extends StatelessWidget {
   final String label;
   final VoidCallback onPressed;
-  final Image? icon; // Thay đổi thành Image? để có thể null
+  final Image? icon;
 
   const OutlinedButtonCustom({
     super.key,
     required this.label,
     required this.onPressed,
-    this.icon, // Icon không bắt buộc
+    this.icon,
   });
 
   @override
   Widget build(BuildContext context) {
     return OutlinedButton.icon(
       icon: icon ??
-          SizedBox.shrink(), // Nếu không có icon, sử dụng SizedBox.shrink()
+          SizedBox.shrink(),
       style: OutlinedButton.styleFrom(
         shape: RoundedRectangleBorder(),
         foregroundColor: secondaryColor,
