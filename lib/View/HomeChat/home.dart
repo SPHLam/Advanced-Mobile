@@ -1,10 +1,13 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:jarvis/View/HomeChat/Widgets/Menu/menu.dart';
 import '../../core/Widget/dropdown-button.dart';
+import '../Account/account_screen.dart';
 import '../BottomSheet/custom_bottom_sheet.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../../ViewModel/message-home-chat.dart';
+import '../EmailChat/email.dart';
 import 'Widgets/BottomNavigatorBarCustom/custom-bottom-navigator-bar.dart';
 import '../../ViewModel/ai-chat-list.dart';
 
@@ -53,9 +56,15 @@ class _HomeChatState extends State<HomeChat> {
     if (index == 2) {
       CustomBottomSheet.show(context);
     } else if (index == 1) {
-
+      // Navigator.push(
+      //   context,
+      //   MaterialPageRoute(builder: (context) => BotScreen()),
+      // );
     } else if (index == 3) {
-
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => AccountScreen()),
+      );
     }
   }
   void _toggleToolVisibility() {
@@ -150,6 +159,7 @@ class _HomeChatState extends State<HomeChat> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
+      drawer: Menu(),
       body: Column(
         children: [
           SafeArea(
@@ -263,7 +273,10 @@ class _HomeChatState extends State<HomeChat> {
                           IconButton(
                             icon: const Icon(Icons.email),
                             onPressed: () {
-
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => EmailComposer()),
+                              );
                             },
                           ),
                         ],

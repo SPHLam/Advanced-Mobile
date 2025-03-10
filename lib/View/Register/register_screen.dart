@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-//import 'package:jarvis/View/Home/home.dart';
 import 'package:jarvis/View/Login/login_screen.dart';
-import 'package:jarvis/constants/colors.dart';
 import 'package:jarvis/constants/image_strings.dart';
 import 'package:jarvis/constants/sizes.dart';
 import 'package:jarvis/constants/text_strings.dart';
@@ -48,7 +46,7 @@ class RegisterScreen extends StatelessWidget {
                           TextFormField(
                             decoration: const InputDecoration(
                               prefixIcon: Icon(Icons.person_outline_rounded),
-                              label: Text(fullnameString),
+                              label: Text(fullNameString),
                             ),
                           ),
                           const SizedBox(height: tFormHeight - 20),
