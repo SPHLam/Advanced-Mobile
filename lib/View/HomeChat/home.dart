@@ -28,7 +28,6 @@ class _HomeChatState extends State<HomeChat> {
   final TextEditingController _controller = TextEditingController();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late String selectedAIItem;
-  bool _isOpenToolWidget = false;
   bool _isOpenDeviceWidget = false;
   int _selectedBottomItemIndex = 0;
   final FocusNode _focusNode = FocusNode();
@@ -72,11 +71,6 @@ class _HomeChatState extends State<HomeChat> {
         MaterialPageRoute(builder: (context) => const AccountScreen()),
       );
     }
-  }
-  void _toggleToolVisibility() {
-    setState(() {
-      _isOpenToolWidget = !_isOpenToolWidget;
-    });
   }
   void _toggleDeviceVisibility() {
     setState(() {
@@ -205,10 +199,6 @@ class _HomeChatState extends State<HomeChat> {
                   IconButton(
                     icon: const Icon(Icons.add_circle_outline),
                     onPressed: Provider.of<MessageModel>(context).messages.isEmpty ? null : _saveConversation,
-                  ),
-                  IconButton(
-                    onPressed: _toggleToolVisibility,
-                    icon: const Icon(Icons.more_horiz),
                   ),
                 ],
               ),
