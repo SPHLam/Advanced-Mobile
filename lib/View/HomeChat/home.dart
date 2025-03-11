@@ -1,17 +1,20 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:jarvis/View/HomeChat/Widgets/Menu/menu.dart';
+import 'package:jarvis/View/Account/account_screen.dart';
+import 'package:jarvis/View/Bot/page/bot_screen.dart';
+import 'package:jarvis/View/Prompt/prompt_screen.dart';
 import '../../core/Widget/dropdown-button.dart';
-import '../Account/account_screen.dart';
-import '../BottomSheet/custom_bottom_sheet.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../../ViewModel/message-home-chat.dart';
 import '../EmailChat/email.dart';
 import 'Widgets/BottomNavigatorBarCustom/custom-bottom-navigator-bar.dart';
-import '../../ViewModel/ai-chat-list.dart';
+import 'Widgets/Menu/menu.dart';
+import 'package:jarvis/ViewModel/ai-chat-list.dart';
 
 import 'model/ai-logo-list.dart';
+
+
 
 class HomeChat extends StatefulWidget {
   const HomeChat({super.key});
@@ -54,16 +57,19 @@ class _HomeChatState extends State<HomeChat> {
       _selectedBottomItemIndex = index;
     });
     if (index == 2) {
-      CustomBottomSheet.show(context);
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const PromptScreen()),
+      );
     } else if (index == 1) {
-      // Navigator.push(
-      //   context,
-      //   MaterialPageRoute(builder: (context) => BotScreen()),
-      // );
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const BotScreen()),
+      );
     } else if (index == 3) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => AccountScreen()),
+        MaterialPageRoute(builder: (context) => const AccountScreen()),
       );
     }
   }
@@ -115,8 +121,8 @@ class _HomeChatState extends State<HomeChat> {
     return Align(
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
-        margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-        padding: EdgeInsets.all(12.0),
+        margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+        padding: const EdgeInsets.all(12.0),
         decoration: BoxDecoration(
           color: isUser ? Colors.blue[100] : Colors.grey[300],
           borderRadius: BorderRadius.circular(50),
@@ -128,7 +134,7 @@ class _HomeChatState extends State<HomeChat> {
           message['text']!,
           style: TextStyle(color: isUser ? Colors.black : Colors.black),
         )
-            : SizedBox.shrink(),
+            : const SizedBox.shrink(),
       ),
     );
   }
@@ -159,12 +165,12 @@ class _HomeChatState extends State<HomeChat> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      drawer: Menu(),
+      drawer: const Menu(),
       body: Column(
         children: [
           SafeArea(
             child: Padding(
-              padding: EdgeInsets.all(10.0),
+              padding: const EdgeInsets.all(10.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
@@ -174,9 +180,9 @@ class _HomeChatState extends State<HomeChat> {
                     },
                     icon: const Icon(Icons.menu),
                   ),
-                  Spacer(),
+                  const Spacer(),
                   Container(
-                    padding: EdgeInsets.all(5),
+                    padding: const EdgeInsets.all(5),
                     decoration: BoxDecoration(
                       color: Colors.grey[200],
                       borderRadius: BorderRadius.circular(50.0),
@@ -235,7 +241,7 @@ class _HomeChatState extends State<HomeChat> {
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
@@ -292,16 +298,16 @@ class _HomeChatState extends State<HomeChat> {
                               controller: _controller,
                               maxLines: null,
                               decoration: InputDecoration(
-                                contentPadding: EdgeInsets.only(left: 10, right: 10),
+                                contentPadding: const EdgeInsets.only(left: 10, right: 10),
                                 hintText: (_selectedImagePath == null) ? 'Enter your message...' : null,
                                 border: InputBorder.none,
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(50),
-                                  borderSide: BorderSide(color: Colors.grey, width: 1),
+                                  borderSide: const BorderSide(color: Colors.grey, width: 1),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(50),
-                                  borderSide: BorderSide(color: Colors.black, width: 1),
+                                  borderSide: const BorderSide(color: Colors.black, width: 1),
                                 ),
                               ),
                             ),

@@ -1,45 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:jarvis/View/HomeChat/home.dart';
 import 'package:jarvis/View/Register/register_screen.dart';
-import 'package:jarvis/constants/colors.dart';
 import 'package:jarvis/constants/image_strings.dart';
 import 'package:jarvis/constants/sizes.dart';
 import 'package:jarvis/constants/text_strings.dart';
 import 'package:jarvis/core/Widget/elevated_button.dart';
 import 'package:jarvis/core/Widget/outlined_button.dart';
 
-//import '../ForgetPassword/forget-password.dart';
+// import '../ForgetPassword/forget_password.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
     return SafeArea(
       child: Scaffold(
         body: Center(
-          // Căn giữa nội dung
           child: SingleChildScrollView(
             child: Container(
               padding: const EdgeInsets.all(tDefaultSize),
-              alignment: Alignment.center, // Căn giữa Container
+              alignment: Alignment.center,
               child: Column(
                 mainAxisAlignment:
-                    MainAxisAlignment.center, // Căn giữa nội dung trong Column
+                MainAxisAlignment.center,
                 crossAxisAlignment:
-                    CrossAxisAlignment.center, // Căn giữa theo chiều ngang
+                CrossAxisAlignment.center,
                 children: [
                   // -- Section - 1 --
                   Text(
                     loginTitleString,
                     style: Theme.of(context).textTheme.headlineLarge,
-                    textAlign: TextAlign.center, // Căn giữa văn bản
+                    textAlign: TextAlign.center,
                   ),
                   Text(
                     loginSubtitleString,
                     style: Theme.of(context).textTheme.bodyMedium,
-                    textAlign: TextAlign.center, // Căn giữa văn bản
+                    textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: tFormHeight),
 
@@ -50,7 +47,7 @@ class LoginScreen extends StatelessWidget {
                           vertical: tFormHeight - 10),
                       child: Column(
                         crossAxisAlignment:
-                            CrossAxisAlignment.center, // Căn giữa input fields
+                        CrossAxisAlignment.center,
                         children: [
                           TextFormField(
                             decoration: const InputDecoration(
@@ -68,18 +65,18 @@ class LoginScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: tFormHeight - 20),
-                          // Align(
-                          //   alignment: Alignment.centerRight,
-                          //   child: TextButton(
-                          //     onPressed: () {
-                          //       Navigator.push(
-                          //           context,
-                          //           MaterialPageRoute(
-                          //               builder: (context) => ForgetPasswordScreen()));
-                          //     },
-                          //     child: const Text(forgetPasswordString, style: TextStyle(color: Colors.blue)),
-                          //   ),
-                          // ),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed: () {
+                                // Navigator.push(
+                                //     context,
+                                //     MaterialPageRoute(
+                                //         builder: (context) => ForgetPasswordScreen()));
+                              },
+                              child: const Text(forgetPasswordString, style: TextStyle(color: Colors.blue)),
+                            ),
+                          ),
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButtonCustom(
@@ -88,7 +85,7 @@ class LoginScreen extends StatelessWidget {
                                 Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => HomeChat()));
+                                        builder: (context) => const HomeChat()));
                               },
                             ),
                           ),
@@ -107,7 +104,7 @@ class LoginScreen extends StatelessWidget {
                       SizedBox(
                         width: double.infinity,
                         child: OutlinedButtonCustom(
-                          icon: Image(
+                          icon: const Image(
                             image: AssetImage(googleLogoImage),
                             width: 20.0,
                           ),
@@ -121,7 +118,7 @@ class LoginScreen extends StatelessWidget {
                           Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => RegisterScreen()));
+                                  builder: (context) => const RegisterScreen()));
                         },
                         child: Text.rich(
                           TextSpan(

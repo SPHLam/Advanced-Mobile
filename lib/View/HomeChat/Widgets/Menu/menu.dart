@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:jarvis/ViewModel/message-home-chat.dart';
 import 'package:jarvis/constants/colors.dart';
+// import 'package:jarvis/View/UpgradeAccount/upgrade_account.dart';
+// import 'package:jarvis/View/Knowledge/page/knowledge_screen.dart';
 import 'package:provider/provider.dart';
 
 class Menu extends StatefulWidget {
-  const Menu({Key? key}) : super(key: key);
+  const Menu({super.key});
   @override
   State<StatefulWidget> createState() => _MenuState();
 }
@@ -182,8 +184,7 @@ class _MenuState extends State<Menu> {
                 return _buildConversationItem(
                     conversation.map((item) => Map<String, String>.from(item)).toList(),
                     index,
-                    messageModel
-                );
+                    messageModel);
               },
             );
           },
@@ -216,10 +217,16 @@ class _MenuState extends State<Menu> {
             setState(() {
               _selectedIndex = index;
             });
-            if (index == 1) {
-
+            if (index == 0) {
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(builder: (context) => const KnowledgeScreen()),
+              // );
             } else {
-
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(builder: (context) => const UpgradeAccount()),
+              // );
             }
           },
           borderRadius: BorderRadius.circular(12),
