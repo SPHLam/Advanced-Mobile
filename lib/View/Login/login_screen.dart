@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jarvis/View/ForgetPassword/forget_password.dart';
 import 'package:jarvis/View/HomeChat/home.dart';
 import 'package:jarvis/View/Register/register_screen.dart';
 import 'package:jarvis/constants/image_strings.dart';
@@ -20,10 +21,8 @@ class LoginScreen extends StatelessWidget {
               padding: const EdgeInsets.all(tDefaultSize),
               alignment: Alignment.center,
               child: Column(
-                mainAxisAlignment:
-                MainAxisAlignment.center,
-                crossAxisAlignment:
-                CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   // -- Section - 1 --
                   Text(
@@ -44,8 +43,7 @@ class LoginScreen extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(
                           vertical: tFormHeight - 10),
                       child: Column(
-                        crossAxisAlignment:
-                        CrossAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           TextFormField(
                             decoration: const InputDecoration(
@@ -67,12 +65,14 @@ class LoginScreen extends StatelessWidget {
                             alignment: Alignment.centerRight,
                             child: TextButton(
                               onPressed: () {
-                                // Navigator.push(
-                                //     context,
-                                //     MaterialPageRoute(
-                                //         builder: (context) => const ForgetPasswordScreen()));
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const ForgetPasswordScreen()));
                               },
-                              child: const Text(forgetPasswordString, style: TextStyle(color: Colors.blue)),
+                              child: const Text(forgetPasswordString,
+                                  style: TextStyle(color: Colors.blue)),
                             ),
                           ),
                           SizedBox(
@@ -83,7 +83,8 @@ class LoginScreen extends StatelessWidget {
                                 Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => const HomeChat()));
+                                        builder: (context) =>
+                                            const HomeChat()));
                               },
                             ),
                           ),
@@ -116,7 +117,8 @@ class LoginScreen extends StatelessWidget {
                           Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => const RegisterScreen()));
+                                  builder: (context) =>
+                                      const RegisterScreen()));
                         },
                         child: Text.rich(
                           TextSpan(
