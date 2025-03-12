@@ -26,7 +26,7 @@ class AccountScreen extends StatelessWidget {
               Row(
                 children: [
                   Container(
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       shape: BoxShape.circle,
                     ),
                     child: const CircleAvatar(
@@ -83,15 +83,15 @@ class AccountScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Image.asset(
-                      'assets/logo/star.png',
+                      'assets/images/star.png',
                       width: 70,
                       errorBuilder: (context, error, stackTrace) {
                         return const Icon(Icons.error, color: Colors.white);
                       },
                     ),
-                    Column(
+                    const Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
+                      children: [
                         Text(
                           'Free Version',
                           style: TextStyle(
@@ -187,7 +187,7 @@ class AccountScreen extends StatelessWidget {
                       onTap: () {},
                     ),
                     const SizedBox(height: 10),
-                    Divider(color: Colors.grey, thickness: 1),
+                    const Divider(color: Colors.grey, thickness: 1),
                     const SizedBox(height: 10),
                     _buildCard(
                       icon: Icons.logout,
@@ -232,7 +232,7 @@ class AccountScreen extends StatelessWidget {
           ),
         ),
         subtitle: subtitle != null
-            ? Text(subtitle, style: TextStyle(color: Colors.grey))
+            ? Text(subtitle, style: const TextStyle(color: Colors.grey))
             : null,
         trailing: trailing,
         onTap: onTap,
