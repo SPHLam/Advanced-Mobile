@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:jarvis/View/Knowledge/page/knowledge_screen.dart';
+import 'package:jarvis/View/UpgradeAccount/upgrade_account.dart';
 import 'package:jarvis/ViewModel/message-home-chat.dart';
 import 'package:jarvis/constants/colors.dart';
 // import 'package:jarvis/View/UpgradeAccount/upgrade_account.dart';
@@ -78,7 +80,8 @@ class _MenuState extends State<Menu> {
                   const SizedBox(height: 20),
                   ElevatedButton.icon(
                     onPressed: _logout,
-                    icon: const Icon(Icons.logout, size: 18, color: Colors.white),
+                    icon:
+                        const Icon(Icons.logout, size: 18, color: Colors.white),
                     label: const Text("Logout"),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red[400],
@@ -87,7 +90,8 @@ class _MenuState extends State<Menu> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 10),
                     ),
                   ),
                 ],
@@ -182,7 +186,9 @@ class _MenuState extends State<Menu> {
               itemBuilder: (context, index) {
                 final conversation = messageModel.savedConversations[index];
                 return _buildConversationItem(
-                    conversation.map((item) => Map<String, String>.from(item)).toList(),
+                    conversation
+                        .map((item) => Map<String, String>.from(item))
+                        .toList(),
                     index,
                     messageModel);
               },
@@ -218,15 +224,16 @@ class _MenuState extends State<Menu> {
               _selectedIndex = index;
             });
             if (index == 0) {
-              // Navigator.push(
-              //   context,
-              //   MaterialPageRoute(builder: (context) => const KnowledgeScreen()),
-              // );
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const KnowledgeScreen()),
+              );
             } else {
-              // Navigator.push(
-              //   context,
-              //   MaterialPageRoute(builder: (context) => const UpgradeAccount()),
-              // );
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const UpgradeAccount()),
+              );
             }
           },
           borderRadius: BorderRadius.circular(12),
@@ -247,7 +254,8 @@ class _MenuState extends State<Menu> {
                   child: Text(
                     title,
                     style: TextStyle(
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.normal,
                       fontSize: 16,
                     ),
                     overflow: TextOverflow.ellipsis,
@@ -266,12 +274,14 @@ class _MenuState extends State<Menu> {
     );
   }
 
-  Widget _buildConversationItem(List<Map<String, String>> conversation, int index, MessageModel messageModel) {
+  Widget _buildConversationItem(List<Map<String, String>> conversation,
+      int index, MessageModel messageModel) {
     String previewText = conversation.isNotEmpty
-        ? (conversation.first["text"] ?? "").substring(0,
-        (conversation.first["text"] ?? "").length > 30
-            ? 30
-            : (conversation.first["text"] ?? "").length)
+        ? (conversation.first["text"] ?? "").substring(
+            0,
+            (conversation.first["text"] ?? "").length > 30
+                ? 30
+                : (conversation.first["text"] ?? "").length)
         : "Empty conversation";
 
     if (previewText.length == 30) {
@@ -288,7 +298,8 @@ class _MenuState extends State<Menu> {
           side: BorderSide(color: Colors.grey[200]!, width: 1),
         ),
         child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           leading: CircleAvatar(
             backgroundColor: Colors.black,
             child: Text(
@@ -318,7 +329,8 @@ class _MenuState extends State<Menu> {
                 context: context,
                 builder: (context) => AlertDialog(
                   title: const Text("Delete Conversation"),
-                  content: const Text("Are you sure you want to delete this conversation?"),
+                  content: const Text(
+                      "Are you sure you want to delete this conversation?"),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
@@ -329,7 +341,8 @@ class _MenuState extends State<Menu> {
                         messageModel.deleteConversation(index);
                         Navigator.pop(context);
                       },
-                      child: const Text("Delete", style: TextStyle(color: Colors.red)),
+                      child: const Text("Delete",
+                          style: TextStyle(color: Colors.red)),
                     ),
                   ],
                 ),

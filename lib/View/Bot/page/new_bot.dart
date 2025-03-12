@@ -267,7 +267,7 @@ class _NewBotState extends State<NewBot> {
                 elevation: 2,
               ),
               child: const Text(
-                "Create Now",
+                "Create",
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
