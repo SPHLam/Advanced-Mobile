@@ -7,8 +7,6 @@ import 'package:jarvis/constants/text_strings.dart';
 import 'package:jarvis/core/Widget/elevated_button.dart';
 import 'package:jarvis/core/Widget/outlined_button.dart';
 
-// import '../ForgetPassword/forget_password.dart';
-
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
@@ -72,7 +70,7 @@ class LoginScreen extends StatelessWidget {
                                 // Navigator.push(
                                 //     context,
                                 //     MaterialPageRoute(
-                                //         builder: (context) => ForgetPasswordScreen()));
+                                //         builder: (context) => const ForgetPasswordScreen()));
                               },
                               child: const Text(forgetPasswordString, style: TextStyle(color: Colors.blue)),
                             ),
@@ -100,7 +98,7 @@ class LoginScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       const Text("OR"),
-                      const SizedBox(height: tFormHeight - 20),
+                      const SizedBox(height: tFormHeight - 10),
                       SizedBox(
                         width: double.infinity,
                         child: OutlinedButtonCustom(
