@@ -89,23 +89,25 @@ class RegisterScreen extends StatelessWidget {
                     children: [
                       const SizedBox(height: tFormHeight - 20),
                       TextButton(
-                          onPressed: () {
-                            Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => const LoginScreen()));
-                          },
-                          child: Text.rich(
-                            TextSpan(
-                                text: alreadyHaveAnAccountString,
-                                style: Theme.of(context).textTheme.bodyLarge,
-                                children: const [
-                                  TextSpan(
-                                    text: " $loginString",
-                                    style: TextStyle(color: Colors.blue),
-                                  )
-                                ]),
-                          ))
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const LoginScreen()));
+                        },
+                        child: Text.rich(
+                          TextSpan(
+                            text: alreadyHaveAnAccountString,
+                            style: Theme.of(context).textTheme.bodyLarge,
+                            children: const [
+                              TextSpan(
+                                text: " $loginString",
+                                style: TextStyle(color: Colors.blue),
+                              )
+                            ]
+                          ),
+                        )
+                      )
                     ],
                   )
                   // -- .end - 3--

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:jarvis/constants/colors.dart';
 
+import '../UpgradeAccount/upgrade_account.dart';
+
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
 
@@ -112,10 +114,10 @@ class AccountScreen extends StatelessWidget {
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(builder: (context) => UpgradeVersion()),
-                        // );
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const UpgradeAccount()),
+                        );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,

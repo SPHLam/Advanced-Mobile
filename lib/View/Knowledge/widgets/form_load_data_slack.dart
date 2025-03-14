@@ -80,7 +80,7 @@ class _FormLoadDataSlackState extends State<FormLoadDataSlack> {
                           borderSide: BorderSide.none,
                         ),
                         prefixIcon:
-                            Icon(Icons.person, color: Colors.blue.shade600),
+                            Icon(Icons.file_open, color: Colors.blue.shade600),
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {

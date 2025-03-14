@@ -17,16 +17,46 @@ class BotScreen extends StatefulWidget {
 
 class _BotScreenState extends State<BotScreen> {
   final List<Bot> _listBots = bots;
+  List<Bot> _filteredBots = [];
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _filteredBots = List.from(_listBots);
+    _searchController.addListener(_filterBots);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _filterBots() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      if (query.isEmpty) {
+        _filteredBots = List.from(_listBots);
+      } else {
+        _filteredBots = _listBots.where((bot) {
+          return bot.name.toLowerCase().contains(query);
+        }).toList();
+      }
+    });
+  }
 
   void _addBot(Bot newBot) {
     setState(() {
       _listBots.add(newBot);
+      _filterBots();
     });
   }
 
   void _editBot(Bot newEditBot, int indexEditBox) {
     setState(() {
       _listBots[indexEditBox] = newEditBot;
+      _filterBots();
     });
   }
 
@@ -34,6 +64,7 @@ class _BotScreenState extends State<BotScreen> {
     final botDeleteIndex = _listBots.indexOf(bot);
     setState(() {
       _listBots.remove(bot);
+      _filterBots();
     });
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
@@ -47,6 +78,7 @@ class _BotScreenState extends State<BotScreen> {
           onPressed: () {
             setState(() {
               _listBots.insert(botDeleteIndex, bot);
+              _filterBots();
             });
           },
         ),
@@ -117,6 +149,7 @@ class _BotScreenState extends State<BotScreen> {
         child: Column(
           children: [
             TextField(
+              controller: _searchController,
               decoration: InputDecoration(
                 prefixIcon: const Icon(Icons.search, color: Colors.grey),
                 hintText: 'Search...',
@@ -139,7 +172,7 @@ class _BotScreenState extends State<BotScreen> {
             ),
             const SizedBox(height: 20),
             Expanded(
-              child: _listBots.isEmpty
+              child: _filteredBots.isEmpty
                   ? const Center(
                 child: Text(
                   "No bots available",
@@ -150,7 +183,7 @@ class _BotScreenState extends State<BotScreen> {
                 ),
               )
                   : ListView.builder(
-                itemCount: _listBots.length,
+                itemCount: _filteredBots.length,
                 itemBuilder: (context, index) {
                   return Container(
                     margin: const EdgeInsets.only(bottom: 8),
@@ -166,7 +199,7 @@ class _BotScreenState extends State<BotScreen> {
                               ),
                             );
                           },
-                          child: BotCard(bot: _listBots[index]),
+                          child: BotCard(bot: _filteredBots[index]),
                         ),
                         Padding(
                           padding: const EdgeInsets.only(top: 15, right: 13),
@@ -177,7 +210,7 @@ class _BotScreenState extends State<BotScreen> {
                                 padding: EdgeInsets.zero,
                                 constraints: const BoxConstraints(),
                                 onPressed: () {
-                                  _openEditBotDialog(context, _listBots[index], index);
+                                  _openEditBotDialog(context, _filteredBots[index], _listBots.indexOf(_filteredBots[index]));
                                 },
                                 icon: const Icon(Icons.edit, size: 18),
                                 color: Colors.green,
@@ -187,7 +220,7 @@ class _BotScreenState extends State<BotScreen> {
                                 padding: EdgeInsets.zero,
                                 constraints: const BoxConstraints(),
                                 onPressed: () {
-                                  _removeBot(_listBots[index]);
+                                  _removeBot(_filteredBots[index]);
                                 },
                                 icon: const Icon(Icons.delete, size: 18),
                                 color: Colors.red,
