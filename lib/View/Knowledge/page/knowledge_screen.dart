@@ -37,8 +37,7 @@ class _KnowledgeScreenState extends State<KnowledgeScreen> {
         _filteredKnowledge = List.from(_listKnowledge);
       } else {
         _filteredKnowledge = _listKnowledge.where((knowledge) {
-          return knowledge.name.toLowerCase().contains(query) ||
-              knowledge.description.toLowerCase().contains(query);
+          return knowledge.name.toLowerCase().contains(query);
         }).toList();
       }
     });
