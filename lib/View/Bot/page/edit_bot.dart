@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:jarvis/View/Bot/model/bot.dart';
 import 'package:jarvis/View/Bot/page/new_bot_knowledge.dart';
+import 'package:jarvis/constants/colors.dart';
 
 class EditBot extends StatefulWidget {
   const EditBot({super.key, required this.editBot, required this.bot});
@@ -107,18 +108,18 @@ class _NewBotState extends State<EditBot> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: primaryColor,
         title: const Text(
           "Edit Bot",
           style: TextStyle(
             fontWeight: FontWeight.w600,
-            color: Colors.black87,
+            color: Colors.white,
             fontSize: 20,
           ),
         ),
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black87),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),

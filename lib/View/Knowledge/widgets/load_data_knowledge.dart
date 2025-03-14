@@ -81,8 +81,6 @@ class _LoadDataKnowledgeState extends State<LoadDataKnowledge> {
                     padding: const EdgeInsets.all(8.0),
                     child: Row(
                       children: [
-                        // const Icon(Icons.storage,
-                        //     color: Colors.green, size: 30),
                         Image.network(
                           widget.imageAddress,
                           width: 34,
