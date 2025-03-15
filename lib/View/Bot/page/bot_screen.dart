@@ -5,7 +5,6 @@ import 'package:jarvis/View/Bot/page/new_bot.dart';
 import 'package:jarvis/View/Bot/page/public_bot.dart';
 import 'package:jarvis/View/Bot/widgets/bot_card.dart';
 import 'package:jarvis/View/Bot/model/bot.dart';
-import 'package:jarvis/View/HomeChat/home.dart';
 import '../../../constants/colors.dart';
 
 class BotScreen extends StatefulWidget {
@@ -185,61 +184,12 @@ class _BotScreenState extends State<BotScreen> {
                   : ListView.builder(
                 itemCount: _filteredBots.length,
                 itemBuilder: (context, index) {
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    child: Stack(
-                      alignment: Alignment.topRight,
-                      children: [
-                        InkWell(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const HomeChat(),
-                              ),
-                            );
-                          },
-                          child: BotCard(bot: _filteredBots[index]),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 15, right: 13),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                padding: EdgeInsets.zero,
-                                constraints: const BoxConstraints(),
-                                onPressed: () {
-                                  _openEditBotDialog(context, _filteredBots[index], _listBots.indexOf(_filteredBots[index]));
-                                },
-                                icon: const Icon(Icons.edit, size: 18),
-                                color: Colors.green,
-                              ),
-                              const SizedBox(width: 6),
-                              IconButton(
-                                padding: EdgeInsets.zero,
-                                constraints: const BoxConstraints(),
-                                onPressed: () {
-                                  _removeBot(_filteredBots[index]);
-                                },
-                                icon: const Icon(Icons.delete, size: 18),
-                                color: Colors.red,
-                              ),
-                              const SizedBox(width: 6),
-                              IconButton(
-                                padding: EdgeInsets.zero,
-                                constraints: const BoxConstraints(),
-                                onPressed: () {
-                                  _openPublishBotDialog(context);
-                                },
-                                icon: const Icon(Icons.publish, size: 19),
-                                color: Colors.blue,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                  return BotCard(
+                    bot: _filteredBots[index],
+                    onEdit: () => _openEditBotDialog(
+                        context, _filteredBots[index], _listBots.indexOf(_filteredBots[index])),
+                    onDelete: () => _removeBot(_filteredBots[index]),
+                    onPublish: () => _openPublishBotDialog(context),
                   );
                 },
               ),

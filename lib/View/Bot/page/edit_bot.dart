@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:jarvis/View/Bot/model/bot.dart';
@@ -12,16 +11,29 @@ class EditBot extends StatefulWidget {
   final Bot bot;
 
   @override
-  State<EditBot> createState() => _NewBotState();
+  State<EditBot> createState() => _EditBotState(); // Sửa tên state
 }
 
-class _NewBotState extends State<EditBot> {
+class _EditBotState extends State<EditBot> {
   final _formKey = GlobalKey<FormState>();
   List<String> _arrKnowledge = [];
   int _accessOption = 1;
   String _enteredName = "";
   String _enteredPrompt = "";
   String? _selectedImagePath;
+
+  @override
+  void initState() {
+    super.initState();
+    _enteredName = widget.bot.name;
+    _enteredPrompt = widget.bot.prompt;
+    _accessOption = widget.bot.isPublish ? 1 : 2;
+    _arrKnowledge = List.from(widget.bot.listKnowledge);
+
+    if (!widget.bot.imageUrl.startsWith('assets/') && !widget.bot.imageUrl.startsWith('http')) {
+      _selectedImagePath = widget.bot.imageUrl;
+    }
+  }
 
   void _openAddKnowledgeDialog(BuildContext context) async {
     final result = await showModalBottomSheet(
@@ -66,16 +78,6 @@ class _NewBotState extends State<EditBot> {
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _enteredName = widget.bot.name;
-    _enteredPrompt = widget.bot.prompt;
-    _accessOption = widget.bot.isPublish ? 1 : 2;
-    _arrKnowledge = List.from(widget.bot.listKnowledge);
-    _selectedImagePath = widget.bot.imageUrl; // Initialize with existing image URL
-  }
-
   void _saveBot() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
@@ -84,8 +86,8 @@ class _NewBotState extends State<EditBot> {
           name: _enteredName,
           prompt: _enteredPrompt,
           team: widget.bot.team,
-          imageUrl: _selectedImagePath ?? widget.bot.imageUrl, // Use new image or keep old one
-          isPublish: _accessOption == 1 ? true : false,
+          imageUrl: _selectedImagePath ?? widget.bot.imageUrl,
+          isPublish: _accessOption == 1,
           listKnowledge: _arrKnowledge,
         ),
       );
@@ -100,6 +102,16 @@ class _NewBotState extends State<EditBot> {
       setState(() {
         _selectedImagePath = image.path;
       });
+    }
+  }
+
+  ImageProvider<Object> _getImageProvider(String imageUrl) {
+    if (imageUrl.startsWith('http')) {
+      return NetworkImage(imageUrl);
+    } else if (imageUrl.startsWith('assets/')) {
+      return AssetImage(imageUrl);
+    } else {
+      return FileImage(File(imageUrl));
     }
   }
 
@@ -157,12 +169,11 @@ class _NewBotState extends State<EditBot> {
                               onTap: _openGallery,
                               child: CircleAvatar(
                                 radius: 30,
-                                backgroundColor: Colors.transparent,
+                                backgroundColor: Colors.grey[300],
                                 backgroundImage: _selectedImagePath != null
-                                    ? FileImage(File(_selectedImagePath!)) as ImageProvider<Object>
-                                    : NetworkImage(widget.bot.imageUrl)
-                                ,
-                                child: _selectedImagePath == null
+                                    ? FileImage(File(_selectedImagePath!))
+                                    : _getImageProvider(widget.bot.imageUrl),
+                                child: _selectedImagePath == null && widget.bot.imageUrl.isEmpty
                                     ? const Icon(Icons.add, size: 32, color: Colors.white)
                                     : null,
                               ),

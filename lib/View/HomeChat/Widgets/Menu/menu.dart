@@ -3,9 +3,8 @@ import 'package:jarvis/View/Knowledge/page/knowledge_screen.dart';
 import 'package:jarvis/View/UpgradeAccount/upgrade_account.dart';
 import 'package:jarvis/ViewModel/message-home-chat.dart';
 import 'package:jarvis/constants/colors.dart';
-// import 'package:jarvis/View/UpgradeAccount/upgrade_account.dart';
-// import 'package:jarvis/View/Knowledge/page/knowledge_screen.dart';
 import 'package:provider/provider.dart';
+import '../../../Login/login_screen.dart';
 
 class Menu extends StatefulWidget {
   const Menu({super.key});
@@ -15,7 +14,6 @@ class Menu extends StatefulWidget {
 
 class _MenuState extends State<Menu> {
   int _selectedIndex = -1;
-  void _logout() async {}
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +28,6 @@ class _MenuState extends State<Menu> {
         ),
         child: Column(
           children: [
-            // App header with logo and name
             Container(
               padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 16),
               decoration: BoxDecoration(
@@ -79,9 +76,15 @@ class _MenuState extends State<Menu> {
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton.icon(
-                    onPressed: _logout,
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const LoginScreen()),
+                      );
+                    },
                     icon:
-                        const Icon(Icons.logout, size: 18, color: Colors.white),
+                    const Icon(Icons.logout, size: 18, color: Colors.white),
                     label: const Text("Logout"),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red[400],
@@ -97,8 +100,6 @@ class _MenuState extends State<Menu> {
                 ],
               ),
             ),
-
-            // Main menu items
             Expanded(
               child: ListView(
                 padding: EdgeInsets.zero,
@@ -156,9 +157,7 @@ class _MenuState extends State<Menu> {
               ),
               IconButton(
                 icon: const Icon(Icons.search, color: Colors.black54),
-                onPressed: () {
-                  // Implement search functionality
-                },
+                onPressed: () {},
                 constraints: const BoxConstraints(),
                 padding: const EdgeInsets.all(8),
               ),
@@ -255,7 +254,7 @@ class _MenuState extends State<Menu> {
                     title,
                     style: TextStyle(
                       fontWeight:
-                          isSelected ? FontWeight.bold : FontWeight.normal,
+                      isSelected ? FontWeight.bold : FontWeight.normal,
                       fontSize: 16,
                     ),
                     overflow: TextOverflow.ellipsis,
@@ -278,10 +277,10 @@ class _MenuState extends State<Menu> {
       int index, MessageModel messageModel) {
     String previewText = conversation.isNotEmpty
         ? (conversation.first["text"] ?? "").substring(
-            0,
-            (conversation.first["text"] ?? "").length > 30
-                ? 30
-                : (conversation.first["text"] ?? "").length)
+        0,
+        (conversation.first["text"] ?? "").length > 30
+            ? 30
+            : (conversation.first["text"] ?? "").length)
         : "Empty conversation";
 
     if (previewText.length == 30) {
@@ -299,7 +298,7 @@ class _MenuState extends State<Menu> {
         ),
         child: ListTile(
           contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           leading: CircleAvatar(
             backgroundColor: Colors.black,
             child: Text(
@@ -324,7 +323,6 @@ class _MenuState extends State<Menu> {
           trailing: IconButton(
             icon: Icon(Icons.delete, color: Colors.red[300], size: 20),
             onPressed: () {
-              // Add confirmation dialog
               showDialog(
                 context: context,
                 builder: (context) => AlertDialog(
@@ -354,7 +352,7 @@ class _MenuState extends State<Menu> {
           onTap: () {
             Provider.of<MessageModel>(context, listen: false)
                 .setConversation(conversation, index);
-            Navigator.pop(context); // Close the drawer
+            Navigator.pop(context);
           },
         ),
       ),

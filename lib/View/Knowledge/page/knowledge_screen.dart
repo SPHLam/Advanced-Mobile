@@ -161,59 +161,25 @@ class _KnowledgeScreenState extends State<KnowledgeScreen> {
             Expanded(
               child: _filteredKnowledge.isEmpty
                   ? const Center(
-                      child: Text(
-                        "No knowledge available",
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    )
+                child: Text(
+                  "No knowledge available",
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey,
+                  ),
+                ),
+              )
                   : ListView.builder(
-                      itemCount: _filteredKnowledge.length,
-                      itemBuilder: (context, index) {
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 8),
-                          child: Stack(
-                            alignment: Alignment.topRight,
-                            children: [
-                              KnowledgeCard(
-                                  knowledge: _filteredKnowledge[index]),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.only(top: 15, right: 13),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    IconButton(
-                                      padding: EdgeInsets.zero,
-                                      constraints: const BoxConstraints(),
-                                      onPressed: () {
-                                        _openEditKnowledgeDialog(context,
-                                            _filteredKnowledge[index], index);
-                                      },
-                                      icon: const Icon(Icons.edit, size: 18),
-                                      color: Colors.green,
-                                    ),
-                                    const SizedBox(width: 6),
-                                    IconButton(
-                                      padding: EdgeInsets.zero,
-                                      constraints: const BoxConstraints(),
-                                      onPressed: () {
-                                        _removeKnowledge(
-                                            _filteredKnowledge[index]);
-                                      },
-                                      icon: const Icon(Icons.delete, size: 18),
-                                      color: Colors.red,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
+                itemCount: _filteredKnowledge.length,
+                itemBuilder: (context, index) {
+                  return KnowledgeCard(
+                    knowledge: _filteredKnowledge[index],
+                    onEdit: () => _openEditKnowledgeDialog(
+                        context, _filteredKnowledge[index], index),
+                    onDelete: () => _removeKnowledge(_filteredKnowledge[index]),
+                  );
+                },
+              ),
             ),
           ],
         ),

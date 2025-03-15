@@ -7,10 +7,10 @@ class AIDropdown extends StatelessWidget {
   final ValueChanged<String?> onChanged;
 
   const AIDropdown({
-    Key? key,
+    super.key,
     required this.listAIItems,
     required this.onChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +31,7 @@ class AIDropdown extends StatelessWidget {
               child: Row(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.only(right: 8.0), // Thêm margin phải
+                    padding: const EdgeInsets.only(right: 8.0),
                     child: Image.asset(
                       fit: BoxFit.cover,
                       item.logoPath,
@@ -47,7 +47,7 @@ class AIDropdown extends StatelessWidget {
                   ),
                   //Spacer(),
                   const Icon(Icons.flash_on, color: Colors.orangeAccent, size: 12),
-                  Text(item.tokenCount.toString(), style: TextStyle(fontSize: 12)),
+                  Text(item.tokenCount.toString(), style: const TextStyle(fontSize: 12)),
                 ],
               ),
             );
@@ -67,13 +67,13 @@ class AIDropdown extends StatelessWidget {
             }).toList();
           },
           decoration: InputDecoration(
-            contentPadding: EdgeInsets.only(left: 10, right: 10),
+            contentPadding: const EdgeInsets.only(left: 10, right: 10),
             enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.grey, width: 1),
+              borderSide: const BorderSide(color: Colors.grey, width: 1),
               borderRadius: BorderRadius.circular(20),
             ),
             focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.grey, width: 1),
+              borderSide: const BorderSide(color: Colors.grey, width: 1),
               borderRadius: BorderRadius.circular(20),
             ),
           ),

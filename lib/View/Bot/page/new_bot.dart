@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:jarvis/View/Bot/model/bot.dart';
@@ -17,21 +16,18 @@ class _NewBotState extends State<NewBot> {
 
   final _formKey = GlobalKey<FormState>();
   int _accessOption = 1;
-
   String _enteredName = "";
   String _enteredPrompt = "";
 
   void _saveBot() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-
       widget.addBot(
         Bot(
           name: _enteredName,
           prompt: _enteredPrompt,
           team: "JarvisCopi Team",
-          imageUrl: _selectedImagePath ??
-              "assets/logo/default-bot.png",
+          imageUrl: _selectedImagePath ?? "assets/logo/default-bot.png",
           isPublish: _accessOption == 1,
           listKnowledge: [],
         ),
@@ -109,8 +105,9 @@ class _NewBotState extends State<NewBot> {
                       radius: 30,
                       backgroundColor: Colors.transparent,
                       backgroundImage: _selectedImagePath != null
-                          ? Image.file(File(_selectedImagePath!)).image
-                          : null,
+                          ? FileImage(File(_selectedImagePath!))
+                          : const AssetImage("assets/logo/default-bot.png")
+                      as ImageProvider<Object>,
                       child: _selectedImagePath == null
                           ? const Icon(Icons.add, size: 32, color: Colors.white)
                           : null,
