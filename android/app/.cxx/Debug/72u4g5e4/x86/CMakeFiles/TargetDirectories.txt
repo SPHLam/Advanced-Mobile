@@ -1,0 +1,2 @@
+D:/University/Fourth year/PTUDCTBDDNC/Advanced-Mobile/android/app/.cxx/Debug/72u4g5e4/x86/CMakeFiles/edit_cache.dir
+D:/University/Fourth year/PTUDCTBDDNC/Advanced-Mobile/android/app/.cxx/Debug/72u4g5e4/x86/CMakeFiles/rebuild_cache.dir
