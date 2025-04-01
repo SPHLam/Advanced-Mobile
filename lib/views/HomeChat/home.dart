@@ -13,7 +13,6 @@ import 'Widgets/Menu/menu.dart';
 import 'package:jarvis/view_models/ai_chat_list_view_model.dart';
 import '../../models/ai_logo.dart';
 
-
 class HomeChat extends StatefulWidget {
   const HomeChat({super.key});
 
@@ -34,15 +33,16 @@ class _HomeChatState extends State<HomeChat> {
   void initState() {
     super.initState();
     _focusNode.addListener(() {
-      if (_focusNode.hasFocus ) {
+      if (_focusNode.hasFocus) {
         setState(() {
           _isOpenDeviceWidget = false;
         });
       }
     });
-    _listAIItem = Provider.of<AIChatList>(context,listen: false).aiItems;
+    _listAIItem = Provider.of<AIChatList>(context, listen: false).aiItems;
     selectedAIItem = _listAIItem.first.name;
   }
+
   @override
   void dispose() {
     _focusNode.dispose();
@@ -70,11 +70,13 @@ class _HomeChatState extends State<HomeChat> {
       );
     }
   }
+
   void _toggleDeviceVisibility() {
     setState(() {
       _isOpenDeviceWidget = !_isOpenDeviceWidget;
     });
   }
+
   void _sendMessage() {
     if (_controller.text.isEmpty && _selectedImagePath == null) return;
     setState(() {
@@ -96,13 +98,14 @@ class _HomeChatState extends State<HomeChat> {
       });
       _controller.clear();
       // _listAIItem.firstWhere((aiItem) => aiItem.name == selectedAIItem).tokenCount -= 1;
-
     });
   }
+
   void updateSelectedAIItem(String newValue) {
     setState(() {
       selectedAIItem = newValue;
-      AIItem aiItem = _listAIItem.firstWhere((aiItem) => aiItem.name == newValue);
+      AIItem aiItem =
+          _listAIItem.firstWhere((aiItem) => aiItem.name == newValue);
       _listAIItem.removeWhere((aiItem) => aiItem.name == newValue);
       _listAIItem.insert(0, aiItem);
     });
@@ -122,17 +125,20 @@ class _HomeChatState extends State<HomeChat> {
         child: message.containsKey('image') && message['image'] != null
             ? Image.file(File(message['image']!))
             : message.containsKey('text') && message['text'] != null
-            ? Text(
-          message['text']!,
-          style: TextStyle(color: isUser ? Colors.black : Colors.black),
-        )
-            : const SizedBox.shrink(),
+                ? Text(
+                    message['text']!,
+                    style:
+                        TextStyle(color: isUser ? Colors.black : Colors.black),
+                  )
+                : const SizedBox.shrink(),
       ),
     );
   }
+
   void _saveConversation() {
     Provider.of<MessageModel>(context, listen: false).saveConversation();
   }
+
   Future<void> _openGallery() async {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
@@ -143,6 +149,7 @@ class _HomeChatState extends State<HomeChat> {
       });
     }
   }
+
   Future<void> _openCamera() async {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.camera);
@@ -153,6 +160,7 @@ class _HomeChatState extends State<HomeChat> {
       });
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -186,7 +194,7 @@ class _HomeChatState extends State<HomeChat> {
                           color: Colors.orangeAccent,
                         ),
                         Text(
-                          '24',
+                          '29',
                           style: const TextStyle(
                             color: Color.fromRGBO(119, 117, 117, 1.0),
                           ),
@@ -196,7 +204,10 @@ class _HomeChatState extends State<HomeChat> {
                   ),
                   IconButton(
                     icon: const Icon(Icons.add_circle_outline),
-                    onPressed: Provider.of<MessageModel>(context).messages.isEmpty ? null : _saveConversation,
+                    onPressed:
+                        Provider.of<MessageModel>(context).messages.isEmpty
+                            ? null
+                            : _saveConversation,
                   ),
                 ],
               ),
@@ -229,7 +240,8 @@ class _HomeChatState extends State<HomeChat> {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10.0, vertical: 5.0),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
@@ -252,7 +264,9 @@ class _HomeChatState extends State<HomeChat> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         IconButton(
-                          icon: _isOpenDeviceWidget ? const Icon(Icons.arrow_back_ios_new) : const Icon(Icons.arrow_forward_ios),
+                          icon: _isOpenDeviceWidget
+                              ? const Icon(Icons.arrow_back_ios_new)
+                              : const Icon(Icons.arrow_forward_ios),
                           onPressed: _toggleDeviceVisibility,
                         ),
                         if (_isOpenDeviceWidget) ...[
@@ -269,7 +283,8 @@ class _HomeChatState extends State<HomeChat> {
                             onPressed: () {
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) => EmailComposer()),
+                                MaterialPageRoute(
+                                    builder: (context) => EmailComposer()),
                               );
                             },
                           ),
@@ -286,16 +301,21 @@ class _HomeChatState extends State<HomeChat> {
                               controller: _controller,
                               maxLines: null,
                               decoration: InputDecoration(
-                                contentPadding: const EdgeInsets.only(left: 10, right: 10),
-                                hintText: (_selectedImagePath == null) ? 'Enter your message...' : null,
+                                contentPadding:
+                                    const EdgeInsets.only(left: 10, right: 10),
+                                hintText: (_selectedImagePath == null)
+                                    ? 'Enter your message...'
+                                    : null,
                                 border: InputBorder.none,
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(50),
-                                  borderSide: const BorderSide(color: Colors.grey, width: 1),
+                                  borderSide: const BorderSide(
+                                      color: Colors.grey, width: 1),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(50),
-                                  borderSide: const BorderSide(color: Colors.black, width: 1),
+                                  borderSide: const BorderSide(
+                                      color: Colors.black, width: 1),
                                 ),
                               ),
                             ),

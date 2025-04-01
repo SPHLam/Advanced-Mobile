@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import '../../core/Widget/dropdown_button.dart';
 import 'package:provider/provider.dart';
@@ -12,16 +11,18 @@ class EmailComposer extends StatefulWidget {
 }
 
 class _EmailComposerState extends State<EmailComposer> {
-  final TextEditingController _emailReceivedController = TextEditingController();
+  final TextEditingController _emailReceivedController =
+      TextEditingController();
   final TextEditingController _emailReplyController = TextEditingController();
-  late int _countToken ;
+  late int _countToken;
   late List<AIItem> _listAIItems;
   @override
   void initState() {
-    _listAIItems = Provider.of<AIChatList>(context,listen: false).aiItems;
-    _countToken = 25;
+    _listAIItems = Provider.of<AIChatList>(context, listen: false).aiItems;
+    _countToken = 30;
     super.initState();
   }
+
   void _createDraft(String action) {
     String draft;
     switch (action) {
@@ -50,6 +51,7 @@ class _EmailComposerState extends State<EmailComposer> {
       _emailReplyController.text = draft;
     });
   }
+
   Widget _buildTextField(String label, TextEditingController controller) {
     return Expanded(
       child: TextField(
@@ -77,6 +79,7 @@ class _EmailComposerState extends State<EmailComposer> {
       ),
     );
   }
+
   Widget _buildButton(String label, VoidCallback onPressed) {
     return ElevatedButton(
       onPressed: onPressed,
@@ -90,7 +93,7 @@ class _EmailComposerState extends State<EmailComposer> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-              label,
+            label,
             style: TextStyle(
               color: Colors.black,
               fontWeight: FontWeight.bold,
@@ -101,12 +104,13 @@ class _EmailComposerState extends State<EmailComposer> {
       ),
     );
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: Icon(Icons.arrow_back,size: 30),
+          icon: Icon(Icons.arrow_back, size: 30),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -119,14 +123,17 @@ class _EmailComposerState extends State<EmailComposer> {
               listAIItems: _listAIItems,
               onChanged: (value) {
                 setState(() {
-                  _countToken = 24;
+                  _countToken -= 1;
                 });
               },
             ),
           ),
-          const SizedBox(width: 10,),
+          const SizedBox(
+            width: 10,
+          ),
           Container(
-            padding: const EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
+            padding:
+                const EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
             decoration: BoxDecoration(
               color: Colors.grey[200],
               borderRadius: BorderRadius.circular(50),
@@ -149,7 +156,9 @@ class _EmailComposerState extends State<EmailComposer> {
               ],
             ),
           ),
-          SizedBox(width: 10,)
+          SizedBox(
+            width: 10,
+          )
         ],
       ),
       body: Padding(
@@ -163,8 +172,9 @@ class _EmailComposerState extends State<EmailComposer> {
             Wrap(
               spacing: 10,
               children: [
-                _buildButton('Thanks',() => _createDraft('Thanks')),
-                _buildButton('Explain more detail for me', () => _createDraft('Explain more detail for me')),
+                _buildButton('Thanks', () => _createDraft('Thanks')),
+                _buildButton('Explain more detail for me',
+                    () => _createDraft('Explain more detail for me')),
               ],
             ),
             const SizedBox(height: 20),

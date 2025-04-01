@@ -1,27 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:jarvis/models/prompt_model.dart';
+import 'package:jarvis/view_models/prompt_list_view_model.dart';
 
 class NewPrompt {
-  static void show(BuildContext context) {
+  static void show(BuildContext context, {required VoidCallback onPromptCreated}) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return const NewPromptContent();
+        return NewPromptContent(onPromptCreated: onPromptCreated);
       },
     );
   }
 }
 
 class NewPromptContent extends StatefulWidget {
-  const NewPromptContent({super.key});
+  final VoidCallback onPromptCreated;
+
+  const NewPromptContent({super.key, required this.onPromptCreated});
 
   @override
   NewPromptContentState createState() => NewPromptContentState();
 }
 
 class NewPromptContentState extends State<NewPromptContent> {
-  int selectedRadio = 0;
-  String selectedLanguage = 'Auto';
+  String selectedLanguage = 'English';
   String selectedCategory = 'Other';
+  final TextEditingController titleController = TextEditingController();
+  final TextEditingController contentController = TextEditingController();
+  final TextEditingController descriptionController = TextEditingController();
+  final viewModel = PromptListViewModel();
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +37,7 @@ class NewPromptContentState extends State<NewPromptContent> {
       insetPadding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
         width: 400,
-        height: selectedRadio == 1 ? 650 : 450,
+        height: 650,
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [Colors.white, Colors.grey.shade50],
@@ -55,9 +62,7 @@ class NewPromptContentState extends State<NewPromptContent> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildToggleSwitch(),
-                    const SizedBox(height: 24),
-                    selectedRadio == 0 ? _buildPrivateLayout() : _buildPublicLayout(),
+                    _buildPromptLayout(),
                   ],
                 ),
               ),
@@ -84,7 +89,7 @@ class NewPromptContentState extends State<NewPromptContent> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           const Text(
-            'New Prompt',
+            'New Private Prompt',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -107,117 +112,42 @@ class NewPromptContentState extends State<NewPromptContent> {
     );
   }
 
-  Widget _buildToggleSwitch() {
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: GestureDetector(
-              onTap: () => setState(() => selectedRadio = 0),
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                decoration: BoxDecoration(
-                  color: selectedRadio == 0 ? Colors.white : Colors.transparent,
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: selectedRadio == 0
-                      ? [BoxShadow(color: Colors.grey.withOpacity(0.2), blurRadius: 10)]
-                      : [],
-                ),
-                child: Text(
-                  'Private',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: selectedRadio == 0 ? Colors.blue.shade700 : Colors.grey,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            child: GestureDetector(
-              onTap: () => setState(() => selectedRadio = 1),
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                decoration: BoxDecoration(
-                  color: selectedRadio == 1 ? Colors.white : Colors.transparent,
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: selectedRadio == 1
-                      ? [BoxShadow(color: Colors.grey.withOpacity(0.2), blurRadius: 10)]
-                      : [],
-                ),
-                child: Text(
-                  'Public',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: selectedRadio == 1 ? Colors.blue.shade700 : Colors.grey,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPrivateLayout() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildTextField(label: 'Name', hint: 'Prompt name', isRequired: true),
-        const SizedBox(height: 20),
-        _buildTextFieldWithInfo(
-          label: 'Prompt',
-          hint: 'e.g: Write an article about [TOPIC]',
-          info: 'Use [ ] for user input',
-          isRequired: true,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPublicLayout() {
+  Widget _buildPromptLayout() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildDropdown(
           label: 'Language',
           value: selectedLanguage,
-          items: ['Auto', 'English', 'Spanish', 'French', 'German'],
+          items: ['English', 'Japanese', 'Spanish', 'French', 'German'],
           onChanged: (value) => setState(() => selectedLanguage = value!),
           isRequired: true,
         ),
         const SizedBox(height: 20),
-        _buildTextField(label: 'Name', hint: 'Prompt name', isRequired: true),
+        _buildTextField(label: 'Name', hint: 'Prompt name', isRequired: true, controller: titleController),
         const SizedBox(height: 20),
         _buildDropdown(
           label: 'Category',
           value: selectedCategory,
-          items: ['Other', 'Business', 'Education', 'Health', 'Entertainment'],
+          items: ['Other', 'Business', 'Marketing', 'SEO', 'Writing', 'Coding', 'Career', 'Chatbot', 'Education', 'Fun', 'Productivity'],
           onChanged: (value) => setState(() => selectedCategory = value!),
           isRequired: true,
         ),
         const SizedBox(height: 20),
-        _buildTextField(label: 'Description', hint: 'Describe your prompt'),
+        _buildTextField(label: 'Description', hint: 'Describe your prompt', controller: descriptionController),
         const SizedBox(height: 20),
         _buildTextFieldWithInfo(
           label: 'Prompt',
           hint: 'e.g: Write an article about [TOPIC]',
           info: 'Use [ ] for user input',
           isRequired: true,
+          controller: contentController,
         ),
       ],
     );
   }
 
-  Widget _buildTextField({required String label, required String hint, bool isRequired = false}) {
+  Widget _buildTextField({required String label, required String hint, required TextEditingController controller, bool isRequired = false}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -236,6 +166,7 @@ class NewPromptContentState extends State<NewPromptContent> {
         ),
         const SizedBox(height: 8),
         TextField(
+          controller: controller,
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: TextStyle(color: Colors.grey.shade400),
@@ -256,6 +187,7 @@ class NewPromptContentState extends State<NewPromptContent> {
     required String label,
     required String hint,
     required String info,
+    required TextEditingController controller,
     bool isRequired = false,
   }) {
     return Column(
@@ -276,6 +208,7 @@ class NewPromptContentState extends State<NewPromptContent> {
         ),
         const SizedBox(height: 8),
         TextField(
+          controller: controller,
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: TextStyle(color: Colors.grey.shade400),
@@ -368,7 +301,38 @@ class NewPromptContentState extends State<NewPromptContent> {
           ),
           const SizedBox(width: 12),
           ElevatedButton(
-            onPressed: () {},
+            onPressed: () async {
+              if (titleController.text.trim().isEmpty || contentController.text.trim().isEmpty) {
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text("Error"),
+                    content: const Text("Please fill in all required fields!"),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text("OK"),
+                      ),
+                    ],
+                  ),
+                );
+                return;
+              }
+
+              PromptRequest newPrompt = PromptRequest(
+                language: selectedLanguage,
+                title: titleController.text,
+                category: selectedCategory.toLowerCase(),
+                description: descriptionController.text,
+                content: contentController.text,
+                isPublic: false,
+              );
+
+              await viewModel.createPrompt(newPrompt);
+
+              widget.onPromptCreated();
+              Navigator.pop(context);
+            },
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               backgroundColor: Colors.green,

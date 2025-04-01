@@ -17,12 +17,13 @@ class DioClient {
         receiveTimeout: const Duration(seconds: 30),
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
+          'X-Stack-Access-Type': 'client',
+          'X-Stack-Project-Id': 'a914f06b-5e46-4966-8693-80e4b9f4f409',
+          'X-Stack-Publishable-Client-Key': 'pck_tqsy29b64a585km2g4wnpc57ypjprzzdch8xzpq0xhayr',
         },
       ),
     );
 
-    // Thêm interceptor để log request/response
     dio.interceptors.add(LogInterceptor(
       request: true,
       requestHeader: true,

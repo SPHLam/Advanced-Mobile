@@ -1,10 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:jarvis/constants/colors.dart';
+import 'package:jarvis/views/Login/login_screen.dart';
+import 'package:jarvis/models/response/api_response.dart';
+import 'package:jarvis/models/user_model.dart';
+import 'package:jarvis/view_models/auth_view_model.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../UpgradeAccount/upgrade_account.dart';
 
-class AccountScreen extends StatelessWidget {
+
+class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
+
+  @override
+  State<AccountScreen> createState() => AccountScreenState();
+}
+
+class AccountScreenState extends State<AccountScreen> {
+  Future<void> _logout() async {
+    await Provider.of<AuthViewModel>(context, listen: false).logout();
+    if (mounted) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+            (Route<dynamic> route) => false,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -197,7 +220,7 @@ class AccountScreen extends StatelessWidget {
                       iconColor: Colors.red,
                       textColor: Colors.red,
                       backgroundColor: Colors.red[50]!,
-                      onTap: () {},
+                      onTap: _logout,
                     ),
                   ],
                 ),
