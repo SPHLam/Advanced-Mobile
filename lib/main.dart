@@ -7,7 +7,7 @@ import 'package:jarvis/view_models/knowledge_base_view_model.dart';
 import 'package:jarvis/view_models/ai_chat_list_view_model.dart';
 import 'package:jarvis/view_models/auth_view_model.dart';
 import 'package:jarvis/view_models/message_view_model.dart';
-// import 'package:jarvis/view_models/prompt_list_view_model.dart';
+import 'package:jarvis/view_models/prompt_list_view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 // import 'package:jarvis/services/prompt_service.dart';
@@ -34,27 +34,30 @@ void main() async {
             // context.read<ChatService>(),
           ),
         ),
+        ChangeNotifierProvider(create: (context) => PromptListViewModel()),
         ChangeNotifierProvider(create: (context) => KnowledgeBase()),
         ChangeNotifierProvider(create: (context) => AIChatList()),
         ChangeNotifierProvider(create: (_) => AuthViewModel()),
       ],
-      child: MyApp(),
+      child: const MyApp(),
     ),
   );
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Ami Assistant',
+      title: 'JarvisCopi Assistant',
       theme: TAppTheme.lightTheme,
       darkTheme: TAppTheme.darkTheme,
       themeMode: ThemeMode.system,
       navigatorKey: navigatorKey,
       routes: {'/login': (context) => const LoginScreen()},
-      home: SplashScreen(),
+      home: const SplashScreen(),
     );
   }
 }

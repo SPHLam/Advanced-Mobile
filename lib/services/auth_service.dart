@@ -50,7 +50,7 @@ class AuthService {
       }
       return ApiResponse(
         success: false,
-        message: 'Lỗi kết nối: $e',
+        message: 'Connection error: $e',
         statusCode: 500,
       );
     }
@@ -160,13 +160,13 @@ class AuthService {
         return ApiResponse(
           success: true,
           data: response.data,
-          message: 'Logout thành công',
+          message: 'Logout successful',
           statusCode: response.statusCode ?? 200,
         );
       } else {
         return ApiResponse(
           success: false,
-          message: 'Logout thất bại',
+          message: 'Logout failed',
           statusCode: response.statusCode ?? 400,
         );
       }

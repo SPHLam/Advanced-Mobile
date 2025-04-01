@@ -62,7 +62,6 @@ class AuthViewModel extends ChangeNotifier {
 
     try {
       final response = await _authService.login(email, password);
-      print(response.toString());
 
       if (response.success && response.data != null) {
         final prefs = await SharedPreferences.getInstance();

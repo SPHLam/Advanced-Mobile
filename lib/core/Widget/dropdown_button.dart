@@ -25,7 +25,7 @@ class AIDropdown extends StatelessWidget {
           value: listAIItems.first.name,
           isExpanded: true,
           onChanged: onChanged,
-          items:  listAIItems.map<DropdownMenuItem<String>>((AIItem item) {
+          items: listAIItems.map<DropdownMenuItem<String>>((AIItem item) {
             return DropdownMenuItem<String>(
               value: item.name,
               child: Row(
@@ -45,8 +45,9 @@ class AIDropdown extends StatelessWidget {
                       style: const TextStyle(fontSize: 12),
                     ),
                   ),
-                  const Icon(Icons.flash_on, color: Colors.orangeAccent, size: 12),
-                  const Text('24', style: TextStyle(fontSize: 12)),
+                  const Icon(Icons.flash_on,
+                      color: Colors.orangeAccent, size: 12),
+                  const Text('29', style: TextStyle(fontSize: 12)),
                 ],
               ),
             );

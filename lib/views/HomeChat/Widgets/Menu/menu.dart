@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:jarvis/views/Login/login_screen.dart';
 import 'package:jarvis/views/Knowledge/page/knowledge_screen.dart';
 import 'package:jarvis/views/UpgradeAccount/upgrade_account.dart';
+import 'package:jarvis/view_models/auth_view_model.dart';
 import 'package:jarvis/view_models/message_view_model.dart';
 import 'package:jarvis/constants/colors.dart';
 import 'package:provider/provider.dart';
-import '../../../Login/login_screen.dart';
 
 class Menu extends StatefulWidget {
   const Menu({super.key});
@@ -14,6 +15,17 @@ class Menu extends StatefulWidget {
 
 class _MenuState extends State<Menu> {
   int _selectedIndex = -1;
+
+  Future<void> _logout() async {
+    await Provider.of<AuthViewModel>(context, listen: false).logout();
+    if (mounted) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+            (Route<dynamic> route) => false,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,15 +88,8 @@ class _MenuState extends State<Menu> {
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const LoginScreen()),
-                      );
-                    },
-                    icon:
-                    const Icon(Icons.logout, size: 18, color: Colors.white),
+                    onPressed: _logout,
+                    icon: const Icon(Icons.logout, size: 18, color: Colors.white),
                     label: const Text("Logout"),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red[400],

@@ -2,48 +2,66 @@ import 'package:jarvis/views/Bot/model/bot.dart';
 
 final List<Bot> bots = [
   const Bot(
-      name: "Claude",
-      prompt:
-      "You are an intelligent and thoughtful assistant created by Anthropic. You excel in deep reasoning, ethical considerations, and long-form writing. Maintain clarity and integrity.",
-      team: "Anthropic Team",
-      imageUrl:
-      "assets/logo/claude.png",
-      isPublish: true,
-      listKnowledge: ["Ethics", "Long-form writing", "Complex reasoning"]),
-
+    name: "GPT-4o mini",
+    prompt:
+    "You are a lightweight, efficient conversational AI developed by OpenAI. You provide quick, accurate responses for everyday tasks and casual conversations.",
+    team: "OpenAI",
+    imageUrl: "assets/logo/gpt-4o-mini.png",
+    isPublish: true,
+    listKnowledge: ["General knowledge", "Quick responses", "Task assistance"],
+  ),
   const Bot(
-      name: "GitHub Copilot",
-      prompt:
-      "You are a coding assistant trained on billions of lines of code. Your goal is to help developers write code faster and better with intelligent suggestions and completions.",
-      team: "GitHub + OpenAI",
-      imageUrl: "assets/logo/github-copilot.png",
-      isPublish: true,
-      listKnowledge: ["Code completion", "Programming", "Developer tools"]),
-
+    name: "GPT-4o",
+    prompt:
+    "You are an advanced conversational AI created by OpenAI. You excel at complex tasks, creative writing, and detailed problem-solving with a friendly tone.",
+    team: "OpenAI",
+    imageUrl: "assets/logo/gpt-4o.png",
+    isPublish: true,
+    listKnowledge: ["Creative writing", "Complex reasoning", "Multitasking"],
+  ),
   const Bot(
-      name: "ChatGPT",
-      prompt:
-      "You are a conversational AI developed by OpenAI. Friendly, smart, and helpful, you can assist users in a variety of tasks from writing to coding to general knowledge.",
-      team: "OpenAI",
-      imageUrl: "assets/logo/chatgpt.png",
-      isPublish: true,
-      listKnowledge: ["General knowledge", "Creative writing", "Coding assistance"]),
-
+    name: "Gemini 1.5 Flash",
+    prompt:
+    "You are a fast and versatile AI model from Google DeepMind, designed for rapid responses and seamless integration with Google services.",
+    team: "Google DeepMind",
+    imageUrl: "assets/logo/gemini-1.5-flash.png",
+    isPublish: true,
+    listKnowledge: ["Fast processing", "Google integration", "Web assistance"],
+  ),
   const Bot(
-      name: "Deepseek",
-      prompt:
-      "You are a research-focused AI model designed to help users understand complex topics, find insights in data, and produce quality content with high precision.",
-      team: "Deepseek Team",
-      imageUrl: "assets/logo/deepseek.png",
-      isPublish: true,
-      listKnowledge: ["Research", "Data analysis", "Academic support"]),
-
+    name: "Gemini 1.5 Pro",
+    prompt:
+    "You are a professional-grade AI from Google DeepMind, built for in-depth analysis, multimodal reasoning, and high-performance tasks.",
+    team: "Google DeepMind",
+    imageUrl: "assets/logo/gemini-1.5-pro.png",
+    isPublish: true,
+    listKnowledge: ["Multimodal reasoning", "Data analysis", "Advanced tasks"],
+  ),
   const Bot(
-      name: "Gemini",
-      prompt:
-      "You are Gemini, Google’s advanced AI model built to integrate deeply with Google services. You provide smart, contextual help across documents, code, and the web.",
-      team: "Google DeepMind",
-      imageUrl: "assets/logo/gemini.png",
-      isPublish: true,
-      listKnowledge: ["Google integration", "Web search", "Multimodal reasoning"]),
+    name: "Claude 3 Haiku",
+    prompt:
+    "You are a concise and thoughtful AI created by Anthropic. Inspired by poetry, you deliver clear, ethical, and succinct answers.",
+    team: "Anthropic Team",
+    imageUrl: "assets/logo/claude-3-haiku.png",
+    isPublish: true,
+    listKnowledge: ["Ethics", "Concise responses", "Critical thinking"],
+  ),
+  const Bot(
+    name: "Claude 3 Sonnet",
+    prompt:
+    "You are an intelligent and balanced AI from Anthropic, designed for deep reasoning, nuanced writing, and ethical decision-making.",
+    team: "Anthropic Team",
+    imageUrl: "assets/logo/claude-3-sonnet.png",
+    isPublish: true,
+    listKnowledge: ["Deep reasoning", "Ethical considerations", "Writing"],
+  ),
+  const Bot(
+    name: "Deepseek Chat",
+    prompt:
+    "You are a research-oriented AI designed by the Deepseek Team to assist with complex topics, data insights, and precise content generation.",
+    team: "Deepseek Team",
+    imageUrl: "assets/logo/deepseek.png",
+    isPublish: true,
+    listKnowledge: ["Research", "Data analysis", "Precision content"],
+  ),
 ];
