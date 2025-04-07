@@ -2,16 +2,25 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:jarvis/views/Account/account_screen.dart';
 import 'package:jarvis/views/Bot/page/bot_screen.dart';
-import 'package:jarvis/views/EmailChat/email.dart';
-import 'package:jarvis/views/Prompt/prompt_screen.dart';
-import 'package:jarvis/core/Widget/dropdown_button.dart';
+import 'package:jarvis/utils/exceptions/chat_exception.dart';
+import 'package:jarvis/models/response/message_response.dart';
+import 'package:jarvis/view_models/auth_view_model.dart';
+import 'package:jarvis/models/prompt_list.dart';
+import 'package:jarvis/view_models/prompt_list_view_model.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:jarvis/view_models/message_view_model.dart';
+import 'package:jarvis/core/Widget/dropdown_button.dart';
+import 'package:jarvis/view_models/ai_chat_list_view_model.dart';
+import 'package:jarvis/view_models/homechat_view_model.dart';
+import '../../models/prompt.dart';
+import '../EmailChat/email.dart';
+import '../Prompt/prompt_screen.dart';
+import '../Prompt/widgets/prompt_details.dart';
 import 'Widgets/BottomNavigatorBarCustom/custom-bottom-navigator-bar.dart';
 import 'Widgets/Menu/menu.dart';
-import 'package:jarvis/view_models/ai_chat_list_view_model.dart';
 import '../../models/ai_logo.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomeChat extends StatefulWidget {
   const HomeChat({super.key});
@@ -21,17 +30,29 @@ class HomeChat extends StatefulWidget {
 }
 
 class _HomeChatState extends State<HomeChat> {
-  String? _selectedImagePath;
   final TextEditingController _controller = TextEditingController();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  late String selectedAIItem;
+  final ScrollController _scrollController = ScrollController();
+  final FocusNode _focusNode = FocusNode();
   bool _isOpenDeviceWidget = false;
   int _selectedBottomItemIndex = 0;
-  final FocusNode _focusNode = FocusNode();
+  String? _selectedImagePath;
   late List<AIItem> _listAIItem;
+  late String selectedAIItem;
+  bool _hasText = false;
+  bool _showSlash = false;
+
   @override
   void initState() {
     super.initState();
+    _controller.addListener(() {
+      setState(() {
+        _hasText = _controller.text.isNotEmpty;
+        if (_scrollController.hasClients) {
+          _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+        }
+      });
+    });
     _focusNode.addListener(() {
       if (_focusNode.hasFocus) {
         setState(() {
@@ -39,13 +60,44 @@ class _HomeChatState extends State<HomeChat> {
         });
       }
     });
-    _listAIItem = Provider.of<AIChatList>(context, listen: false).aiItems;
-    selectedAIItem = _listAIItem.first.name;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadUserInfo();
+    });
+
+    final aiChatList = Provider.of<AIChatList>(context, listen: false);
+    _listAIItem = aiChatList.aiItems;
+    selectedAIItem = aiChatList.selectedAIItem.name;
+
+    final aiItem =
+        _listAIItem.firstWhere((aiItem) => aiItem.name == selectedAIItem);
+    Provider.of<MessageModel>(context, listen: false)
+        .fetchAllConversations(aiItem.id, 'dify')
+        .then((_) async {
+      await Provider.of<MessageModel>(context, listen: false)
+          .checkCurrentConversation(aiItem.id);
+    });
+    Provider.of<MessageModel>(context, listen: false).updateRemainingUsage();
+    Provider.of<PromptListViewModel>(context, listen: false)
+        .fetchAllPrompts()
+        .then((_) {
+      Provider.of<PromptListViewModel>(context, listen: false).allPrompts;
+    });
+  }
+
+  Future<void> _loadUserInfo() async {
+    try {
+      await Provider.of<AuthViewModel>(context, listen: false).fetchUserInfo();
+    } catch (e) {
+      return;
+    }
   }
 
   @override
   void dispose() {
+    _controller.dispose();
     _focusNode.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -77,66 +129,120 @@ class _HomeChatState extends State<HomeChat> {
     });
   }
 
-  void _sendMessage() {
+  void _sendMessage() async {
     if (_controller.text.isEmpty && _selectedImagePath == null) return;
-    setState(() {
+
+    try {
+      final aiItem =
+          _listAIItem.firstWhere((aiItem) => aiItem.name == selectedAIItem);
+      await Provider.of<MessageModel>(context, listen: false).sendMessage(
+        _controller.text,
+        aiItem,
+      );
+      _controller.clear();
       if (_selectedImagePath != null) {
-        Provider.of<MessageModel>(context, listen: false).addMessage({
-          'sender': 'user',
-          'image': _selectedImagePath!,
-        });
-        _selectedImagePath = null;
-      } else {
-        Provider.of<MessageModel>(context, listen: false).addMessage({
-          'sender': 'user',
-          'text': _controller.text,
+        setState(() {
+          _selectedImagePath = null;
         });
       }
-      Provider.of<MessageModel>(context, listen: false).addMessage({
-        'sender': 'bot',
-        'text': 'Hello.',
-      });
-      _controller.clear();
-      // _listAIItem.firstWhere((aiItem) => aiItem.name == selectedAIItem).tokenCount -= 1;
-    });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            e is ChatException ? e.message : 'Có lỗi xảy ra khi gửi tin nhắn',
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
-  void updateSelectedAIItem(String newValue) {
+  void _updateSelectedAIItem(String newValue) {
     setState(() {
       selectedAIItem = newValue;
       AIItem aiItem =
           _listAIItem.firstWhere((aiItem) => aiItem.name == newValue);
+      Provider.of<AIChatList>(context, listen: false).setSelectedAIItem(aiItem);
       _listAIItem.removeWhere((aiItem) => aiItem.name == newValue);
       _listAIItem.insert(0, aiItem);
     });
   }
 
-  Widget _buildMessage(String sender, Map<String, String> message) {
-    bool isUser = sender == 'user';
+  Widget _buildMessage(Message message) {
+    bool isUser = message.role == 'user';
+    bool isError = message.isErrored ?? false;
+
+    Future<void> launchURL(String url) async {
+      final Uri uri = Uri.parse(url);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Không thể mở link: $url')),
+        );
+      }
+    }
+
     return Align(
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
         padding: const EdgeInsets.all(12.0),
         decoration: BoxDecoration(
-          color: isUser ? Colors.blue[100] : Colors.grey[300],
+          color: isError
+              ? Colors.red[100]
+              : (isUser ? Colors.blue[100] : Colors.grey[300]),
           borderRadius: BorderRadius.circular(50),
         ),
-        child: message.containsKey('image') && message['image'] != null
-            ? Image.file(File(message['image']!))
-            : message.containsKey('text') && message['text'] != null
-                ? Text(
-                    message['text']!,
-                    style:
-                        TextStyle(color: isUser ? Colors.black : Colors.black),
-                  )
-                : const SizedBox.shrink(),
+        child: Consumer<MessageModel>(builder: (context, messageModel, child) {
+          if (!isUser && message.content.isEmpty && messageModel.isSending) {
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Đang xử lý...',
+                  style: TextStyle(
+                    color: isError ? Colors.red : Colors.black,
+                  ),
+                ),
+              ],
+            );
+          }
+          return isUser
+              ? Text(
+                  message.content,
+                  style: TextStyle(color: isError ? Colors.red : Colors.black),
+                )
+              : MarkdownBody(
+                  data: message.content,
+                  styleSheet: MarkdownStyleSheet(
+                    p: TextStyle(color: isError ? Colors.red : Colors.black),
+                    a: const TextStyle(
+                      color: Colors.blue,
+                      decoration: TextDecoration.underline,
+                    ),
+                    listBullet:
+                        TextStyle(color: isError ? Colors.red : Colors.black),
+                  ),
+                  selectable: true,
+                  onTapLink: (text, href, title) {
+                    if (href != null) {
+                      launchURL(href);
+                    }
+                  },
+                );
+        }),
       ),
     );
-  }
-
-  void _saveConversation() {
-    Provider.of<MessageModel>(context, listen: false).saveConversation();
   }
 
   Future<void> _openGallery() async {
@@ -161,179 +267,312 @@ class _HomeChatState extends State<HomeChat> {
     }
   }
 
+  void _onTextChanged(String input) {
+    if (input.isNotEmpty) {
+      _showSlash = input.startsWith('/');
+    } else {
+      _showSlash = false;
+    }
+  }
+
+  void _openPromptDetailsDialog(BuildContext context, Prompt prompt) {
+    PromptDetails.show(
+      context,
+      itemTitle: prompt.title,
+      content: prompt.content,
+      category: prompt.category,
+      description: prompt.description,
+      isPublic: prompt.isPublic,
+      isFavorite: prompt.isFavorite,
+    ).then((result) {
+      if (result != null) {
+        setState(() {
+          if (result.contains('Respond in')) {
+            print('Sending: $result');
+          }
+        });
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
       drawer: const Menu(),
-      body: Column(
-        children: [
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  IconButton(
-                    onPressed: () {
-                      _scaffoldKey.currentState?.openDrawer();
-                    },
-                    icon: const Icon(Icons.menu),
-                  ),
-                  const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      borderRadius: BorderRadius.circular(50.0),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.flash_on,
-                          color: Colors.orangeAccent,
+      body: Consumer<MessageModel>(
+        builder: (context, messageModel, child) {
+          return Column(
+            children: [
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          _scaffoldKey.currentState?.openDrawer();
+                        },
+                        icon: const Icon(Icons.menu),
+                      ),
+                      const Spacer(),
+                      Container(
+                        padding: const EdgeInsets.all(5),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(50.0),
                         ),
-                        Text(
-                          '29',
-                          style: const TextStyle(
-                            color: Color.fromRGBO(119, 117, 117, 1.0),
-                          ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.flash_on,
+                              color: Colors.orangeAccent,
+                            ),
+                            Text(
+                              '${messageModel.remainingUsage ?? 0}',
+                              style: const TextStyle(
+                                color: Color.fromRGBO(119, 117, 117, 1.0),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.add_circle_outline),
+                        onPressed: () {
+                          Provider.of<MessageModel>(context, listen: false)
+                              .clearMessage();
+                        },
+                      ),
+                    ],
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.add_circle_outline),
-                    onPressed:
-                        Provider.of<MessageModel>(context).messages.isEmpty
-                            ? null
-                            : _saveConversation,
-                  ),
-                ],
+                ),
               ),
-            ),
-          ),
-          Expanded(
-            child: GestureDetector(
-              onTap: () {
-                FocusScope.of(context).unfocus();
-                if (_isOpenDeviceWidget) {
-                  _toggleDeviceVisibility();
-                }
-              },
-              child: Column(
-                children: [
-                  Expanded(
-                    child: Consumer<MessageModel>(
-                      builder: (context, messageModel, child) {
-                        return ListView.builder(
+              Expanded(
+                child: GestureDetector(
+                  onTap: () {
+                    FocusScope.of(context).unfocus();
+                    if (_isOpenDeviceWidget) {
+                      _toggleDeviceVisibility();
+                    }
+                  },
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: ListView.builder(
+                          controller: _scrollController,
                           itemCount: messageModel.messages.length,
                           itemBuilder: (context, index) {
                             final message = messageModel.messages[index];
-                            return _buildMessage(
-                              message['sender'] ?? 'unknown',
-                              message,
-                            );
+                            return _buildMessage(message);
                           },
-                        );
-                      },
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10.0, vertical: 5.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        SizedBox(
-                          width: 140,
-                          child: AIDropdown(
-                            listAIItems: _listAIItem,
-                            onChanged: (String? newValue) {
-                              if (newValue != null) {
-                                updateSelectedAIItem(newValue);
-                              }
-                            },
-                          ),
                         ),
-                      ],
-                    ),
-                  ),
-                  MouseRegion(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        IconButton(
-                          icon: _isOpenDeviceWidget
-                              ? const Icon(Icons.arrow_back_ios_new)
-                              : const Icon(Icons.arrow_forward_ios),
-                          onPressed: _toggleDeviceVisibility,
-                        ),
-                        if (_isOpenDeviceWidget) ...[
-                          IconButton(
-                            icon: const Icon(Icons.camera_alt),
-                            onPressed: _openCamera,
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.image_rounded),
-                            onPressed: _openGallery,
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.email),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => EmailComposer()),
-                              );
-                            },
-                          ),
-                        ],
-                        Expanded(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey, width: 1),
-                              borderRadius: BorderRadius.circular(50),
-                              color: Colors.grey[200],
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10.0, vertical: 5.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              width: 140,
+                              child: AIDropdown(
+                                listAIItems: _listAIItem,
+                                onChanged: (String? newValue) {
+                                  if (newValue != null) {
+                                    _updateSelectedAIItem(newValue);
+                                  }
+                                },
+                              ),
                             ),
-                            child: TextField(
-                              focusNode: _focusNode,
-                              controller: _controller,
-                              maxLines: null,
-                              decoration: InputDecoration(
-                                contentPadding:
-                                    const EdgeInsets.only(left: 10, right: 10),
-                                hintText: (_selectedImagePath == null)
-                                    ? 'Enter your message...'
-                                    : null,
-                                border: InputBorder.none,
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(50),
-                                  borderSide: const BorderSide(
-                                      color: Colors.grey, width: 1),
+                          ],
+                        ),
+                      ),
+                      if (_showSlash)
+                        Consumer<PromptListViewModel>(
+                          builder: (context, promptList, child) {
+                            if (promptList.isLoading) {
+                              return const CircularProgressIndicator();
+                            } else if (promptList.hasError) {
+                              return Text('Có lỗi xảy ra: ${promptList.error}');
+                            } else {
+                              return Padding(
+                                padding: const EdgeInsets.all(5),
+                                child: Container(
+                                  width:
+                                      MediaQuery.of(context).size.width / 3 * 2,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: const Color.fromARGB(
+                                          255, 158, 198, 232),
+                                      width: 1.0,
+                                    ),
+                                    borderRadius: BorderRadius.circular(20.0),
+                                  ),
+                                  constraints: BoxConstraints(
+                                      maxHeight:
+                                          MediaQuery.of(context).size.height /
+                                              3),
+                                  child: ListView.builder(
+                                    itemCount:
+                                        promptList.allPrompts.items.length,
+                                    itemBuilder: (context, index) {
+                                      return ListTile(
+                                        title: Text(promptList
+                                            .allPrompts.items[index].title),
+                                        onTap: () {
+                                          _controller.text = "";
+                                          _showSlash = false;
+                                          _openPromptDetailsDialog(
+                                              context,
+                                              promptList
+                                                  .allPrompts.items[index]);
+                                        },
+                                      );
+                                    },
+                                  ),
                                 ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(50),
-                                  borderSide: const BorderSide(
-                                      color: Colors.black, width: 1),
-                                ),
+                              );
+                            }
+                          },
+                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          IconButton(
+                            icon: _isOpenDeviceWidget
+                                ? const Icon(Icons.arrow_back_ios_new)
+                                : const Icon(Icons.arrow_forward_ios),
+                            onPressed: _toggleDeviceVisibility,
+                          ),
+                          if (_isOpenDeviceWidget) ...[
+                            IconButton(
+                              icon: const Icon(Icons.camera_alt),
+                              onPressed: _openCamera,
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.image_rounded),
+                              onPressed: _openGallery,
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.email),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => EmailComposer()),
+                                );
+                              },
+                            ),
+                          ],
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                border:
+                                    Border.all(color: Colors.grey, width: 1),
+                                borderRadius: BorderRadius.circular(50),
+                                color: Colors.grey[200],
+                              ),
+                              child: Stack(
+                                alignment: Alignment.centerLeft,
+                                children: [
+                                  TextField(
+                                    focusNode: _focusNode,
+                                    controller: _controller,
+                                    onChanged: _onTextChanged,
+                                    maxLines: null,
+                                    decoration: InputDecoration(
+                                      contentPadding: const EdgeInsets.only(
+                                          left: 10, right: 10),
+                                      hintText: (_selectedImagePath == null)
+                                          ? 'Enter your message...'
+                                          : null,
+                                      border: InputBorder.none,
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(50),
+                                        borderSide: const BorderSide(
+                                            color: Colors.grey, width: 1),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(50),
+                                        borderSide: const BorderSide(
+                                            color: Colors.black, width: 1),
+                                      ),
+                                    ),
+                                  ),
+                                  if (_selectedImagePath != null)
+                                    Padding(
+                                      padding: const EdgeInsets.all(4),
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                            color: Colors.grey.withOpacity(0.5),
+                                            width: 1,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color:
+                                                  Colors.grey.withOpacity(0.1),
+                                              spreadRadius: 1,
+                                              blurRadius: 1,
+                                            ),
+                                          ],
+                                        ),
+                                        child: Stack(
+                                          children: [
+                                            ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              child: Image.file(
+                                                File(_selectedImagePath!),
+                                                width: 60,
+                                                height: 60,
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ),
+                                            Positioned(
+                                              top: -15,
+                                              right: -15,
+                                              child: IconButton(
+                                                icon: const Icon(
+                                                  Icons.close,
+                                                  size: 20,
+                                                  color: Colors.black54,
+                                                ),
+                                                onPressed: () {
+                                                  setState(() {
+                                                    _selectedImagePath = null;
+                                                  });
+                                                },
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                ],
                               ),
                             ),
                           ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.send),
-                          onPressed: _sendMessage,
-                        ),
-                      ],
-                    ),
+                          IconButton(
+                            icon: const Icon(Icons.send),
+                            onPressed: _hasText || _selectedImagePath != null
+                                ? _sendMessage
+                                : null,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 5),
+                    ],
                   ),
-                  const SizedBox(height: 5),
-                ],
+                ),
               ),
-            ),
-          ),
-        ],
+            ],
+          );
+        },
       ),
       bottomNavigationBar: CustomBottomNavigationBar(
         currentIndex: _selectedBottomItemIndex,

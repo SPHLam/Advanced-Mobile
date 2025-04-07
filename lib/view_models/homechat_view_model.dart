@@ -345,7 +345,7 @@ class MessageModel extends ChangeNotifier {
         assistantId: assistantId,
       );
 
-      _messages.clear(); // Xóa tin nh���n cũ trước khi thêm lịch sử mới
+      _messages.clear(); // Xóa tin nh   n cũ trước khi thêm lịch sử mới
       _currentConversationId =
           conversationId; // Cập nhật ID cuộc hội thoại hiện tại
 
