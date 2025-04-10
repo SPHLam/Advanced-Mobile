@@ -1,11 +1,11 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:jarvis/views/Account/account_screen.dart';
 import 'package:jarvis/views/Bot/page/bot_screen.dart';
 import 'package:jarvis/utils/exceptions/chat_exception.dart';
 import 'package:jarvis/models/response/message_response.dart';
 import 'package:jarvis/view_models/auth_view_model.dart';
-import 'package:jarvis/models/prompt_list.dart';
 import 'package:jarvis/view_models/prompt_list_view_model.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -69,8 +69,7 @@ class _HomeChatState extends State<HomeChat> {
     _listAIItem = aiChatList.aiItems;
     selectedAIItem = aiChatList.selectedAIItem.name;
 
-    final aiItem =
-        _listAIItem.firstWhere((aiItem) => aiItem.name == selectedAIItem);
+    final aiItem = _listAIItem.firstWhere((aiItem) => aiItem.name == selectedAIItem);
     Provider.of<MessageModel>(context, listen: false)
         .fetchAllConversations(aiItem.id, 'dify')
         .then((_) async {
@@ -78,19 +77,20 @@ class _HomeChatState extends State<HomeChat> {
           .checkCurrentConversation(aiItem.id);
     });
     Provider.of<MessageModel>(context, listen: false).updateRemainingUsage();
-    Provider.of<PromptListViewModel>(context, listen: false)
-        .fetchAllPrompts()
-        .then((_) {
-      Provider.of<PromptListViewModel>(context, listen: false).allPrompts;
-    });
+    _refreshPrompts();
   }
 
   Future<void> _loadUserInfo() async {
     try {
       await Provider.of<AuthViewModel>(context, listen: false).fetchUserInfo();
     } catch (e) {
-      return;
+      if (kDebugMode) print('Error loading user info: $e');
     }
+  }
+
+  Future<void> _refreshPrompts() async {
+    await Provider.of<PromptListViewModel>(context, listen: false)
+        .fetchAllPrompts();
   }
 
   @override
@@ -109,7 +109,9 @@ class _HomeChatState extends State<HomeChat> {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const PromptScreen()),
-      );
+      ).then((_) {
+        _refreshPrompts();
+      });
     } else if (index == 1) {
       Navigator.push(
         context,
@@ -133,8 +135,7 @@ class _HomeChatState extends State<HomeChat> {
     if (_controller.text.isEmpty && _selectedImagePath == null) return;
 
     try {
-      final aiItem =
-          _listAIItem.firstWhere((aiItem) => aiItem.name == selectedAIItem);
+      final aiItem = _listAIItem.firstWhere((aiItem) => aiItem.name == selectedAIItem);
       await Provider.of<MessageModel>(context, listen: false).sendMessage(
         _controller.text,
         aiItem,
@@ -149,7 +150,7 @@ class _HomeChatState extends State<HomeChat> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            e is ChatException ? e.message : 'Có lỗi xảy ra khi gửi tin nhắn',
+            e is ChatException ? e.message : 'An error occurred while sending the message',
           ),
           backgroundColor: Colors.red,
         ),
@@ -160,8 +161,7 @@ class _HomeChatState extends State<HomeChat> {
   void _updateSelectedAIItem(String newValue) {
     setState(() {
       selectedAIItem = newValue;
-      AIItem aiItem =
-          _listAIItem.firstWhere((aiItem) => aiItem.name == newValue);
+      AIItem aiItem = _listAIItem.firstWhere((aiItem) => aiItem.name == newValue);
       Provider.of<AIChatList>(context, listen: false).setSelectedAIItem(aiItem);
       _listAIItem.removeWhere((aiItem) => aiItem.name == newValue);
       _listAIItem.insert(0, aiItem);
@@ -178,7 +178,7 @@ class _HomeChatState extends State<HomeChat> {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Không thể mở link: $url')),
+          SnackBar(content: Text('Cannot open link: $url')),
         );
       }
     }
@@ -209,7 +209,7 @@ class _HomeChatState extends State<HomeChat> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'Đang xử lý...',
+                  'Processing...',
                   style: TextStyle(
                     color: isError ? Colors.red : Colors.black,
                   ),
@@ -219,27 +219,26 @@ class _HomeChatState extends State<HomeChat> {
           }
           return isUser
               ? Text(
-                  message.content,
-                  style: TextStyle(color: isError ? Colors.red : Colors.black),
-                )
+            message.content,
+            style: TextStyle(color: isError ? Colors.red : Colors.black),
+          )
               : MarkdownBody(
-                  data: message.content,
-                  styleSheet: MarkdownStyleSheet(
-                    p: TextStyle(color: isError ? Colors.red : Colors.black),
-                    a: const TextStyle(
-                      color: Colors.blue,
-                      decoration: TextDecoration.underline,
-                    ),
-                    listBullet:
-                        TextStyle(color: isError ? Colors.red : Colors.black),
-                  ),
-                  selectable: true,
-                  onTapLink: (text, href, title) {
-                    if (href != null) {
-                      launchURL(href);
-                    }
-                  },
-                );
+            data: message.content,
+            styleSheet: MarkdownStyleSheet(
+              p: TextStyle(color: isError ? Colors.red : Colors.black),
+              a: const TextStyle(
+                color: Colors.blue,
+                decoration: TextDecoration.underline,
+              ),
+              listBullet: TextStyle(color: isError ? Colors.red : Colors.black),
+            ),
+            selectable: true,
+            onTapLink: (text, href, title) {
+              if (href != null) {
+                launchURL(href);
+              }
+            },
+          );
         }),
       ),
     );
@@ -286,11 +285,12 @@ class _HomeChatState extends State<HomeChat> {
       isFavorite: prompt.isFavorite,
     ).then((result) {
       if (result != null) {
-        setState(() {
-          if (result.contains('Respond in')) {
-            print('Sending: $result');
-          }
-        });
+        if (result.contains('Respond in')) {
+          _controller.text = result;
+          _sendMessage();
+        } else {
+          _refreshPrompts();
+        }
       }
     });
   }
@@ -370,8 +370,7 @@ class _HomeChatState extends State<HomeChat> {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10.0, vertical: 5.0),
+                        padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
@@ -400,34 +399,26 @@ class _HomeChatState extends State<HomeChat> {
                               return Padding(
                                 padding: const EdgeInsets.all(5),
                                 child: Container(
-                                  width:
-                                      MediaQuery.of(context).size.width / 3 * 2,
+                                  width: MediaQuery.of(context).size.width / 3 * 2,
                                   decoration: BoxDecoration(
                                     border: Border.all(
-                                      color: const Color.fromARGB(
-                                          255, 158, 198, 232),
+                                      color: const Color.fromARGB(255, 158, 198, 232),
                                       width: 1.0,
                                     ),
                                     borderRadius: BorderRadius.circular(20.0),
                                   ),
                                   constraints: BoxConstraints(
-                                      maxHeight:
-                                          MediaQuery.of(context).size.height /
-                                              3),
+                                      maxHeight: MediaQuery.of(context).size.height / 3),
                                   child: ListView.builder(
-                                    itemCount:
-                                        promptList.allPrompts.items.length,
+                                    itemCount: promptList.allPrompts.items.length,
                                     itemBuilder: (context, index) {
                                       return ListTile(
-                                        title: Text(promptList
-                                            .allPrompts.items[index].title),
+                                        title: Text(promptList.allPrompts.items[index].title),
                                         onTap: () {
                                           _controller.text = "";
                                           _showSlash = false;
                                           _openPromptDetailsDialog(
-                                              context,
-                                              promptList
-                                                  .allPrompts.items[index]);
+                                              context, promptList.allPrompts.items[index]);
                                         },
                                       );
                                     },
@@ -460,8 +451,7 @@ class _HomeChatState extends State<HomeChat> {
                               onPressed: () {
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(
-                                      builder: (context) => EmailComposer()),
+                                  MaterialPageRoute(builder: (context) => EmailComposer()),
                                 );
                               },
                             ),
@@ -469,8 +459,7 @@ class _HomeChatState extends State<HomeChat> {
                           Expanded(
                             child: Container(
                               decoration: BoxDecoration(
-                                border:
-                                    Border.all(color: Colors.grey, width: 1),
+                                border: Border.all(color: Colors.grey, width: 1),
                                 borderRadius: BorderRadius.circular(50),
                                 color: Colors.grey[200],
                               ),
@@ -483,21 +472,18 @@ class _HomeChatState extends State<HomeChat> {
                                     onChanged: _onTextChanged,
                                     maxLines: null,
                                     decoration: InputDecoration(
-                                      contentPadding: const EdgeInsets.only(
-                                          left: 10, right: 10),
+                                      contentPadding: const EdgeInsets.only(left: 10, right: 10),
                                       hintText: (_selectedImagePath == null)
                                           ? 'Enter your message...'
                                           : null,
                                       border: InputBorder.none,
                                       enabledBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(50),
-                                        borderSide: const BorderSide(
-                                            color: Colors.grey, width: 1),
+                                        borderSide: const BorderSide(color: Colors.grey, width: 1),
                                       ),
                                       focusedBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(50),
-                                        borderSide: const BorderSide(
-                                            color: Colors.black, width: 1),
+                                        borderSide: const BorderSide(color: Colors.black, width: 1),
                                       ),
                                     ),
                                   ),
@@ -510,12 +496,10 @@ class _HomeChatState extends State<HomeChat> {
                                             color: Colors.grey.withOpacity(0.5),
                                             width: 1,
                                           ),
-                                          borderRadius:
-                                              BorderRadius.circular(8),
+                                          borderRadius: BorderRadius.circular(8),
                                           boxShadow: [
                                             BoxShadow(
-                                              color:
-                                                  Colors.grey.withOpacity(0.1),
+                                              color: Colors.grey.withOpacity(0.1),
                                               spreadRadius: 1,
                                               blurRadius: 1,
                                             ),
@@ -524,8 +508,7 @@ class _HomeChatState extends State<HomeChat> {
                                         child: Stack(
                                           children: [
                                             ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
+                                              borderRadius: BorderRadius.circular(8),
                                               child: Image.file(
                                                 File(_selectedImagePath!),
                                                 width: 60,
@@ -559,9 +542,7 @@ class _HomeChatState extends State<HomeChat> {
                           ),
                           IconButton(
                             icon: const Icon(Icons.send),
-                            onPressed: _hasText || _selectedImagePath != null
-                                ? _sendMessage
-                                : null,
+                            onPressed: _hasText || _selectedImagePath != null ? _sendMessage : null,
                           ),
                         ],
                       ),
