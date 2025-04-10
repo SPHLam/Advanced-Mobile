@@ -354,35 +354,6 @@ class _MenuState extends State<Menu> {
               style: TextStyle(color: Colors.grey[600], fontSize: 12),
             ),
           ),
-          trailing: IconButton(
-            icon: Icon(Icons.delete, color: Colors.red[300], size: 20),
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text("Delete Conversation"),
-                  content: const Text(
-                      "Are you sure you want to delete this conversation?"),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text("Cancel"),
-                    ),
-                    // TextButton(
-                    //   onPressed: () {
-                    //     messageModel.deleteConversation(index);
-                    //     Navigator.pop(context);
-                    //   },
-                    //   child: const Text("Delete",
-                    //       style: TextStyle(color: Colors.red)),
-                    // ),
-                  ],
-                ),
-              );
-            },
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-          ),
           onTap: () async {
             await Provider.of<MessageModel>(context, listen: false)
                 .loadConversationHistory(currentAI.id, conversation.id);

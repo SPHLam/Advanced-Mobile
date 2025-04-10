@@ -14,7 +14,7 @@ class DioClient {
       BaseOptions(
         baseUrl: 'https://api.dev.jarvis.cx/api/v1',
         connectTimeout: const Duration(seconds: 30),
-        receiveTimeout: const Duration(seconds: 30),
+        receiveTimeout: const Duration(hours: 1),
         headers: {
           'Content-Type': 'application/json',
           'X-Stack-Access-Type': 'client',

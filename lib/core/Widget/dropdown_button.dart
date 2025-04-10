@@ -45,9 +45,6 @@ class AIDropdown extends StatelessWidget {
                       style: const TextStyle(fontSize: 12),
                     ),
                   ),
-                  const Icon(Icons.flash_on,
-                      color: Colors.orangeAccent, size: 12),
-                  const Text('29', style: TextStyle(fontSize: 12)),
                 ],
               ),
             );
