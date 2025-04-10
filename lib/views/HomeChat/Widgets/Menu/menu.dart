@@ -1,28 +1,57 @@
 import 'package:flutter/material.dart';
-import 'package:jarvis/views/Login/login_screen.dart';
+import 'package:intl/intl.dart';
 import 'package:jarvis/views/Knowledge/page/knowledge_screen.dart';
-import 'package:jarvis/views/UpgradeAccount/upgrade_account.dart';
+import 'package:jarvis/models/ai_logo.dart';
 import 'package:jarvis/view_models/auth_view_model.dart';
-import 'package:jarvis/view_models/message_view_model.dart';
-import 'package:jarvis/constants/colors.dart';
 import 'package:provider/provider.dart';
+import '../../../../view_models/homechat_view_model.dart';
+import '../../../Login/login_screen.dart';
+import '../../../UpgradeAccount/upgrade_account.dart';
+import '../../../../view_models/ai_chat_list_view_model.dart';
+import 'package:jarvis/constants/colors.dart';
 
 class Menu extends StatefulWidget {
   const Menu({super.key});
+
   @override
   State<StatefulWidget> createState() => _MenuState();
 }
 
 class _MenuState extends State<Menu> {
   int _selectedIndex = -1;
+  late final AIChatList aiChatList;
+  late AIItem currentAI;
+  late ScrollController _scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    aiChatList = Provider.of<AIChatList>(context, listen: false);
+    currentAI = aiChatList.selectedAIItem;
+
+    _scrollController = ScrollController()
+      ..addListener(() {
+        if (_scrollController.position.pixels ==
+            _scrollController.position.maxScrollExtent) {
+          Provider.of<MessageModel>(context, listen: false)
+              .fetchAllConversations(currentAI.id, 'dify', isLoadMore: true);
+        }
+      });
+  }
+
+  String _formatTimestamp(int timestamp) {
+    final dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
+    return DateFormat('dd/MM/yyyy HH:mm').format(dateTime);
+  }
 
   Future<void> _logout() async {
+    // Logic logout từ code cũ
     await Provider.of<AuthViewModel>(context, listen: false).logout();
     if (mounted) {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => const LoginScreen()),
-            (Route<dynamic> route) => false,
+        (Route<dynamic> route) => false,
       );
     }
   }
@@ -89,7 +118,8 @@ class _MenuState extends State<Menu> {
                   const SizedBox(height: 20),
                   ElevatedButton.icon(
                     onPressed: _logout,
-                    icon: const Icon(Icons.logout, size: 18, color: Colors.white),
+                    icon:
+                        const Icon(Icons.logout, size: 18, color: Colors.white),
                     label: const Text("Logout"),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red[400],
@@ -127,14 +157,14 @@ class _MenuState extends State<Menu> {
       children: [
         _buildMenuItemCard(
           icon: Icons.book_outlined,
-          title: "Knowledge",
-          index: 0,
+          title: "Knowledge Management",
+          index: 1,
           color: Colors.indigo,
         ),
         _buildMenuItemCard(
           icon: Icons.workspace_premium,
-          title: "Upgrade Account",
-          index: 1,
+          title: "Upgrade Version",
+          index: 2,
           color: Colors.amber[700]!,
         ),
       ],
@@ -151,7 +181,7 @@ class _MenuState extends State<Menu> {
             children: [
               const Expanded(
                 child: Text(
-                  'All Prompts',
+                  'All Conversations',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -171,30 +201,35 @@ class _MenuState extends State<Menu> {
         ),
         Consumer<MessageModel>(
           builder: (context, messageModel, child) {
-            if (messageModel.savedConversations.isEmpty) {
-              return const Padding(
-                padding: EdgeInsets.all(16),
-                child: Center(
-                  child: Text(
-                    "No conversations yet",
-                    style: TextStyle(color: Colors.black45),
-                  ),
+            if (messageModel.isLoading && messageModel.conversations.isEmpty) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (messageModel.errorMessage != null &&
+                messageModel.conversations.isEmpty) {
+              return Center(
+                child: Text(
+                  messageModel.errorMessage ?? 'Server error, please try again',
+                  style: const TextStyle(color: Colors.red, fontSize: 16),
                 ),
               );
             }
 
             return ListView.builder(
+              controller: _scrollController,
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: messageModel.savedConversations.length,
+              itemCount: messageModel.conversations.length +
+                  (messageModel.hasMoreConversation ? 1 : 0),
               itemBuilder: (context, index) {
-                final conversation = messageModel.savedConversations[index];
+                if (index == messageModel.conversations.length) {
+                  return const Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                }
+                final conversation = messageModel.conversations[index];
                 return _buildConversationItem(
-                    conversation
-                        .map((item) => Map<String, String>.from(item))
-                        .toList(),
-                    index,
-                    messageModel);
+                    conversation, index, messageModel);
               },
             );
           },
@@ -227,13 +262,13 @@ class _MenuState extends State<Menu> {
             setState(() {
               _selectedIndex = index;
             });
-            if (index == 0) {
+            if (index == 1) {
               Navigator.push(
                 context,
                 MaterialPageRoute(
                     builder: (context) => const KnowledgeScreen()),
               );
-            } else {
+            } else if (index == 2) {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const UpgradeAccount()),
@@ -259,7 +294,7 @@ class _MenuState extends State<Menu> {
                     title,
                     style: TextStyle(
                       fontWeight:
-                      isSelected ? FontWeight.bold : FontWeight.normal,
+                          isSelected ? FontWeight.bold : FontWeight.normal,
                       fontSize: 16,
                     ),
                     overflow: TextOverflow.ellipsis,
@@ -278,19 +313,13 @@ class _MenuState extends State<Menu> {
     );
   }
 
-  Widget _buildConversationItem(List<Map<String, String>> conversation,
-      int index, MessageModel messageModel) {
-    String previewText = conversation.isNotEmpty
-        ? (conversation.first["text"] ?? "").substring(
-        0,
-        (conversation.first["text"] ?? "").length > 30
-            ? 30
-            : (conversation.first["text"] ?? "").length)
+  Widget _buildConversationItem(
+      dynamic conversation, int index, MessageModel messageModel) {
+    String previewText = conversation.title.isNotEmpty
+        ? conversation.title.substring(
+            0, conversation.title.length > 30 ? 30 : conversation.title.length)
         : "Empty conversation";
-
-    if (previewText.length == 30) {
-      previewText += "...";
-    }
+    if (previewText.length == 30) previewText += "...";
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -303,7 +332,7 @@ class _MenuState extends State<Menu> {
         ),
         child: ListTile(
           contentPadding:
-          const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           leading: CircleAvatar(
             backgroundColor: Colors.black,
             child: Text(
@@ -319,10 +348,10 @@ class _MenuState extends State<Menu> {
           subtitle: Padding(
             padding: const EdgeInsets.only(top: 6),
             child: Text(
-              previewText,
-              maxLines: 1,
+              "$previewText\n${_formatTimestamp(conversation.createdAt)}",
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(color: Colors.grey[600]),
+              style: TextStyle(color: Colors.grey[600], fontSize: 12),
             ),
           ),
           trailing: IconButton(
@@ -339,14 +368,14 @@ class _MenuState extends State<Menu> {
                       onPressed: () => Navigator.pop(context),
                       child: const Text("Cancel"),
                     ),
-                    TextButton(
-                      onPressed: () {
-                        messageModel.deleteConversation(index);
-                        Navigator.pop(context);
-                      },
-                      child: const Text("Delete",
-                          style: TextStyle(color: Colors.red)),
-                    ),
+                    // TextButton(
+                    //   onPressed: () {
+                    //     messageModel.deleteConversation(index);
+                    //     Navigator.pop(context);
+                    //   },
+                    //   child: const Text("Delete",
+                    //       style: TextStyle(color: Colors.red)),
+                    // ),
                   ],
                 ),
               );
@@ -354,13 +383,19 @@ class _MenuState extends State<Menu> {
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
           ),
-          onTap: () {
-            Provider.of<MessageModel>(context, listen: false)
-                .setConversation(conversation, index);
+          onTap: () async {
+            await Provider.of<MessageModel>(context, listen: false)
+                .loadConversationHistory(currentAI.id, conversation.id);
             Navigator.pop(context);
           },
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 }
