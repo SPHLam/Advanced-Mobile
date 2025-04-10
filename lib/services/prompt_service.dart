@@ -1,13 +1,13 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:jarvis/models/prompt_model.dart';
-import 'package:jarvis/utils/dio/dio_client.dart';
+import 'package:jarvis/utils/dio/dio_jarvis.dart';
 import 'package:jarvis/models/prompt_list.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
 class PromptService {
-  final dio = DioClient().dio;
+  final dio = DioJarvis().dio;
 
   Future<PromptList> fetchAllPrompts() async {
     try {

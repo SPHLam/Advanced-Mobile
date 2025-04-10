@@ -11,6 +11,12 @@ class AuthInterceptor extends Interceptor {
       RequestOptions options, RequestInterceptorHandler handler) async {
     final prefs = await SharedPreferences.getInstance();
     final accessToken = prefs.getString('accessToken');
+
+    if (options.path.contains('/auth/sessions/current/refresh')) {
+      handler.next(options);
+      return;
+    }
+
     if (accessToken != null) {
       options.headers['Authorization'] = 'Bearer $accessToken';
     }
@@ -25,8 +31,7 @@ class AuthInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
     if (err.response?.statusCode == 401 &&
-        !err.requestOptions.path.contains('/auth/refresh')) {
-
+        !err.requestOptions.path.contains('/auth/sessions/current/refresh')) {
       final isTokenRefreshed = await _refreshAccessToken();
       if (isTokenRefreshed) {
         try {
@@ -48,7 +53,7 @@ class AuthInterceptor extends Interceptor {
         }
       } else {
         await _logout();
-             }
+      }
     }
     handler.next(err);
   }
@@ -59,8 +64,14 @@ class AuthInterceptor extends Interceptor {
 
     if (refreshToken != null) {
       try {
-        final response =
-            await dio.get('/auth/refresh?refreshToken=$refreshToken');
+        final response = await dio.post(
+          '/auth/sessions/current/refresh',
+          options: Options(
+            headers: {
+              'X-Stack-Refresh-Token': refreshToken,
+            },
+          ),
+        );
 
         if (response.statusCode == 200) {
           final newAccessToken = response.data['token']['accessToken'];
@@ -68,6 +79,7 @@ class AuthInterceptor extends Interceptor {
           return true;
         }
       } catch (e) {
+        print('❌ Refresh token failed: $e');
         return false;
       }
     }

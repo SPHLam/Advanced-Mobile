@@ -1,15 +1,16 @@
 import 'package:dio/dio.dart';
 import 'package:jarvis/utils/dio/interceptor.dart/auth_interceptor.dart';
+import 'package:uuid/uuid.dart';
 
-class DioClient {
-  static final DioClient _instance = DioClient._internal();
+class DioJarvis {
+  static final DioJarvis _instance = DioJarvis._internal();
   late Dio dio;
 
-  factory DioClient() {
+  factory DioJarvis() {
     return _instance;
   }
 
-  DioClient._internal() {
+  DioJarvis._internal() {
     dio = Dio(
       BaseOptions(
         baseUrl: 'https://api.dev.jarvis.cx/api/v1',
@@ -17,9 +18,7 @@ class DioClient {
         receiveTimeout: const Duration(seconds: 30),
         headers: {
           'Content-Type': 'application/json',
-          'X-Stack-Access-Type': 'client',
-          'X-Stack-Project-Id': 'a914f06b-5e46-4966-8693-80e4b9f4f409',
-          'X-Stack-Publishable-Client-Key': 'pck_tqsy29b64a585km2g4wnpc57ypjprzzdch8xzpq0xhayr',
+          'x-jarvis-guid': const Uuid().v4(),
         },
       ),
     );

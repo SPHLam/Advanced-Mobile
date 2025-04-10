@@ -9,8 +9,8 @@ String? validateEmail(String? value) {
 }
 
 String? validatePassword(String? value) {
-  if (value == null || value.isEmpty || value.length < 6) {
-    return 'Password must be at least 6 characters';
+  if (value == null || value.isEmpty || value.length < 8) {
+    return 'Password must be at least 8 characters';
   }
 
   // pattern for validate password, it must have at least 1 uppercase letter, at least 1 number

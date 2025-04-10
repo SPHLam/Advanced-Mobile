@@ -6,7 +6,7 @@ import 'package:jarvis/models/response/conversation_history_response.dart';
 
 import 'package:jarvis/models/response/message_response.dart';
 import 'package:jarvis/models/response/token_usage_response.dart';
-import 'package:jarvis/utils/dio/dio_client.dart';
+import 'package:jarvis/utils/dio/dio_jarvis.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
@@ -15,7 +15,7 @@ class ChatService {
   late final Dio dio;
 
   ChatService({required this.prefs}) {
-    dio = DioClient().dio;
+    dio = DioJarvis().dio;
   }
 
   Future<ChatResponse> sendMessage({
