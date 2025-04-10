@@ -1,17 +1,22 @@
 import 'dart:developer';
-import 'package:jarvis/utils/dio/dio_client.dart';
+import 'package:jarvis/utils/dio/dio_auth.dart';
 import '../models/user_model.dart';
 import '../models/response/api_response.dart';
 import 'package:dio/dio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
-  final dio = DioClient().dio;
+  final dio = DioAuth().dio;
 
   Future<ApiResponse> register(User user) async {
     try {
       final response = await dio.post(
-        '/auth/sign-up',
-        data: user.toJson(),
+        '/auth/password/sign-up',
+        data: {
+          'email': user.email,
+          'password': user.password,
+          'verification_callback_url': 'https://auth.dev.jarvis.cx/handler/email-verification?after_auth_return_to=%2Fauth%2Fsignin%3Fclient_id%3Djarvis_chat%26redirect%3Dhttps%253A%252F%252Fchat.dev.jarvis.cx%252Fauth%252Foauth%252Fsuccess',
+        },
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -25,7 +30,7 @@ class AuthService {
         log('data: ${response.data}');
         return ApiResponse(
           success: false,
-          message: 'Sign up failed: ${response.data}',
+          message: 'Sign up failed: ${response.data['message'] ?? 'Unknown error'}',
           statusCode: response.statusCode ?? 400,
         );
       }
@@ -40,6 +45,8 @@ class AuthService {
               .map<String>((detail) => detail['issue'] ?? 'Unknown issue')
               .toList();
           errorMessage = issues.join(', ');
+        } else if (errorData['message'] != null) {
+          errorMessage = errorData['message'];
         }
 
         return ApiResponse(
@@ -50,7 +57,7 @@ class AuthService {
       }
       return ApiResponse(
         success: false,
-        message: 'Connection error: $e',
+        message: 'Connection error: ${e.message}',
         statusCode: 500,
       );
     }
@@ -59,7 +66,7 @@ class AuthService {
   Future<ApiResponse> login(String email, String password) async {
     try {
       final response = await dio.post(
-        '/auth/sign-in',
+        '/auth/password/sign-in',
         data: {
           'email': email,
           'password': password,
@@ -67,6 +74,21 @@ class AuthService {
       );
 
       if (response.statusCode == 200) {
+        final accessToken = response.data['access_token'];
+        final refreshToken = response.data['refresh_token'];
+
+        if (accessToken == null || refreshToken == null) {
+          return ApiResponse(
+            success: false,
+            message: 'Login failed: Missing accessToken or refreshToken in response',
+            statusCode: 400,
+          );
+        }
+
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('accessToken', accessToken);
+        await prefs.setString('refreshToken', refreshToken);
+
         return ApiResponse(
           success: true,
           data: response.data,
@@ -76,7 +98,7 @@ class AuthService {
       } else {
         return ApiResponse(
           success: false,
-          message: 'Login failed',
+          message: 'Login failed: ${response.data['message'] ?? 'Unknown error'}',
           statusCode: response.statusCode ?? 400,
         );
       }
@@ -91,6 +113,8 @@ class AuthService {
               .map<String>((detail) => detail['issue'] ?? 'Unknown issue')
               .toList();
           errorMessage = issues.join(', ');
+        } else if (errorData['message'] != null) {
+          errorMessage = errorData['message'];
         }
 
         return ApiResponse(
@@ -121,7 +145,7 @@ class AuthService {
       } else {
         return ApiResponse(
           success: false,
-          message: 'Get user information failed',
+          message: 'Get user information failed: ${response.data['message'] ?? 'Unknown error'}',
           statusCode: response.statusCode ?? 400,
         );
       }
@@ -136,6 +160,8 @@ class AuthService {
               .map<String>((detail) => detail['issue'] ?? 'Unknown issue')
               .toList();
           errorMessage = issues.join(', ');
+        } else if (errorData['message'] != null) {
+          errorMessage = errorData['message'];
         }
 
         return ApiResponse(
@@ -155,8 +181,31 @@ class AuthService {
 
   Future<ApiResponse> logout() async {
     try {
-      final response = await dio.get('/auth/sign-out');
+      final prefs = await SharedPreferences.getInstance();
+      final refreshToken = prefs.getString('refreshToken');
+
+      if (refreshToken == null) {
+        return ApiResponse(
+          success: false,
+          message: 'Refresh token not found. Please login again.',
+          statusCode: 401,
+        );
+      }
+
+      final response = await dio.delete(
+        '/auth/sessions/current',
+        options: Options(
+          headers: {
+            'X-Stack-Refresh-Token': refreshToken,
+          },
+        ),
+        data: {},
+      );
+
       if (response.statusCode == 200) {
+        await prefs.remove('accessToken');
+        await prefs.remove('refreshToken');
+
         return ApiResponse(
           success: true,
           data: response.data,
@@ -166,7 +215,7 @@ class AuthService {
       } else {
         return ApiResponse(
           success: false,
-          message: 'Logout failed',
+          message: 'Logout failed: ${response.data['message'] ?? 'Unknown error'}',
           statusCode: response.statusCode ?? 400,
         );
       }
@@ -181,6 +230,10 @@ class AuthService {
               .map<String>((detail) => detail['issue'] ?? 'Unknown issue')
               .toList();
           errorMessage = issues.join(', ');
+        } else if (errorData['message'] != null) {
+          errorMessage = errorData['message'];
+        } else if (errorData['error'] != null) {
+          errorMessage = errorData['error'];
         }
       }
 

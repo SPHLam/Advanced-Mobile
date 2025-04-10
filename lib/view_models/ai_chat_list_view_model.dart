@@ -42,7 +42,6 @@ class AIChatList extends ChangeNotifier {
   ];
 
   late AIItem _selectedAIItem;
-  int tokenCount = 30;
 
   AIChatList() {
     _selectedAIItem = aiItems.first;
