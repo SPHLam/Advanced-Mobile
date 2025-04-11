@@ -15,7 +15,8 @@ class AuthService {
         data: {
           'email': user.email,
           'password': user.password,
-          'verification_callback_url': 'https://auth.dev.jarvis.cx/handler/email-verification?after_auth_return_to=%2Fauth%2Fsignin%3Fclient_id%3Djarvis_chat%26redirect%3Dhttps%253A%252F%252Fchat.dev.jarvis.cx%252Fauth%252Foauth%252Fsuccess',
+          'verification_callback_url':
+              'https://auth.dev.jarvis.cx/handler/email-verification?after_auth_return_to=%2Fauth%2Fsignin%3Fclient_id%3Djarvis_chat%26redirect%3Dhttps%253A%252F%252Fchat.dev.jarvis.cx%252Fauth%252Foauth%252Fsuccess',
         },
       );
 
@@ -30,23 +31,18 @@ class AuthService {
         log('data: ${response.data}');
         return ApiResponse(
           success: false,
-          message: 'Sign up failed: ${response.data['message'] ?? 'Unknown error'}',
+          message: 'Sign up failed: ${response.data}',
           statusCode: response.statusCode ?? 400,
         );
       }
     } on DioException catch (e) {
       if (e.response != null) {
-        final errorData = e.response!.data;
+        final errorData = e.response!.data['error'];
         String errorMessage = 'Sign up failed';
 
-        if (errorData['details'] != null && errorData['details'].isNotEmpty) {
-          log('errorData: ${errorData['details']}');
-          List<String> issues = (errorData['details'] as List<dynamic>)
-              .map<String>((detail) => detail['issue'] ?? 'Unknown issue')
-              .toList();
-          errorMessage = issues.join(', ');
-        } else if (errorData['message'] != null) {
-          errorMessage = errorData['message'];
+        if (errorData.isNotEmpty) {
+          log('errorData: $errorData');
+          errorMessage = errorData;
         }
 
         return ApiResponse(
@@ -57,7 +53,7 @@ class AuthService {
       }
       return ApiResponse(
         success: false,
-        message: 'Connection error: ${e.message}',
+        message: 'Connection error: $e',
         statusCode: 500,
       );
     }
@@ -80,7 +76,8 @@ class AuthService {
         if (accessToken == null || refreshToken == null) {
           return ApiResponse(
             success: false,
-            message: 'Login failed: Missing accessToken or refreshToken in response',
+            message:
+                'Login failed: Missing accessToken or refreshToken in response',
             statusCode: 400,
           );
         }
@@ -98,23 +95,18 @@ class AuthService {
       } else {
         return ApiResponse(
           success: false,
-          message: 'Login failed: ${response.data['message'] ?? 'Unknown error'}',
+          message: 'Login failed: ${response.data}',
           statusCode: response.statusCode ?? 400,
         );
       }
     } on DioException catch (e) {
       String errorMessage = 'Login failed';
       if (e.response != null) {
-        final errorData = e.response!.data;
+        final errorData = e.response!.data['error'];
 
-        if (errorData['details'] != null && errorData['details'].isNotEmpty) {
-          log('errorData: ${errorData['details']}');
-          List<String> issues = (errorData['details'] as List<dynamic>)
-              .map<String>((detail) => detail['issue'] ?? 'Unknown issue')
-              .toList();
-          errorMessage = issues.join(', ');
-        } else if (errorData['message'] != null) {
-          errorMessage = errorData['message'];
+        if (errorData.isNotEmpty) {
+          log('errorData: $errorData');
+          errorMessage = errorData;
         }
 
         return ApiResponse(
@@ -145,23 +137,18 @@ class AuthService {
       } else {
         return ApiResponse(
           success: false,
-          message: 'Get user information failed: ${response.data['message'] ?? 'Unknown error'}',
+          message: 'Get user information failed: ${response.data}',
           statusCode: response.statusCode ?? 400,
         );
       }
     } on DioException catch (e) {
       String errorMessage = 'Unauthorized';
       if (e.response != null) {
-        final errorData = e.response!.data;
+        final errorData = e.response!.data['error'];
 
-        if (errorData['details'] != null && errorData['details'].isNotEmpty) {
-          log('errorData: ${errorData['details']}');
-          List<String> issues = (errorData['details'] as List<dynamic>)
-              .map<String>((detail) => detail['issue'] ?? 'Unknown issue')
-              .toList();
-          errorMessage = issues.join(', ');
-        } else if (errorData['message'] != null) {
-          errorMessage = errorData['message'];
+        if (errorData.isNotEmpty) {
+          log('errorData: $errorData');
+          errorMessage = errorData;
         }
 
         return ApiResponse(
@@ -215,25 +202,18 @@ class AuthService {
       } else {
         return ApiResponse(
           success: false,
-          message: 'Logout failed: ${response.data['message'] ?? 'Unknown error'}',
+          message: 'Logout failed: ${response.data ?? 'Unknown error'}',
           statusCode: response.statusCode ?? 400,
         );
       }
     } on DioException catch (e) {
       String errorMessage = 'Unauthorized';
       if (e.response != null) {
-        final errorData = e.response!.data;
+        final errorData = e.response!.data['error'];
 
-        if (errorData['details'] != null && errorData['details'].isNotEmpty) {
-          log('errorData: ${errorData['details']}');
-          List<String> issues = (errorData['details'] as List<dynamic>)
-              .map<String>((detail) => detail['issue'] ?? 'Unknown issue')
-              .toList();
-          errorMessage = issues.join(', ');
-        } else if (errorData['message'] != null) {
-          errorMessage = errorData['message'];
-        } else if (errorData['error'] != null) {
-          errorMessage = errorData['error'];
+        if (errorData.isNotEmpty) {
+          log('errorData: $errorData');
+          errorMessage = errorData;
         }
       }
 

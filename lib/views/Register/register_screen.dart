@@ -40,6 +40,7 @@ class RegisterScreenState extends State<RegisterScreen> {
         email: _emailController.text,
         password: _passwordController.text,
       );
+      print('Success: $success');
 
       if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
