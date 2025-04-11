@@ -100,7 +100,7 @@ class ChatService {
         );
       } else {
         throw ChatException(
-          message: 'Lỗi không xác định từ server',
+          message: 'Unknown error from server',
           statusCode: response.statusCode ?? 500,
         );
       }
@@ -135,13 +135,13 @@ class ChatService {
         return ApiResponse(
           success: true,
           data: response.data,
-          message: 'Lấy thông tin user thành công',
+          message: 'Get user information successfully',
           statusCode: response.statusCode ?? 200,
         );
       } else {
         return ApiResponse(
           success: false,
-          message: 'Lấy thông tin user thất bại',
+          message: 'Get user information failed',
           statusCode: response.statusCode ?? 400,
         );
       }
@@ -154,14 +154,9 @@ class ChatService {
           errorMessage = 'Internal Server Error';
         }
 
-        final errorData = e.response!.data;
-        // Check for custom error messages in the response data
-        if (errorData['details'] != null && errorData['details'].isNotEmpty) {
-          // Collect all issues in `details` into a single message
-          List<String> issues = (errorData['details'] as List<dynamic>)
-              .map<String>((detail) => detail['issue'] ?? 'Unknown issue')
-              .toList();
-          errorMessage = issues.join(', ');
+        final errorData = e.response!.data['error'];
+        if (errorData.isNotEmpty) {
+          errorMessage = errorData;
         }
       }
 
@@ -222,7 +217,7 @@ class ChatService {
         return TokenUsageResponse.fromJson(response.data);
       } else {
         throw ChatException(
-          message: 'Lỗi không xác định từ server',
+          message: 'Unknown error from server',
           statusCode: response.statusCode ?? 500,
         );
       }
@@ -230,7 +225,7 @@ class ChatService {
       throw ChatException(
         message: e.response?.data?['message'] ??
             e.message ??
-            'Lỗi kết nối tới server',
+            'Error connecting to server',
         statusCode: e.response?.statusCode ?? 500,
       );
     }

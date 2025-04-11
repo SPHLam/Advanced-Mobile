@@ -31,7 +31,7 @@ class AuthViewModel extends ChangeNotifier {
 
       final response = await _authService.register(user);
 
-      if (response.success && response.data['user'] != null) {
+      if (response.success && response.data != null) {
         isLoading = false;
         notifyListeners();
         return true;
