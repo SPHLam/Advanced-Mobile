@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:jarvis/utils/dio/interceptor.dart/auth_interceptor.dart';
-import 'package:uuid/uuid.dart';
 
 class DioJarvis {
   static final DioJarvis _instance = DioJarvis._internal();
@@ -18,7 +17,7 @@ class DioJarvis {
         receiveTimeout: const Duration(seconds: 30),
         headers: {
           'Content-Type': 'application/json',
-          'x-jarvis-guid': const Uuid().v4(),
+          'x-jarvis-guid': '',
         },
       ),
     );

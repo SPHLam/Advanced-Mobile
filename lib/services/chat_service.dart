@@ -154,9 +154,12 @@ class ChatService {
           errorMessage = 'Internal Server Error';
         }
 
-        final errorData = e.response!.data['error'];
-        if (errorData.isNotEmpty) {
-          errorMessage = errorData;
+        final errorData = e.response!.data;
+        if (errorData['details'] != null && errorData['details'].isNotEmpty) {
+          List<String> issues = (errorData['details'] as List<dynamic>)
+              .map<String>((detail) => detail['issue'] ?? 'Unknown issue')
+              .toList();
+          errorMessage = issues.join(', ');
         }
       }
 
