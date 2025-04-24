@@ -1,29 +1,23 @@
 import 'dart:developer';
-import 'package:jarvis/utils/dio/dio_auth.dart';
+import 'package:jarvis/utils/dio/dio_jarvis.dart';
 import '../models/user_model.dart';
 import '../models/response/api_response.dart';
 import 'package:dio/dio.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
-  final dio = DioAuth().dio;
+  final dio = DioJarvis().dio;
 
   Future<ApiResponse> register(User user) async {
     try {
       final response = await dio.post(
-        '/auth/password/sign-up',
-        data: {
-          'email': user.email,
-          'password': user.password,
-          'verification_callback_url':
-              'https://auth.dev.jarvis.cx/handler/email-verification?after_auth_return_to=%2Fauth%2Fsignin%3Fclient_id%3Djarvis_chat%26redirect%3Dhttps%253A%252F%252Fchat.dev.jarvis.cx%252Fauth%252Foauth%252Fsuccess',
-        },
+        '/auth/sign-up',
+        data: user.toJson(),
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         return ApiResponse(
           success: true,
-          message: 'Sign up successful',
+          message: 'Đăng ký thành công',
           data: response.data,
           statusCode: response.statusCode ?? 200,
         );
@@ -31,18 +25,23 @@ class AuthService {
         log('data: ${response.data}');
         return ApiResponse(
           success: false,
-          message: 'Sign up failed: ${response.data}',
+          message: 'Đăng ký thất bại: ${response.data}',
           statusCode: response.statusCode ?? 400,
         );
       }
     } on DioException catch (e) {
       if (e.response != null) {
-        final errorData = e.response!.data['error'];
-        String errorMessage = 'Sign up failed';
+        final errorData = e.response!.data;
+        String errorMessage = 'Đăng ký thất bại';
 
-        if (errorData.isNotEmpty) {
-          log('errorData: $errorData');
-          errorMessage = errorData;
+        // Check for custom error messages in the response data
+        if (errorData['details'] != null && errorData['details'].isNotEmpty) {
+          // Collect all issues in `details` into a single message
+          log('errorData: ${errorData['details']}');
+          List<String> issues = (errorData['details'] as List<dynamic>)
+              .map<String>((detail) => detail['issue'] ?? 'Unknown issue')
+              .toList();
+          errorMessage = issues.join(', ');
         }
 
         return ApiResponse(
@@ -53,7 +52,7 @@ class AuthService {
       }
       return ApiResponse(
         success: false,
-        message: 'Connection error: $e',
+        message: 'Lỗi kết nối: $e',
         statusCode: 500,
       );
     }
@@ -62,7 +61,7 @@ class AuthService {
   Future<ApiResponse> login(String email, String password) async {
     try {
       final response = await dio.post(
-        '/auth/password/sign-in',
+        '/auth/sign-in',
         data: {
           'email': email,
           'password': password,
@@ -70,43 +69,32 @@ class AuthService {
       );
 
       if (response.statusCode == 200) {
-        final accessToken = response.data['access_token'];
-        final refreshToken = response.data['refresh_token'];
-
-        if (accessToken == null || refreshToken == null) {
-          return ApiResponse(
-            success: false,
-            message:
-                'Login failed: Missing accessToken or refreshToken in response',
-            statusCode: 400,
-          );
-        }
-
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('accessToken', accessToken);
-        await prefs.setString('refreshToken', refreshToken);
-
         return ApiResponse(
           success: true,
           data: response.data,
-          message: 'Login successful',
+          message: 'Đăng nhập thành công',
           statusCode: response.statusCode ?? 200,
         );
       } else {
         return ApiResponse(
           success: false,
-          message: 'Login failed: ${response.data}',
+          message: 'Đăng nhập thất bại',
           statusCode: response.statusCode ?? 400,
         );
       }
     } on DioException catch (e) {
-      String errorMessage = 'Login failed';
+      String errorMessage = 'Đăng nhập thất bại';
       if (e.response != null) {
-        final errorData = e.response!.data['error'];
+        final errorData = e.response!.data;
 
-        if (errorData.isNotEmpty) {
-          log('errorData: $errorData');
-          errorMessage = errorData;
+        // Check for custom error messages in the response data
+        if (errorData['details'] != null && errorData['details'].isNotEmpty) {
+          // Collect all issues in `details` into a single message
+          log('errorData: ${errorData['details']}');
+          List<String> issues = (errorData['details'] as List<dynamic>)
+              .map<String>((detail) => detail['issue'] ?? 'Unknown issue')
+              .toList();
+          errorMessage = issues.join(', ');
         }
 
         return ApiResponse(
@@ -131,24 +119,29 @@ class AuthService {
         return ApiResponse(
           success: true,
           data: response.data,
-          message: 'Get user information successful',
+          message: 'Lấy thông tin user thành công',
           statusCode: response.statusCode ?? 200,
         );
       } else {
         return ApiResponse(
           success: false,
-          message: 'Get user information failed: ${response.data}',
+          message: 'Lấy thông tin user thất bại',
           statusCode: response.statusCode ?? 400,
         );
       }
     } on DioException catch (e) {
       String errorMessage = 'Unauthorized';
       if (e.response != null) {
-        final errorData = e.response!.data['error'];
+        final errorData = e.response!.data;
 
-        if (errorData.isNotEmpty) {
-          log('errorData: $errorData');
-          errorMessage = errorData;
+        // Check for custom error messages in the response data
+        if (errorData['details'] != null && errorData['details'].isNotEmpty) {
+          // Collect all issues in `details` into a single message
+          log('errorData: ${errorData['details']}');
+          List<String> issues = (errorData['details'] as List<dynamic>)
+              .map<String>((detail) => detail['issue'] ?? 'Unknown issue')
+              .toList();
+          errorMessage = issues.join(', ');
         }
 
         return ApiResponse(
@@ -168,52 +161,34 @@ class AuthService {
 
   Future<ApiResponse> logout() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final refreshToken = prefs.getString('refreshToken');
-
-      if (refreshToken == null) {
-        return ApiResponse(
-          success: false,
-          message: 'Refresh token not found. Please login again.',
-          statusCode: 401,
-        );
-      }
-
-      final response = await dio.delete(
-        '/auth/sessions/current',
-        options: Options(
-          headers: {
-            'X-Stack-Refresh-Token': refreshToken,
-          },
-        ),
-        data: {},
-      );
-
+      final response = await dio.get('/auth/sign-out');
       if (response.statusCode == 200) {
-        await prefs.remove('accessToken');
-        await prefs.remove('refreshToken');
-
         return ApiResponse(
           success: true,
           data: response.data,
-          message: 'Logout successful',
+          message: 'Logout thành công',
           statusCode: response.statusCode ?? 200,
         );
       } else {
         return ApiResponse(
           success: false,
-          message: 'Logout failed: ${response.data ?? 'Unknown error'}',
+          message: 'Logout thất bại',
           statusCode: response.statusCode ?? 400,
         );
       }
     } on DioException catch (e) {
       String errorMessage = 'Unauthorized';
       if (e.response != null) {
-        final errorData = e.response!.data['error'];
+        final errorData = e.response!.data;
 
-        if (errorData.isNotEmpty) {
-          log('errorData: $errorData');
-          errorMessage = errorData;
+        // Check for custom error messages in the response data
+        if (errorData['details'] != null && errorData['details'].isNotEmpty) {
+          // Collect all issues in `details` into a single message
+          log('errorData: ${errorData['details']}');
+          List<String> issues = (errorData['details'] as List<dynamic>)
+              .map<String>((detail) => detail['issue'] ?? 'Unknown issue')
+              .toList();
+          errorMessage = issues.join(', ');
         }
       }
 

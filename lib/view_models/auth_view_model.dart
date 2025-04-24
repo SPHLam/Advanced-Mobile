@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_model.dart';
 import '../services/auth_service.dart';
@@ -31,20 +32,22 @@ class AuthViewModel extends ChangeNotifier {
 
       final response = await _authService.register(user);
 
-      if (response.success && response.data != null) {
+      if (response.success && response.data['user'] != null) {
+        // Chỉ lưu thông tin user
+        // final prefs = await SharedPreferences.getInstance();
+        // await prefs.setString('user', jsonEncode(response.data['user']));
+
         isLoading = false;
         notifyListeners();
         return true;
       } else {
-        error = response.message ?? 'Sign up failed';
+        error = response.message ?? 'Đăng ký thất bại';
         isLoading = false;
         notifyListeners();
         return false;
       }
     } catch (e) {
-      if (kDebugMode) {
-        print('Register error: $e');
-      }
+      print('Register error: $e');
       error = e.toString();
       isLoading = false;
       notifyListeners();
@@ -65,12 +68,12 @@ class AuthViewModel extends ChangeNotifier {
 
       if (response.success && response.data != null) {
         final prefs = await SharedPreferences.getInstance();
-
+        // Lưu access token
         if (response.data['token']?['accessToken'] != null) {
           await prefs.setString(
               'accessToken', response.data['token']['accessToken']);
         }
-
+        // Lưu refresh token
         if (response.data['token']?['refreshToken'] != null) {
           await prefs.setString(
               'refreshToken', response.data['token']['refreshToken']);
@@ -80,15 +83,13 @@ class AuthViewModel extends ChangeNotifier {
         notifyListeners();
         return true;
       } else {
-        error = response.message ?? 'Login failed';
+        error = response.message ?? 'Đăng nhập thất bại';
         isLoading = false;
         notifyListeners();
         return false;
       }
     } catch (e) {
-      if (kDebugMode) {
-        print('Login error: $e');
-      }
+      print('Login error: $e');
       error = e.toString();
       isLoading = false;
       notifyListeners();
@@ -100,6 +101,8 @@ class AuthViewModel extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     final accessToken = prefs.getString('accessToken');
     final refreshToken = prefs.getString('refreshToken');
+
+    // await prefs.setString('refreshToken', "deleteRefreshToken");
 
     _isLoggedIn = accessToken != null && refreshToken != null;
     notifyListeners();
