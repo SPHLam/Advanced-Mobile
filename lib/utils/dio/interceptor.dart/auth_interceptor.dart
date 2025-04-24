@@ -9,14 +9,9 @@ class AuthInterceptor extends Interceptor {
   @override
   void onRequest(
       RequestOptions options, RequestInterceptorHandler handler) async {
+    // Thêm accessToken vào mỗi request
     final prefs = await SharedPreferences.getInstance();
     final accessToken = prefs.getString('accessToken');
-
-    if (options.path.contains('/auth/sessions/current/refresh')) {
-      handler.next(options);
-      return;
-    }
-
     if (accessToken != null) {
       options.headers['Authorization'] = 'Bearer $accessToken';
     }
@@ -31,31 +26,42 @@ class AuthInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
     if (err.response?.statusCode == 401 &&
-        !err.requestOptions.path.contains('/auth/sessions/current/refresh')) {
+        !err.requestOptions.path.contains('/auth/refresh')) {
+      // Thử làm mới accessToken
+
       final isTokenRefreshed = await _refreshAccessToken();
       if (isTokenRefreshed) {
+        // Gửi lại request với accessToken mới
         try {
           final retryResponse = await dio.request(
             err.requestOptions.path,
             options: Options(
               method: err.requestOptions.method,
+              // headers: error.requestOptions.headers, do onrequest đã có rồi
             ),
             data: err.requestOptions.data,
             queryParameters: err.requestOptions.queryParameters,
           );
-          handler.resolve(retryResponse);
+          handler.resolve(retryResponse); // Trả về response mới
           return;
         } catch (retryError) {
           if (retryError is DioException) {
-            handler.next(retryError);
+            handler.next(retryError); // Hoặc xử lý lại theo cách khác
             return;
           }
         }
       } else {
+        // Nếu làm mới token không thành công, đăng xuất
         await _logout();
+        // handler.next(err);
+        // handler.reject(DioException(
+        //   requestOptions: err.requestOptions,
+        //   type: DioExceptionType.cancel,
+        //   error: "Session expired, please log in again",
+        // ));
       }
     }
-    handler.next(err);
+    handler.next(err); // Trả về lỗi nếu không xử lý được
   }
 
   Future<bool> _refreshAccessToken() async {
@@ -64,14 +70,8 @@ class AuthInterceptor extends Interceptor {
 
     if (refreshToken != null) {
       try {
-        final response = await dio.post(
-          '/auth/sessions/current/refresh',
-          options: Options(
-            headers: {
-              'X-Stack-Refresh-Token': refreshToken,
-            },
-          ),
-        );
+        final response =
+        await dio.get('/auth/refresh?refreshToken=$refreshToken');
 
         if (response.statusCode == 200) {
           final newAccessToken = response.data['token']['accessToken'];
@@ -79,8 +79,8 @@ class AuthInterceptor extends Interceptor {
           return true;
         }
       } catch (e) {
-        print('❌ Refresh token failed: $e');
         return false;
+        // print('Lỗi làm mới token: $e');
       }
     }
     return false;

@@ -32,7 +32,7 @@ class ChatService {
           "conversation": {
             "id": conversationId ?? const Uuid().v4(),
             "messages":
-                previousMessages?.map((msg) => msg.toJson()).toList() ?? [],
+            previousMessages?.map((msg) => msg.toJson()).toList() ?? [],
           }
         },
         "assistant": {
@@ -100,7 +100,7 @@ class ChatService {
         );
       } else {
         throw ChatException(
-          message: 'Unknown error from server',
+          message: 'Lỗi không xác định từ server',
           statusCode: response.statusCode ?? 500,
         );
       }
@@ -135,13 +135,13 @@ class ChatService {
         return ApiResponse(
           success: true,
           data: response.data,
-          message: 'Get user information successfully',
+          message: 'Lấy thông tin user thành công',
           statusCode: response.statusCode ?? 200,
         );
       } else {
         return ApiResponse(
           success: false,
-          message: 'Get user information failed',
+          message: 'Lấy thông tin user thất bại',
           statusCode: response.statusCode ?? 400,
         );
       }
@@ -155,7 +155,9 @@ class ChatService {
         }
 
         final errorData = e.response!.data;
+        // Check for custom error messages in the response data
         if (errorData['details'] != null && errorData['details'].isNotEmpty) {
+          // Collect all issues in `details` into a single message
           List<String> issues = (errorData['details'] as List<dynamic>)
               .map<String>((detail) => detail['issue'] ?? 'Unknown issue')
               .toList();
@@ -220,7 +222,7 @@ class ChatService {
         return TokenUsageResponse.fromJson(response.data);
       } else {
         throw ChatException(
-          message: 'Unknown error from server',
+          message: 'Lỗi không xác định từ server',
           statusCode: response.statusCode ?? 500,
         );
       }
@@ -228,7 +230,7 @@ class ChatService {
       throw ChatException(
         message: e.response?.data?['message'] ??
             e.message ??
-            'Error connecting to server',
+            'Lỗi kết nối tới server',
         statusCode: e.response?.statusCode ?? 500,
       );
     }
