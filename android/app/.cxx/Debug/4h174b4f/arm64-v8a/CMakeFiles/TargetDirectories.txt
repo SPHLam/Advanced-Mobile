@@ -1,0 +1,2 @@
+D:/University/Fourth year/PTUDCTBDDNC/Project_AI_Chat/android/app/.cxx/Debug/4h174b4f/arm64-v8a/CMakeFiles/edit_cache.dir
+D:/University/Fourth year/PTUDCTBDDNC/Project_AI_Chat/android/app/.cxx/Debug/4h174b4f/arm64-v8a/CMakeFiles/rebuild_cache.dir
