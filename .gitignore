@@ -5,11 +5,9 @@
 *.swp
 .DS_Store
 .atom/
-.build/
 .buildlog/
 .history
 .svn/
-.swiftpm/
 migrate_working_dir/
 
 # IntelliJ related
@@ -43,3 +41,52 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Flutter/Dart specific
+**/build/
+**/.dart_tool/
+**/.pub/
+**/packages
+**/generated_plugin_registrant.dart
+*.lock
+
+# Obsolete files
+*.DS_Store
+*.log
+
+# iOS specific
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/App.framework
+ios/Flutter/engine/
+ios/Flutter/Flutter.xcframework/
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+
+# Android specific
+android/.gradle/
+android/app/debug/
+android/app/profile/
+android/app/release/
+android/local.properties
+
+# IntelliJ/VS Code
+.idea/
+*.iml
+.vscode/
+
+# macOS
+macos/Pods/
+macos/.symlinks/
+macos/Flutter/GeneratedPluginRegistrant.swift
+
+# Web specific
+web/.dart_tool/
+
+# Linux specific
+linux/flutter/ephemeral/
+.idx
+
+# Google Analytics
