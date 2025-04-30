@@ -1,17 +1,11 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import '../model/knowledge.dart';
+import 'package:jarvis/models/knowledge.dart';
 
 class KnowledgeCard extends StatelessWidget {
   final Knowledge knowledge;
-  final VoidCallback onEdit;
-  final VoidCallback onDelete;
 
-  const KnowledgeCard({
-    super.key,
-    required this.knowledge,
-    required this.onEdit,
-    required this.onDelete,
-  });
+  const KnowledgeCard({super.key, required this.knowledge});
 
   @override
   Widget build(BuildContext context) {
@@ -43,41 +37,13 @@ class KnowledgeCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        knowledge.name,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        GestureDetector(
-                          onTap: onEdit,
-                          child: Icon(
-                            Icons.edit,
-                            size: 14,
-                            color: Colors.green.shade600,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        GestureDetector(
-                          onTap: onDelete,
-                          child: Icon(
-                            Icons.delete,
-                            size: 14,
-                            color: Colors.red.shade600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                Text(
+                  knowledge.name,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(

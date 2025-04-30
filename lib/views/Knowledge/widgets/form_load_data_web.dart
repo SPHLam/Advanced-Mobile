@@ -1,8 +1,15 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+// import 'package:jarvis/services/analytics_service.dart';
+import 'package:jarvis/viewmodels/knowledge_base_view_model.dart';
+import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class FormLoadDataWeb extends StatefulWidget {
-  const FormLoadDataWeb({super.key, required this.addNewData});
+  const FormLoadDataWeb(
+      {super.key, required this.addNewData, required this.knowledgeId});
   final void Function(String newData) addNewData;
+  final String knowledgeId;
 
   @override
   State<FormLoadDataWeb> createState() => _FormLoadDataWebState();
@@ -11,13 +18,47 @@ class FormLoadDataWeb extends StatefulWidget {
 class _FormLoadDataWebState extends State<FormLoadDataWeb> {
   final _formKey = GlobalKey<FormState>();
   String _enteredName = "";
+  String _enteredWebUrl = "";
+  final String url = 'https://jarvis.cx/help/knowledge-base/connectors/';
 
-  void _saveFile() {
+  void _saveFile() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
+      bool isSuccess =
+          await Provider.of<KnowledgeBaseProvider>(context, listen: false)
+              .uploadWebUrl(widget.knowledgeId, _enteredName, _enteredWebUrl);
+
+      if (isSuccess) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Successfully connected '),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Fail connected '),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+
+      // AnalyticsService().logEvent(
+      //   "upload_web",
+      //   {"name": _enteredName, "url": _enteredWebUrl},
+      // );
 
       widget.addNewData(_enteredName);
       Navigator.pop(context);
+    }
+  }
+
+  Future<void> _openLink() async {
+    if (await canLaunchUrl(Uri.parse(url))) {
+      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    } else {
+      throw 'Cannot open URL: $url';
     }
   }
 
@@ -43,23 +84,42 @@ class _FormLoadDataWebState extends State<FormLoadDataWeb> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Image.network(
-                    "https://cdn-icons-png.flaticon.com/512/5339/5339181.png",
-                    width: 40,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Icon(Icons.language,
-                          size: 40, color: Colors.blue.shade600);
-                    },
+                  Row(
+                    children: [
+                      Image.network(
+                        "https://cdn-icons-png.flaticon.com/512/5339/5339181.png",
+                        width: 40,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Icon(Icons.language,
+                              size: 40, color: Colors.blue.shade600);
+                        },
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        "Add Unit",
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.blue.shade800,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 12),
-                  Text(
-                    "Website Unit",
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.blue.shade800,
+                  InkWell(
+                    onTap: _openLink,
+                    child: Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: Colors.blue,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Text(
+                        'Docs',
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
                     ),
                   ),
                 ],
@@ -84,7 +144,7 @@ class _FormLoadDataWebState extends State<FormLoadDataWeb> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter a name';
+                          return 'Please input website name';
                         }
                         return null;
                       },
@@ -108,11 +168,13 @@ class _FormLoadDataWebState extends State<FormLoadDataWeb> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter a Web URL';
+                          return 'Please input web url';
                         }
                         return null;
                       },
-                      onSaved: (value) {},
+                      onSaved: (value) {
+                        _enteredWebUrl = value!;
+                      },
                     ),
                   ],
                 ),
@@ -122,7 +184,7 @@ class _FormLoadDataWebState extends State<FormLoadDataWeb> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   ElevatedButton(
-                    onPressed: Navigator.of(context).pop,
+                    onPressed: () => Navigator.of(context).pop(),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 24, vertical: 12),
@@ -153,13 +215,25 @@ class _FormLoadDataWebState extends State<FormLoadDataWeb> {
                       ),
                       elevation: 3,
                     ),
-                    child: const Text(
-                      "Create",
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w500,
-                      ),
+                    child: Consumer<KnowledgeBaseProvider>(
+                      builder: (context, kbProvider, child) {
+                        return kbProvider.isLoading
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Text(
+                                "Save",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              );
+                      },
                     ),
                   ),
                 ],

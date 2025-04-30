@@ -4,10 +4,10 @@ class ForgetPasswordScreen extends StatefulWidget {
   const ForgetPasswordScreen({super.key});
 
   @override
-  ForgetPasswordScreenState createState() => ForgetPasswordScreenState();
+  _ForgetPasswordScreenState createState() => _ForgetPasswordScreenState();
 }
 
-class ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
+class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
   String _email = '';
 
@@ -35,8 +35,7 @@ class ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
             child: Form(
               key: _formKey,
               child: Column(
@@ -62,7 +61,7 @@ class ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                   ),
                   const SizedBox(height: 16),
                   const Text(
-                    'Enter your email address and we\'ll send you a link to reset your password.',
+                    'Select the email address associated with your account and we will send you a link to reset your password.',
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.black54,
@@ -93,7 +92,7 @@ class ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                       errorBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide:
-                            const BorderSide(color: Colors.redAccent, width: 2),
+                        const BorderSide(color: Colors.redAccent, width: 2),
                       ),
                       contentPadding: const EdgeInsets.symmetric(vertical: 16),
                     ),
@@ -132,19 +131,6 @@ class ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                           letterSpacing: 0.5,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Center(
-                    child: TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: Text(
-                        'Back to Login',
-                        style: TextStyle(
-                          color: Colors.blue[700],
-                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),

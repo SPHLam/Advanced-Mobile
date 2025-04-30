@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:jarvis/models/prompt_model.dart';
-import 'package:jarvis/view_models/prompt_list_view_model.dart';
+import 'package:jarvis/viewmodels/prompt_list_view_model.dart';
 
 class NewPrompt {
-  static void show(BuildContext context, {required VoidCallback onPromptCreated}) {
+  static void show(BuildContext context,
+      {required VoidCallback onPromptCreated}) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -124,17 +125,36 @@ class NewPromptContentState extends State<NewPromptContent> {
           isRequired: true,
         ),
         const SizedBox(height: 20),
-        _buildTextField(label: 'Name', hint: 'Prompt name', isRequired: true, controller: titleController),
+        _buildTextField(
+            label: 'Name',
+            hint: 'Prompt name',
+            isRequired: true,
+            controller: titleController),
         const SizedBox(height: 20),
         _buildDropdown(
           label: 'Category',
           value: selectedCategory,
-          items: ['Other', 'Business', 'Marketing', 'SEO', 'Writing', 'Coding', 'Career', 'Chatbot', 'Education', 'Fun', 'Productivity'],
+          items: [
+            'Other',
+            'Business',
+            'Marketing',
+            'SEO',
+            'Writing',
+            'Coding',
+            'Career',
+            'Chatbot',
+            'Education',
+            'Fun',
+            'Productivity'
+          ],
           onChanged: (value) => setState(() => selectedCategory = value!),
           isRequired: true,
         ),
         const SizedBox(height: 20),
-        _buildTextField(label: 'Description', hint: 'Describe your prompt', controller: descriptionController),
+        _buildTextField(
+            label: 'Description',
+            hint: 'Describe your prompt',
+            controller: descriptionController),
         const SizedBox(height: 20),
         _buildTextFieldWithInfo(
           label: 'Prompt',
@@ -147,7 +167,11 @@ class NewPromptContentState extends State<NewPromptContent> {
     );
   }
 
-  Widget _buildTextField({required String label, required String hint, required TextEditingController controller, bool isRequired = false}) {
+  Widget _buildTextField(
+      {required String label,
+      required String hint,
+      required TextEditingController controller,
+      bool isRequired = false}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -155,12 +179,16 @@ class NewPromptContentState extends State<NewPromptContent> {
           children: [
             Text(
               label,
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.grey.shade800),
+              style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade800),
             ),
             if (isRequired)
               const Text(
                 ' *',
-                style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    color: Colors.redAccent, fontWeight: FontWeight.bold),
               ),
           ],
         ),
@@ -176,7 +204,8 @@ class NewPromptContentState extends State<NewPromptContent> {
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
         ),
       ],
@@ -197,12 +226,16 @@ class NewPromptContentState extends State<NewPromptContent> {
           children: [
             Text(
               label,
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.grey.shade800),
+              style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade800),
             ),
             if (isRequired)
               const Text(
                 ' *',
-                style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    color: Colors.redAccent, fontWeight: FontWeight.bold),
               ),
           ],
         ),
@@ -218,7 +251,8 @@ class NewPromptContentState extends State<NewPromptContent> {
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
         ),
         const SizedBox(height: 8),
@@ -250,19 +284,25 @@ class NewPromptContentState extends State<NewPromptContent> {
           children: [
             Text(
               label,
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.grey.shade800),
+              style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade800),
             ),
             if (isRequired)
               const Text(
                 ' *',
-                style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    color: Colors.redAccent, fontWeight: FontWeight.bold),
               ),
           ],
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
           value: value,
-          items: items.map((item) => DropdownMenuItem(value: item, child: Text(item))).toList(),
+          items: items
+              .map((item) => DropdownMenuItem(value: item, child: Text(item)))
+              .toList(),
           onChanged: onChanged,
           decoration: InputDecoration(
             filled: true,
@@ -271,7 +311,8 @@ class NewPromptContentState extends State<NewPromptContent> {
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
           style: TextStyle(color: Colors.grey.shade800),
           dropdownColor: Colors.white,
@@ -291,18 +332,23 @@ class NewPromptContentState extends State<NewPromptContent> {
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
               elevation: 0,
             ),
             child: const Text(
               'Cancel',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
+              style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white),
             ),
           ),
           const SizedBox(width: 12),
           ElevatedButton(
             onPressed: () async {
-              if (titleController.text.trim().isEmpty || contentController.text.trim().isEmpty) {
+              if (titleController.text.trim().isEmpty ||
+                  contentController.text.trim().isEmpty) {
                 showDialog(
                   context: context,
                   builder: (context) => AlertDialog(
@@ -337,12 +383,16 @@ class NewPromptContentState extends State<NewPromptContent> {
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               backgroundColor: Colors.green,
               shadowColor: Colors.transparent,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
               elevation: 0,
             ),
             child: const Text(
               'Create',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
+              style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white),
             ),
           ),
         ],

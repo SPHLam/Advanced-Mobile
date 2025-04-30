@@ -1,11 +1,11 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:jarvis/views/Bot/data/bots_data.dart';
-import 'package:jarvis/views/Bot/page/edit_bot.dart';
 import 'package:jarvis/views/Bot/page/new_bot.dart';
-import 'package:jarvis/views/Bot/page/public_bot.dart';
-import 'package:jarvis/views/Bot/widgets/bot_card.dart';
-import 'package:jarvis/views/Bot/model/bot.dart';
+import 'package:jarvis/views/Bot/widgets/bot_list.dart';
+import 'package:provider/provider.dart';
 import '../../../constants/colors.dart';
+import '../../../models/bot_request.dart';
+import '../../../viewmodels/bot_view_model.dart';
 
 class BotScreen extends StatefulWidget {
   const BotScreen({super.key});
@@ -15,119 +15,53 @@ class BotScreen extends StatefulWidget {
 }
 
 class _BotScreenState extends State<BotScreen> {
-  final List<Bot> _listBots = bots;
-  List<Bot> _filteredBots = [];
-  final TextEditingController _searchController = TextEditingController();
+  final viewModel = BotViewModel();
+  late TextEditingController _controller;
 
   @override
   void initState() {
     super.initState();
-    _filteredBots = List.from(_listBots);
-    _searchController.addListener(_filterBots);
+    _controller = TextEditingController();
   }
 
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
-  void _filterBots() {
-    final query = _searchController.text.toLowerCase();
-    setState(() {
-      if (query.isEmpty) {
-        _filteredBots = List.from(_listBots);
-      } else {
-        _filteredBots = _listBots.where((bot) {
-          return bot.name.toLowerCase().contains(query);
-        }).toList();
-      }
-    });
-  }
-
-  void _addBot(Bot newBot) {
-    setState(() {
-      _listBots.add(newBot);
-      _filterBots();
-    });
-  }
-
-  void _editBot(Bot newEditBot, int indexEditBox) {
-    setState(() {
-      _listBots[indexEditBox] = newEditBot;
-      _filterBots();
-    });
-  }
-
-  void _removeBot(Bot bot) {
-    final botDeleteIndex = _listBots.indexOf(bot);
-    setState(() {
-      _listBots.remove(bot);
-      _filterBots();
-    });
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        duration: const Duration(seconds: 3),
-        backgroundColor: Colors.grey[800],
-        content: const Text("Bot has been Deleted!"),
-        action: SnackBarAction(
-          label: 'Undo',
-          textColor: Colors.cyan,
-          onPressed: () {
-            setState(() {
-              _listBots.insert(botDeleteIndex, bot);
-              _filterBots();
-            });
-          },
+  Future<void> _addBot(BotRequest newBot) async {
+    final viewModel = context.read<BotViewModel>();
+    bool isCreated = await viewModel.createBot(newBot);
+    if (isCreated) {
+      viewModel.fetchBots();
+    } else {
+      // Hiển thị thông báo lỗi nếu tạo bot không thành công
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Create bot failed',
+            style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.blue[600],
         ),
-      ),
-    );
+      );
+    }
   }
 
   void _openAddBotDialog(BuildContext context) {
     showDialog(
-      context: context,
-      builder: (context) => NewBot(
-        addBot: (newBot) {
-          _addBot(newBot);
-        },
-      ),
-    );
-  }
-
-  void _openEditBotDialog(BuildContext context, Bot bot, int index) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => EditBot(
-          editBot: (bot) {
-            _editBot(bot, index);
-          },
-          bot: bot,
-        ),
-      ),
-    );
-  }
-
-  void _openPublishBotDialog(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (context) => const PublicBot(),
-    );
+        context: context,
+        builder: (context) => NewBot(
+              addBot: (newBot) {
+                _addBot(newBot);
+              },
+            ));
   }
 
   @override
   Widget build(BuildContext context) {
+    final viewModel = context.watch<BotViewModel>();
     return Scaffold(
       appBar: AppBar(
         backgroundColor: primaryColor,
         iconTheme: const IconThemeData(color: Colors.white),
         title: const Text(
-          "Bots",
+          'Bots',
           style: TextStyle(fontWeight: FontWeight.w500, color: Colors.white),
         ),
         actions: [
@@ -148,58 +82,33 @@ class _BotScreenState extends State<BotScreen> {
         child: Column(
           children: [
             TextField(
-              controller: _searchController,
+              controller: _controller,
+              onChanged: (value) {
+                viewModel.query = value; // Gửi query qua callback
+              },
               decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                hintText: 'Search...',
-                hintStyle: const TextStyle(color: Colors.grey),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: Colors.grey.shade200,
+                prefixIcon: Icon(Icons.search, color: Colors.grey.shade600),
+                hintText: 'Search...',
+                hintStyle: TextStyle(color: Colors.grey.shade600),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide.none,
                 ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey[300]!),
-                ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Colors.cyan),
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(color: Colors.blue, width: 1),
                 ),
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 10),
             Expanded(
-              child: _filteredBots.isEmpty
-                  ? const Center(
-                child: Text(
-                  "No bots available",
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey,
-                  ),
-                ),
-              )
-                  : ListView.builder(
-                itemCount: _filteredBots.length,
-                itemBuilder: (context, index) {
-                  return BotCard(
-                    bot: _filteredBots[index],
-                    onEdit: () => _openEditBotDialog(
-                        context, _filteredBots[index], _listBots.indexOf(_filteredBots[index])),
-                    onDelete: () => _removeBot(_filteredBots[index]),
-                    onPublish: () => _openPublishBotDialog(context),
-                  );
-                },
-              ),
+              child: BotListWidget(),
             ),
           ],
         ),
       ),
     );
   }
-}
-
-class Listviews {
 }

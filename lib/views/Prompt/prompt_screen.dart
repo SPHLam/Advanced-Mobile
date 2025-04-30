@@ -1,8 +1,7 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:jarvis/views/Prompt/widgets/new_prompt.dart';
 import 'package:jarvis/views/Prompt/widgets/prompt_details.dart';
-import 'package:jarvis/view_models/prompt_list_view_model.dart';
+import 'package:jarvis/viewmodels/prompt_list_view_model.dart';
 import 'package:jarvis/models/prompt_list.dart';
 import 'package:jarvis/models/prompt.dart';
 
@@ -72,20 +71,20 @@ class _PromptScreenState extends State<PromptScreen> {
   void _openPromptDetailsDialog(BuildContext context, Prompt prompt) {
     PromptDetails.show(
       context,
+      promptId: prompt.id,
       itemTitle: prompt.title,
       content: prompt.content,
       category: prompt.category,
       description: prompt.description,
+      language: prompt.language,
       isPublic: prompt.isPublic,
-      isFavorite: prompt.isFavorite,
+      isFavorite: _favoriteStates[prompt.id] ?? prompt.isFavorite,
     ).then((result) {
       if (result != null) {
         setState(() {
-          if (result.contains('Respond in')) {
-            if (kDebugMode) {
-              print('Sending: $result');
-            }
-          } else {
+          if (result['action'] == 'send') {
+            Navigator.pop(context, result['content']);
+          } else if (result['action'] == 'update') {
             _refreshPrompts();
           }
         });
@@ -140,298 +139,300 @@ class _PromptScreenState extends State<PromptScreen> {
   }
 
   Widget _buildSegmentedControl() => Container(
-    padding: const EdgeInsets.all(4),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(12),
-      boxShadow: [
-        BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 4)
-      ],
-    ),
-    child: Row(children: [
-      _buildSegmentOption('My Prompts', 0),
-      _buildSegmentOption('Public Prompts', 1),
-    ]),
-  );
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+                color: Colors.grey.withOpacity(0.1),
+                spreadRadius: 1,
+                blurRadius: 4)
+          ],
+        ),
+        child: Row(children: [
+          _buildSegmentOption('My Prompts', 0),
+          _buildSegmentOption('Public Prompts', 1),
+        ]),
+      );
 
   Widget _buildSegmentOption(String label, int index) => Expanded(
-    child: MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: () {
-          setState(() {
-            selectedSegment = index;
-            _refreshPrompts();
-          });
-        },
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            color:
-            selectedSegment == index ? Colors.blue : Colors.transparent,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Text(
-            label,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color:
-              selectedSegment == index ? Colors.white : Colors.black87,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-      ),
-    ),
-  );
-
-  Widget _buildSearchBar() => Row(
-    children: [
-      Expanded(
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                  color: Colors.grey.withOpacity(0.1),
-                  spreadRadius: 1,
-                  blurRadius: 4)
-            ],
-          ),
-          child: TextField(
-            controller: _searchController,
-            onChanged: (value) {
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: () {
               setState(() {
-                searchQuery = value.toLowerCase();
+                selectedSegment = index;
                 _refreshPrompts();
               });
             },
-            decoration: InputDecoration(
-              prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
-              hintText: 'Search...',
-              hintStyle: TextStyle(color: Colors.grey[600]),
-              border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none),
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration: BoxDecoration(
+                color:
+                    selectedSegment == index ? Colors.blue : Colors.transparent,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                label,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color:
+                      selectedSegment == index ? Colors.white : Colors.black87,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ),
           ),
         ),
-      ),
-      const SizedBox(width: 12),
-      MouseRegion(
-        cursor: SystemMouseCursors.click,
-        child: GestureDetector(
-          onTap: () {
-            setState(() {
-              _showFavoritesOnly = !_showFavoritesOnly;
-              _refreshPrompts();
-            });
-          },
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                    color: Colors.grey.withOpacity(0.1),
-                    spreadRadius: 1,
-                    blurRadius: 4)
-              ],
-            ),
-            child: Icon(
-              _showFavoritesOnly ? Icons.star : Icons.star_border,
-              color: _showFavoritesOnly ? Colors.yellow[700] : Colors.grey[600],
-            ),
-          ),
-        ),
-      ),
-    ],
-  );
+      );
 
-  Widget _buildPromptType() => Row(
-    children: [
-      Expanded(
-        child: Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            for (var category in (isExpanded
-                ? [
-              'all',
-              'marketing',
-              'business',
-              'seo',
-              'writing',
-              'coding',
-              'career',
-              'chatbot',
-              'education',
-              'fun',
-              'productivity',
-              'other'
-            ]
-                : ['all', 'business', 'education']))
-              GestureDetector(
-                onTap: () {
+  Widget _buildSearchBar() => Row(
+        children: [
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                      color: Colors.grey.withOpacity(0.1),
+                      spreadRadius: 1,
+                      blurRadius: 4)
+                ],
+              ),
+              child: TextField(
+                controller: _searchController,
+                onChanged: (value) {
                   setState(() {
-                    selectedCategory = category;
+                    searchQuery = value.toLowerCase();
                     _refreshPrompts();
                   });
                 },
-                child: Chip(
-                  label: Text(
-                    category == 'all'
-                        ? 'All'
-                        : category[0].toUpperCase() + category.substring(1),
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: selectedCategory == category
-                          ? Colors.white
-                          : Colors.blue[900],
-                    ),
-                  ),
-                  backgroundColor: selectedCategory == category
-                      ? Colors.blue
-                      : Colors.blue[50],
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 12, vertical: 6),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20)),
+                decoration: InputDecoration(
+                  prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
+                  hintText: 'Search...',
+                  hintStyle: TextStyle(color: Colors.grey[600]),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none),
                 ),
               ),
-          ],
-        ),
-      ),
-      MouseRegion(
-        cursor: SystemMouseCursors.click,
-        child: IconButton(
-          icon: Icon(isExpanded ? Icons.expand_less : Icons.expand_more),
-          onPressed: () => setState(() => isExpanded = !isExpanded),
-        ),
-      ),
-    ],
-  );
+            ),
+          ),
+          const SizedBox(width: 12),
+          MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  _showFavoritesOnly = !_showFavoritesOnly;
+                  _refreshPrompts();
+                });
+              },
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                        color: Colors.grey.withOpacity(0.1),
+                        spreadRadius: 1,
+                        blurRadius: 4)
+                  ],
+                ),
+                child: Icon(
+                  _showFavoritesOnly ? Icons.star : Icons.star_border,
+                  color: _showFavoritesOnly
+                      ? Colors.yellow[700]
+                      : Colors.grey[600],
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
 
-  Widget _buildPromptsList() => Container(
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(12),
-      boxShadow: [
-        BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 4)
-      ],
-    ),
-    child: FutureBuilder<PromptList>(
-      future: promptsFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        }
-        if (!snapshot.hasData || snapshot.data!.items.isEmpty) {
-          return const Center(child: Text('No prompts found'));
-        }
-        final prompts = snapshot.data!.items;
-        for (var prompt in prompts) {
-          _favoriteStates[prompt.id] ??= prompt.isFavorite;
-        }
-        return ListView.builder(
-          padding: const EdgeInsets.all(8),
-          itemCount: prompts.length,
-          itemBuilder: (context, index) {
-            final prompt = prompts[index];
-            final isFavorite = _favoriteStates[prompt.id] ?? false;
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildPromptType() => Row(
+        children: [
+          Expanded(
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: MouseRegion(
-                        cursor: SystemMouseCursors.click,
-                        child: GestureDetector(
-                          onTap: () =>
-                              _openPromptDetailsDialog(context, prompt),
-                          child: Text(
-                            prompt.title,
-                            style: const TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          ),
+                for (var category in (isExpanded
+                    ? [
+                        'all',
+                        'marketing',
+                        'business',
+                        'seo',
+                        'writing',
+                        'coding',
+                        'career',
+                        'chatbot',
+                        'education',
+                        'fun',
+                        'productivity',
+                        'other'
+                      ]
+                    : ['all', 'business', 'education']))
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        selectedCategory = category;
+                        _refreshPrompts();
+                      });
+                    },
+                    child: Chip(
+                      label: Text(
+                        category == 'all'
+                            ? 'All'
+                            : category[0].toUpperCase() + category.substring(1),
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: selectedCategory == category
+                              ? Colors.white
+                              : Colors.blue[900],
                         ),
                       ),
+                      backgroundColor: selectedCategory == category
+                          ? Colors.blue
+                          : Colors.blue[50],
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20)),
                     ),
+                  ),
+              ],
+            ),
+          ),
+          MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: IconButton(
+              icon: Icon(isExpanded ? Icons.expand_less : Icons.expand_more),
+              onPressed: () => setState(() => isExpanded = !isExpanded),
+            ),
+          ),
+        ],
+      );
+
+  Widget _buildPromptsList() => Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+                color: Colors.grey.withOpacity(0.1),
+                spreadRadius: 1,
+                blurRadius: 4)
+          ],
+        ),
+        child: FutureBuilder<PromptList>(
+          future: promptsFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.hasError) {
+              return Center(child: Text('Error: ${snapshot.error}'));
+            }
+            if (!snapshot.hasData || snapshot.data!.items.isEmpty) {
+              return const Center(child: Text('No prompts found'));
+            }
+            final prompts = snapshot.data!.items;
+            for (var prompt in prompts) {
+              _favoriteStates[prompt.id] ??= prompt.isFavorite;
+            }
+            return ListView.builder(
+              padding: const EdgeInsets.all(8),
+              itemCount: prompts.length,
+              itemBuilder: (context, index) {
+                final prompt = prompts[index];
+                final isFavorite = _favoriteStates[prompt.id] ?? false;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        MouseRegion(
-                          cursor: SystemMouseCursors.click,
-                          child: GestureDetector(
-                            onTap: () =>
-                                _toggleFavorite(prompt.id, isFavorite),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Icon(
-                                isFavorite ? Icons.star : Icons.star_border,
-                                color: isFavorite
-                                    ? Colors.yellow[700]
-                                    : Colors.grey,
+                        Expanded(
+                          child: MouseRegion(
+                            cursor: SystemMouseCursors.click,
+                            child: GestureDetector(
+                              onTap: () =>
+                                  _openPromptDetailsDialog(context, prompt),
+                              child: Text(
+                                prompt.title,
+                                style: const TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.bold),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
                               ),
                             ),
                           ),
                         ),
-                        if (!(prompt.isPublic))
-                          MouseRegion(
-                            cursor: SystemMouseCursors.click,
-                            child: GestureDetector(
-                              onTap: () => _deletePrompt(prompt.id),
-                              child: const Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: Icon(Icons.delete_outline,
-                                    color: Colors.grey),
+                        Row(
+                          children: [
+                            MouseRegion(
+                              cursor: SystemMouseCursors.click,
+                              child: GestureDetector(
+                                onTap: () =>
+                                    _toggleFavorite(prompt.id, isFavorite),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Icon(
+                                    isFavorite ? Icons.star : Icons.star_border,
+                                    color: isFavorite
+                                        ? Colors.yellow[700]
+                                        : Colors.grey,
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                        MouseRegion(
-                          cursor: SystemMouseCursors.click,
-                          child: GestureDetector(
-                            onTap: () =>
-                                _openPromptDetailsDialog(context, prompt),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Icon(Icons.arrow_right,
-                                  color: Colors.grey[600]),
+                            if (!(prompt.isPublic))
+                              MouseRegion(
+                                cursor: SystemMouseCursors.click,
+                                child: GestureDetector(
+                                  onTap: () => _deletePrompt(prompt.id),
+                                  child: const Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Icon(Icons.delete_outline,
+                                        color: Colors.grey),
+                                  ),
+                                ),
+                              ),
+                            MouseRegion(
+                              cursor: SystemMouseCursors.click,
+                              child: GestureDetector(
+                                onTap: () =>
+                                    _openPromptDetailsDialog(context, prompt),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Icon(Icons.arrow_right,
+                                      color: Colors.grey[600]),
+                                ),
+                              ),
                             ),
-                          ),
+                          ],
                         ),
                       ],
                     ),
+                    const SizedBox(height: 8),
+                    Text(
+                      prompt.description,
+                      style: TextStyle(color: Colors.grey[600]),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 2,
+                    ),
+                    const Divider(),
                   ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  prompt.description,
-                  style: TextStyle(color: Colors.grey[600]),
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 2,
-                ),
-                const Divider(),
-              ],
+                );
+              },
             );
           },
-        );
-      },
-    ),
-  );
+        ),
+      );
 }

@@ -1,369 +1,344 @@
-import 'dart:io';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:jarvis/views/Bot/model/bot.dart';
+import 'package:jarvis/views/Bot/page/preview_bot.dart';
+import 'package:jarvis/models/bot_request.dart';
+import 'package:jarvis/viewmodels/bot_view_model.dart';
+import 'package:jarvis/viewmodels/knowledge_base_view_model.dart';
 import 'package:jarvis/views/Bot/page/new_bot_knowledge.dart';
-import 'package:jarvis/constants/colors.dart';
+import 'package:jarvis/models/knowledge.dart';
+import 'package:provider/provider.dart';
 
 class EditBot extends StatefulWidget {
   const EditBot({super.key, required this.editBot, required this.bot});
-  final void Function(Bot newBot) editBot;
-  final Bot bot;
+  final void Function(BotRequest newBot) editBot;
+  final BotRequest bot;
 
   @override
-  State<EditBot> createState() => _EditBotState(); // Sửa tên state
+  State<EditBot> createState() => _NewBotState();
 }
 
-class _EditBotState extends State<EditBot> {
+class _NewBotState extends State<EditBot> {
   final _formKey = GlobalKey<FormState>();
   List<String> _arrKnowledge = [];
-  int _accessOption = 1;
+
+  //TextFormField
   String _enteredName = "";
   String _enteredPrompt = "";
-  String? _selectedImagePath;
-
-  @override
-  void initState() {
-    super.initState();
-    _enteredName = widget.bot.name;
-    _enteredPrompt = widget.bot.prompt;
-    _accessOption = widget.bot.isPublish ? 1 : 2;
-    _arrKnowledge = List.from(widget.bot.listKnowledge);
-
-    if (!widget.bot.imageUrl.startsWith('assets/') && !widget.bot.imageUrl.startsWith('http')) {
-      _selectedImagePath = widget.bot.imageUrl;
-    }
-  }
+  String _enteredDescription = "";
 
   void _openAddKnowledgeDialog(BuildContext context) async {
     final result = await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (context) => NewBotKnowledge(arrKnowledgeAdded: _arrKnowledge),
+      builder: (context) => NewBotKnowledge(),
     );
 
     if (result != null) {
-      setState(() {
-        _arrKnowledge.add(result);
-      });
+      //Show add success
     }
   }
 
-  void _handleDeleteKnowledge(String name) {
-    setState(() {
-      _arrKnowledge.remove(name);
-    });
+  void _handleDeleteKnowledge(String knowledgeId) {
+    Provider.of<BotViewModel>(context, listen: false)
+        .removeKnowledge(knowledgeId);
   }
 
-  void _handleEditKnowledge(String oldName) async {
-    final result = await showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => NewBotKnowledge(arrKnowledgeAdded: _arrKnowledge),
-    );
-
-    if (result != null) {
-      setState(() {
-        final index = _arrKnowledge.indexOf(oldName);
-        if (index != -1) {
-          _arrKnowledge[index] = result;
-        }
-      });
-    }
+  @override
+  void initState() {
+    super.initState();
+    _enteredName = widget.bot.assistantName;
+    _enteredPrompt = widget.bot.instructions!;
+    _enteredDescription = widget.bot.description!;
   }
 
   void _saveBot() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      widget.editBot(
-        Bot(
-          name: _enteredName,
-          prompt: _enteredPrompt,
-          team: widget.bot.team,
-          imageUrl: _selectedImagePath ?? widget.bot.imageUrl,
-          isPublish: _accessOption == 1,
-          listKnowledge: _arrKnowledge,
-        ),
-      );
+
+      // information edit bot
+      widget.editBot(BotRequest(
+        assistantName: _enteredName,
+        instructions: _enteredPrompt,
+        description: _enteredDescription,
+      ));
       Navigator.pop(context);
     }
   }
 
-  Future<void> _openGallery() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      setState(() {
-        _selectedImagePath = image.path;
-      });
-    }
-  }
-
-  ImageProvider<Object> _getImageProvider(String imageUrl) {
-    if (imageUrl.startsWith('http')) {
-      return NetworkImage(imageUrl);
-    } else if (imageUrl.startsWith('assets/')) {
-      return AssetImage(imageUrl);
-    } else {
-      return FileImage(File(imageUrl));
-    }
+  Future<void> _previewBot() async {
+    Provider.of<BotViewModel>(context, listen: false).isPreview = true;
+    await Provider.of<BotViewModel>(context, listen: false)
+        .loadConversationHistory();
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const PreviewScreen(),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: primaryColor,
-        title: const Text(
-          "Edit Bot",
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            color: Colors.white,
-            fontSize: 20,
-          ),
-        ),
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-      ),
-      body: Container(
-        color: Colors.grey[100],
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: SingleChildScrollView(
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Card(
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Basic Information',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black87,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Center(
-                            child: GestureDetector(
-                              onTap: _openGallery,
-                              child: CircleAvatar(
-                                radius: 30,
-                                backgroundColor: Colors.grey[300],
-                                backgroundImage: _selectedImagePath != null
-                                    ? FileImage(File(_selectedImagePath!))
-                                    : _getImageProvider(widget.bot.imageUrl),
-                                child: _selectedImagePath == null && widget.bot.imageUrl.isEmpty
-                                    ? const Icon(Icons.add, size: 32, color: Colors.white)
-                                    : null,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            initialValue: _enteredName,
-                            decoration: InputDecoration(
-                              labelText: 'Name',
-                              hintText: 'Enter bot name',
-                              filled: true,
-                              fillColor: Colors.grey[50],
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide(color: Colors.grey[300]!),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide(color: Colors.grey[300]!),
-                              ),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter a name';
-                              }
-                              return null;
-                            },
-                            onSaved: (value) {
-                              _enteredName = value!;
-                            },
-                          ),
-                          const SizedBox(height: 12),
-                          TextFormField(
-                            initialValue: _enteredPrompt,
-                            maxLines: 4,
-                            decoration: InputDecoration(
-                              labelText: 'Prompt',
-                              hintText: 'Enter prompt content...',
-                              filled: true,
-                              fillColor: Colors.grey[50],
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide(color: Colors.grey[300]!),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide(color: Colors.grey[300]!),
-                              ),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter a prompt';
-                              }
-                              return null;
-                            },
-                            onSaved: (value) {
-                              _enteredPrompt = value!;
-                            },
-                          ),
-                          const SizedBox(height: 12),
-                          DropdownButtonFormField<int>(
-                            value: _accessOption,
-                            items: const [
-                              DropdownMenuItem(
-                                value: 1,
-                                child: Text('Public'),
-                              ),
-                              DropdownMenuItem(
-                                value: 2,
-                                child: Text('Private'),
-                              ),
-                            ],
-                            onChanged: (int? newValue) {
-                              setState(() {
-                                _accessOption = newValue!;
-                              });
-                            },
-                            decoration: InputDecoration(
-                              labelText: 'Access',
-                              filled: true,
-                              fillColor: Colors.grey[50],
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide(color: Colors.grey[300]!),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide(color: Colors.grey[300]!),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Card(
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Knowledge Base',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black87,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          ..._arrKnowledge.map(
-                                (knowledge) => Container(
-                              margin: const EdgeInsets.only(bottom: 8),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: Colors.grey[200]!),
-                              ),
-                              child: ListTile(
-                                leading: const Icon(Icons.book, color: Colors.blue),
-                                title: Text(
-                                  knowledge,
-                                  style: const TextStyle(fontSize: 16),
-                                ),
-                                trailing: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    IconButton(
-                                      icon: const Icon(Icons.edit, color: Colors.green),
-                                      onPressed: () => _handleEditKnowledge(knowledge),
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(Icons.delete, color: Colors.red),
-                                      onPressed: () => _handleDeleteKnowledge(knowledge),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          ElevatedButton.icon(
-                            onPressed: () => _openAddKnowledgeDialog(context),
-                            icon: const Icon(Icons.add),
-                            label: const Text('Add Knowledge'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blue[50],
-                              foregroundColor: Colors.blue[700],
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: _saveBot,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue[700],
-                      minimumSize: const Size(double.infinity, 50),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Text(
-                      'Save Changes',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+        appBar: AppBar(
+          title: const Text(
+            "Edit Bot",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
             ),
           ),
+          centerTitle: true,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
         ),
-      ),
-    );
+        body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Information',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      TextFormField(
+                        // controller: nameController,
+                        initialValue: _enteredName,
+                        decoration: const InputDecoration(
+                          labelText: 'Name',
+                          hintText: 'Enter a AI Bot\'s Name...',
+                          suffixIcon: Icon(Icons.edit),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter a name';
+                          }
+                          return null;
+                        },
+                        onSaved: (value) {
+                          _enteredName = value!;
+                        },
+                      ),
+                      const Text(
+                        'Example: Professional Translator | Writing Expert | Code Assistant',
+                        style: TextStyle(color: Colors.grey, fontSize: 12),
+                      ),
+                      const SizedBox(height: 10),
+                      TextFormField(
+                        initialValue: _enteredDescription,
+                        decoration: const InputDecoration(
+                          labelText: 'Description',
+                          hintText: 'Enter a description...',
+                          suffixIcon: Icon(Icons.description),
+                        ),
+                        onSaved: (value) {
+                          _enteredDescription = value ?? "";
+                        },
+                      ),
+                      const SizedBox(height: 15),
+                      TextFormField(
+                        initialValue: _enteredPrompt,
+                        maxLines: 4,
+                        decoration: const InputDecoration(
+                          labelText: 'Prompt',
+                          hintText: 'Enter a AI Bot\'s Prompt Content...',
+                          border: OutlineInputBorder(),
+                        ),
+                        onSaved: (value) {
+                          _enteredPrompt = value ?? "";
+                        },
+                      ),
+                      const SizedBox(height: 10),
+                      const Text(
+                        'Example: You are an experienced translator with skills in multiple languages worldwide.',
+                        style: TextStyle(color: Colors.grey, fontSize: 12),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // Nút Save với ElevatedButton có gradient
+                          Expanded(
+                            child: Container(
+                              height: 40,
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [Colors.blue, Colors.lightBlueAccent],
+                                  begin: Alignment.centerLeft,
+                                  end: Alignment.centerRight,
+                                ),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: ElevatedButton(
+                                onPressed: _saveBot,
+                                style: ElevatedButton.styleFrom(
+                                  //padding: const EdgeInsets.symmetric(vertical: 16),
+                                  backgroundColor: Colors
+                                      .transparent, // Quan trọng để giữ gradient
+                                  shadowColor:
+                                      Colors.transparent, // Loại bỏ bóng
+                                  shape: const RoundedRectangleBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(10)),
+                                  ),
+                                ),
+                                child: const Text(
+                                  "Save",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 16), // Khoảng cách giữa hai nút
+                          // Nút Preview với OutlineButton
+                          Expanded(
+                            child: SizedBox(
+                              height: 40,
+                              child: OutlinedButton(
+                                onPressed: _previewBot,
+                                style: OutlinedButton.styleFrom(
+                                  //padding: const EdgeInsets.symmetric(vertical: 16),
+                                  side: const BorderSide(
+                                      color: Colors.blue, width: 1),
+                                  shape: const RoundedRectangleBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(10)),
+                                  ),
+                                ),
+                                child: const Text(
+                                  "Preview",
+                                  style: TextStyle(
+                                    color: Colors.blue,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      const Text("Imported Knowledge"),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Consumer<BotViewModel>(
+                            builder: (context, botViewModel, child) {
+                              return Column(
+                                children: botViewModel.knowledgeList
+                                    .map(
+                                      (knowledge) => Card(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Row(
+                                            children: [
+                                              Image.network(
+                                                'assets/images/open-book.png',
+                                                width: 30,
+                                                errorBuilder: (context, error,
+                                                    stackTrace) {
+                                                  return const Icon(Icons
+                                                      .storage); // Hiển thị icon lỗi nếu không load được hình
+                                                },
+                                              ),
+                                              const SizedBox(width: 10),
+                                              Expanded(
+                                                child: Text(
+                                                  knowledge.name,
+                                                  style: const TextStyle(
+                                                      fontSize: 16),
+                                                ),
+                                              ),
+                                              Row(
+                                                children: [
+                                                  IconButton(
+                                                    icon: const Icon(
+                                                        Icons.delete),
+                                                    iconSize: 20,
+                                                    color: Colors.red,
+                                                    onPressed: () {
+                                                      _handleDeleteKnowledge(
+                                                          knowledge.id);
+                                                    },
+                                                  ),
+                                                ],
+                                              )
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                    .toList(),
+                              );
+                            },
+                          ),
+                          const SizedBox(
+                            height: 6,
+                          ),
+                          OutlinedButton(
+                            onPressed: () {
+                              _openAddKnowledgeDialog(context);
+                            },
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(
+                                  width: 1, color: Colors.blue),
+                              shape: const RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(10)),
+                              ),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize
+                                  .min, // Đảm bảo nút không chiếm toàn bộ chiều ngang
+                              children: [
+                                Icon(
+                                  Icons.add,
+                                  color: Colors.blue,
+                                ),
+                                SizedBox(
+                                    width: 8), // Khoảng cách giữa icon và text
+                                Text(
+                                  'Add Knowledge',
+                                  style: TextStyle(color: Colors.blue),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ));
+
+    //   actions: [
+    //   ],
+    // );
   }
 }

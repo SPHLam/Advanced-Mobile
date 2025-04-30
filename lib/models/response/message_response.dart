@@ -3,12 +3,14 @@ import 'package:jarvis/models/response/assistant_response.dart';
 class Message {
   final String role;
   final String content;
+  final List<String>? imagePaths;
   final Assistant assistant;
   final bool? isErrored;
 
   Message({
     required this.role,
     required this.content,
+    this.imagePaths,
     required this.assistant,
     this.isErrored,
   });

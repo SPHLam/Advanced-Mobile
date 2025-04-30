@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class PublishPlatform extends StatelessWidget {
@@ -13,20 +14,22 @@ class PublishPlatform extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: ListTile(
-          leading: Image.asset(imagePath),
+          leading: Image.network(imagePath),
           title: Text(platformName),
-          trailing: ElevatedButton(
+          trailing: OutlinedButton(
             onPressed: () {},
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
-              elevation: 0,
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(
+                  color: Colors.blue,
+                  width: 2.0), // Customize border color and width
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius:
+                    BorderRadius.circular(10), // Optional: Rounded corners
               ),
             ),
             child: const Icon(
               Icons.publish,
-              color: Colors.white,
+              color: Colors.blue, // Màu của icon
             ),
           ),
         ),

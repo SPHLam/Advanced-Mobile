@@ -1,26 +1,30 @@
-import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:jarvis/views/Account/account_screen.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:jarvis/views/Account/pages/account_screen.dart';
 import 'package:jarvis/views/Bot/page/bot_screen.dart';
+import 'package:jarvis/core/Widget/chat_widget.dart';
 import 'package:jarvis/utils/exceptions/chat_exception.dart';
-import 'package:jarvis/models/response/message_response.dart';
-import 'package:jarvis/view_models/auth_view_model.dart';
-import 'package:jarvis/view_models/prompt_list_view_model.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:provider/provider.dart';
-import 'package:jarvis/core/Widget/dropdown_button.dart';
-import 'package:jarvis/view_models/ai_chat_list_view_model.dart';
-import 'package:jarvis/view_models/homechat_view_model.dart';
+import 'package:jarvis/viewmodels/auth_view_model.dart';
+import 'package:jarvis/viewmodels/bot_view_model.dart';
+import 'package:jarvis/viewmodels/knowledge_base_view_model.dart';
+import 'package:jarvis/viewmodels/prompt_list_view_model.dart';
+import '../../constants/text_strings.dart';
+import '../../core/Widget/dropdown_button.dart';
 import '../../models/prompt.dart';
+import '../../utils/helpers/ads/ads_helper.dart';
+import '../../viewmodels/aichat_list_view_model.dart';
+import '../../viewmodels/homechat_view_model.dart';
+import 'package:provider/provider.dart';
 import '../EmailChat/email.dart';
 import '../Prompt/prompt_screen.dart';
 import '../Prompt/widgets/prompt_details.dart';
-import 'Widgets/BottomNavigatorBarCustom/custom-bottom-navigator-bar.dart';
-import 'Widgets/Menu/menu.dart';
+import 'Widgets/bottom_navigation.dart';
+import 'Widgets/menu.dart';
 import '../../models/ai_logo.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:screenshot/screenshot.dart';
+import 'Widgets/build_message.dart';
+import 'Widgets/input_message.dart';
 
 class HomeChat extends StatefulWidget {
   const HomeChat({super.key});
@@ -30,21 +34,31 @@ class HomeChat extends StatefulWidget {
 }
 
 class _HomeChatState extends State<HomeChat> {
+  // AdMob
+  InterstitialAd? _interstitialAd;
+
+  // Controller
   final TextEditingController _controller = TextEditingController();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final ScrollController _scrollController = ScrollController();
+  final ScreenshotController _screenshotController = ScreenshotController();
   final FocusNode _focusNode = FocusNode();
+
   bool _isOpenDeviceWidget = false;
-  int _selectedBottomItemIndex = 0;
-  String? _selectedImagePath;
-  late List<AIItem> _listAIItem;
-  late String selectedAIItem;
   bool _hasText = false;
   bool _showSlash = false;
+  int _selectedBottomItemIndex = 0;
+  List<String>? _imagePaths;
+  late List<AIItem> _listAIItem;
+  late String _selectedAIItem;
 
   @override
   void initState() {
     super.initState();
+    // Load interstitial ad when open app
+    _loadInterstitialAd();
+
+    // Bắt sự kiện thay đổi text trong ô nhập dữ liệu
     _controller.addListener(() {
       setState(() {
         _hasText = _controller.text.isNotEmpty;
@@ -53,6 +67,8 @@ class _HomeChatState extends State<HomeChat> {
         }
       });
     });
+
+    // Bắt sự lắng nghe khi focus vào ô nhập dữ liệu
     _focusNode.addListener(() {
       if (_focusNode.hasFocus) {
         setState(() {
@@ -61,43 +77,101 @@ class _HomeChatState extends State<HomeChat> {
       }
     });
 
+    // Lấy thông tin user
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadUserInfo();
+      _loadConversation();
+      _loadAllPrompt();
     });
 
+    // Lấy danh sách AI
     final aiChatList = Provider.of<AIChatList>(context, listen: false);
     _listAIItem = aiChatList.aiItems;
-    selectedAIItem = aiChatList.selectedAIItem.name;
+    _selectedAIItem = aiChatList.selectedAIItem.name;
 
-    final aiItem = _listAIItem.firstWhere((aiItem) => aiItem.name == selectedAIItem);
-    Provider.of<MessageModel>(context, listen: false)
-        .fetchAllConversations(aiItem.id, 'dify')
-        .then((_) async {
-      await Provider.of<MessageModel>(context, listen: false)
-          .checkCurrentConversation(aiItem.id);
-    });
+    // Hiển thị token
     Provider.of<MessageModel>(context, listen: false).updateRemainingUsage();
-    _refreshPrompts();
+
+    // Lấy danh sách Knowledgebase
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<KnowledgeBaseProvider>(context, listen: false)
+          .fetchAllKnowledgeBases(isLoadMore: false);
+    });
+  }
+
+  void _loadInterstitialAd() {
+    InterstitialAd.load(
+      adUnitId: AdHelper.interstitialAdUnitId,
+      request: AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (InterstitialAd ad) {
+          setState(() {
+            _interstitialAd = ad;
+          });
+          _interstitialAd?.show();
+          _interstitialAd?.fullScreenContentCallback =
+              FullScreenContentCallback(
+            onAdDismissedFullScreenContent: (InterstitialAd ad) {
+              ad.dispose();
+              print("Interstitial Ad dismissed.");
+            },
+            onAdFailedToShowFullScreenContent:
+                (InterstitialAd ad, AdError error) {
+              ad.dispose();
+              print("Failed to show Interstitial Ad: ${error.message}");
+            },
+          );
+        },
+        onAdFailedToLoad: (error) {
+          print('Interstitial ad failed to load: $error');
+        },
+      ),
+    );
   }
 
   Future<void> _loadUserInfo() async {
     try {
       await Provider.of<AuthViewModel>(context, listen: false).fetchUserInfo();
     } catch (e) {
-      if (kDebugMode) print('Error loading user info: $e');
+      return;
     }
   }
 
-  Future<void> _refreshPrompts() async {
-    await Provider.of<PromptListViewModel>(context, listen: false)
-        .fetchAllPrompts();
+  Future<void> _loadConversation() async {
+    final aiItem =
+        _listAIItem.firstWhere((aiItem) => aiItem.name == _selectedAIItem);
+    try {
+      Provider.of<MessageModel>(context, listen: false)
+          .fetchAllConversations(aiItem.id, 'dify')
+          .then((_) async {
+        await Provider.of<MessageModel>(context, listen: false)
+            .checkCurrentConversation(aiItem.id);
+      });
+    } catch (e) {
+      return;
+    }
+  }
+
+  Future<void> _loadAllPrompt() async {
+    try {
+      // Lấy danh sách prompts
+      Provider.of<PromptListViewModel>(context, listen: false)
+          .fetchAllPrompts()
+          .then((_) {
+        Provider.of<PromptListViewModel>(context, listen: false).allPrompts;
+      });
+    } catch (e) {
+      return;
+    }
   }
 
   @override
   void dispose() {
+    _controller.removeListener(() {});
     _controller.dispose();
     _focusNode.dispose();
     _scrollController.dispose();
+    _interstitialAd?.dispose();
     super.dispose();
   }
 
@@ -105,19 +179,32 @@ class _HomeChatState extends State<HomeChat> {
     setState(() {
       _selectedBottomItemIndex = index;
     });
-    if (index == 2) {
+    if (index == 1) {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const PromptScreen()),
-      ).then((_) {
-        _refreshPrompts();
+      ).then((result) {
+        if (result != null &&
+            result is String &&
+            result.contains('Respond in')) {
+          setState(() {
+            _controller.text = result.replaceFirst('Respond in: ', '');
+            _sendMessage();
+          });
+        }
+        _loadAllPrompt();
       });
-    } else if (index == 1) {
+    } else if (index == 2) {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const BotScreen()),
       );
     } else if (index == 3) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => EmailComposer()),
+      );
+    } else if (index == 4) {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const AccountScreen()),
@@ -132,25 +219,27 @@ class _HomeChatState extends State<HomeChat> {
   }
 
   void _sendMessage() async {
-    if (_controller.text.isEmpty && _selectedImagePath == null) return;
+    if (_imagePaths == null && _controller.text.isEmpty) return;
 
     try {
-      final aiItem = _listAIItem.firstWhere((aiItem) => aiItem.name == selectedAIItem);
+      final aiItem =
+          _listAIItem.firstWhere((aiItem) => aiItem.name == _selectedAIItem);
+
       await Provider.of<MessageModel>(context, listen: false).sendMessage(
-        _controller.text,
+        _controller.text.isEmpty ? '' : _controller.text,
         aiItem,
+        imagePaths: _imagePaths ?? null,
       );
+
       _controller.clear();
-      if (_selectedImagePath != null) {
-        setState(() {
-          _selectedImagePath = null;
-        });
-      }
+      setState(() {
+        _imagePaths = null; // Clear image paths after sending
+      });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            e is ChatException ? e.message : 'An error occurred while sending the message',
+            e is ChatException ? e.message : 'Có lỗi xảy ra khi gửi tin nhắn',
           ),
           backgroundColor: Colors.red,
         ),
@@ -160,110 +249,17 @@ class _HomeChatState extends State<HomeChat> {
 
   void _updateSelectedAIItem(String newValue) {
     setState(() {
-      selectedAIItem = newValue;
-      AIItem aiItem = _listAIItem.firstWhere((aiItem) => aiItem.name == newValue);
+      _selectedAIItem = newValue;
+      AIItem aiItem =
+          _listAIItem.firstWhere((aiItem) => aiItem.name == newValue);
+
+      // Cập nhật selectedAIItem trong AIChatList
       Provider.of<AIChatList>(context, listen: false).setSelectedAIItem(aiItem);
+
+      // Di chuyển item được chọn lên đầu danh sách
       _listAIItem.removeWhere((aiItem) => aiItem.name == newValue);
       _listAIItem.insert(0, aiItem);
     });
-  }
-
-  Widget _buildMessage(Message message) {
-    bool isUser = message.role == 'user';
-    bool isError = message.isErrored ?? false;
-
-    Future<void> launchURL(String url) async {
-      final Uri uri = Uri.parse(url);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Cannot open link: $url')),
-        );
-      }
-    }
-
-    return Align(
-      alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-        padding: const EdgeInsets.all(12.0),
-        decoration: BoxDecoration(
-          color: isError
-              ? Colors.red[100]
-              : (isUser ? Colors.blue[100] : Colors.grey[300]),
-          borderRadius: BorderRadius.circular(50),
-        ),
-        child: Consumer<MessageModel>(builder: (context, messageModel, child) {
-          if (!isUser && message.content.isEmpty && messageModel.isSending) {
-            return Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Processing...',
-                  style: TextStyle(
-                    color: isError ? Colors.red : Colors.black,
-                  ),
-                ),
-              ],
-            );
-          }
-          return isUser
-              ? Text(
-            message.content,
-            style: TextStyle(color: isError ? Colors.red : Colors.black),
-          )
-              : MarkdownBody(
-            data: message.content,
-            styleSheet: MarkdownStyleSheet(
-              p: TextStyle(color: isError ? Colors.red : Colors.black),
-              a: const TextStyle(
-                color: Colors.blue,
-                decoration: TextDecoration.underline,
-              ),
-              listBullet: TextStyle(color: isError ? Colors.red : Colors.black),
-            ),
-            selectable: true,
-            onTapLink: (text, href, title) {
-              if (href != null) {
-                launchURL(href);
-              }
-            },
-          );
-        }),
-      ),
-    );
-  }
-
-  Future<void> _openGallery() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      setState(() {
-        _selectedImagePath = image.path;
-        _isOpenDeviceWidget = false;
-      });
-    }
-  }
-
-  Future<void> _openCamera() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.camera);
-    if (image != null) {
-      setState(() {
-        _selectedImagePath = image.path;
-        _isOpenDeviceWidget = false;
-      });
-    }
   }
 
   void _onTextChanged(String input) {
@@ -277,19 +273,23 @@ class _HomeChatState extends State<HomeChat> {
   void _openPromptDetailsDialog(BuildContext context, Prompt prompt) {
     PromptDetails.show(
       context,
+      promptId: prompt.id,
       itemTitle: prompt.title,
       content: prompt.content,
       category: prompt.category,
       description: prompt.description,
+      language: prompt.language,
       isPublic: prompt.isPublic,
       isFavorite: prompt.isFavorite,
     ).then((result) {
       if (result != null) {
-        if (result.contains('Respond in')) {
-          _controller.text = result;
-          _sendMessage();
-        } else {
-          _refreshPrompts();
+        if (result['action'] == 'send') {
+          setState(() {
+            _controller.text = result['content'];
+            _sendMessage();
+          });
+        } else if (result['action'] == 'update') {
+          _loadAllPrompt();
         }
       }
     });
@@ -297,267 +297,236 @@ class _HomeChatState extends State<HomeChat> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      drawer: const Menu(),
-      body: Consumer<MessageModel>(
-        builder: (context, messageModel, child) {
-          return Column(
-            children: [
-              SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      IconButton(
-                        onPressed: () {
-                          _scaffoldKey.currentState?.openDrawer();
-                        },
-                        icon: const Icon(Icons.menu),
-                      ),
-                      const Spacer(),
-                      Container(
-                        padding: const EdgeInsets.all(5),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          borderRadius: BorderRadius.circular(50.0),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.flash_on,
-                              color: Colors.orangeAccent,
-                            ),
-                            Text(
-                              '${messageModel.remainingUsage ?? 0}',
-                              style: const TextStyle(
-                                color: Color.fromRGBO(119, 117, 117, 1.0),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.add_circle_outline),
-                        onPressed: () {
-                          Provider.of<MessageModel>(context, listen: false)
-                              .clearMessage();
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Expanded(
-                child: GestureDetector(
-                  onTap: () {
-                    FocusScope.of(context).unfocus();
-                    if (_isOpenDeviceWidget) {
-                      _toggleDeviceVisibility();
-                    }
-                  },
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: ListView.builder(
-                          controller: _scrollController,
-                          itemCount: messageModel.messages.length,
-                          itemBuilder: (context, index) {
-                            final message = messageModel.messages[index];
-                            return _buildMessage(message);
+    final botModel = context.watch<BotViewModel>();
+    return Screenshot(
+      controller: _screenshotController,
+      child: Scaffold(
+        key: _scaffoldKey,
+        drawer: Menu(),
+        body: Consumer<MessageModel>(
+          builder: (context, messageModel, child) {
+            return Column(
+              children: [
+                SafeArea(
+                  child: Padding(
+                    padding: EdgeInsets.all(10.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        IconButton(
+                          onPressed: () {
+                            // Open menu
+                            _scaffoldKey.currentState?.openDrawer();
                           },
+                          icon: const Icon(Icons.menu),
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            SizedBox(
-                              width: 140,
-                              child: AIDropdown(
-                                listAIItems: _listAIItem,
-                                onChanged: (String? newValue) {
-                                  if (newValue != null) {
-                                    _updateSelectedAIItem(newValue);
-                                  }
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      if (_showSlash)
-                        Consumer<PromptListViewModel>(
-                          builder: (context, promptList, child) {
-                            if (promptList.isLoading) {
-                              return const CircularProgressIndicator();
-                            } else if (promptList.hasError) {
-                              return Text('Có lỗi xảy ra: ${promptList.error}');
-                            } else {
-                              return Padding(
-                                padding: const EdgeInsets.all(5),
+                        const Spacer(),
+                        !botModel.isChatWithMyBot
+                            ? SizedBox(
+                                width: 155,
+                                child: AIDropdown(
+                                  listAIItems: _listAIItem,
+                                  onChanged: (String? newValue) {
+                                    if (newValue != null) {
+                                      _updateSelectedAIItem(newValue);
+                                    }
+                                  },
+                                ),
+                              )
+                            : Expanded(
                                 child: Container(
-                                  width: MediaQuery.of(context).size.width / 3 * 2,
                                   decoration: BoxDecoration(
-                                    border: Border.all(
-                                      color: const Color.fromARGB(255, 158, 198, 232),
-                                      width: 1.0,
-                                    ),
-                                    borderRadius: BorderRadius.circular(20.0),
+                                    borderRadius: BorderRadius.circular(20),
+                                    color: const Color.fromARGB(
+                                        255, 238, 240, 243),
                                   ),
-                                  constraints: BoxConstraints(
-                                      maxHeight: MediaQuery.of(context).size.height / 3),
-                                  child: ListView.builder(
-                                    itemCount: promptList.allPrompts.items.length,
-                                    itemBuilder: (context, index) {
-                                      return ListTile(
-                                        title: Text(promptList.allPrompts.items[index].title),
-                                        onTap: () {
-                                          _controller.text = "";
-                                          _showSlash = false;
-                                          _openPromptDetailsDialog(
-                                              context, promptList.allPrompts.items[index]);
-                                        },
-                                      );
-                                    },
+                                  height: 30,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10),
+                                  child: Center(
+                                    child: Text(
+                                      botModel.currentChatBot.assistantName,
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      maxLines: 1,
+                                    ),
                                   ),
                                 ),
-                              );
-                            }
+                              ),
+                        const Spacer(),
+                        if (!botModel.isChatWithMyBot)
+                          Container(
+                            padding: EdgeInsets.all(5),
+                            decoration: BoxDecoration(
+                              color: const Color.fromARGB(255, 238, 240, 243),
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.flash_on,
+                                  color: Colors.orange,
+                                ),
+                                messageModel.maxTokens == 99999 &&
+                                        messageModel.maxTokens != null
+                                    ? const Text(
+                                        "Unlimited",
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          color: Colors.orange,
+                                        ),
+                                      )
+                                    : Text(
+                                        '${messageModel.remainingUsage}',
+                                        style: const TextStyle(
+                                          color: Color.fromRGBO(
+                                              119, 117, 117, 1.0),
+                                        ),
+                                      ),
+                              ],
+                            ),
+                          ),
+                        IconButton(
+                          icon: const Icon(Icons.add_circle_outline),
+                          onPressed: () {
+                            Provider.of<MessageModel>(context, listen: false)
+                                .clearMessage();
+                            botModel.isChatWithMyBot = false;
                           },
                         ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          IconButton(
-                            icon: _isOpenDeviceWidget
-                                ? const Icon(Icons.arrow_back_ios_new)
-                                : const Icon(Icons.arrow_forward_ios),
-                            onPressed: _toggleDeviceVisibility,
-                          ),
-                          if (_isOpenDeviceWidget) ...[
-                            IconButton(
-                              icon: const Icon(Icons.camera_alt),
-                              onPressed: _openCamera,
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.image_rounded),
-                              onPressed: _openGallery,
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.email),
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => EmailComposer()),
-                                );
-                              },
-                            ),
-                          ],
-                          Expanded(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.grey, width: 1),
-                                borderRadius: BorderRadius.circular(50),
-                                color: Colors.grey[200],
-                              ),
-                              child: Stack(
-                                alignment: Alignment.centerLeft,
-                                children: [
-                                  TextField(
-                                    focusNode: _focusNode,
-                                    controller: _controller,
-                                    onChanged: _onTextChanged,
-                                    maxLines: null,
-                                    decoration: InputDecoration(
-                                      contentPadding: const EdgeInsets.only(left: 10, right: 10),
-                                      hintText: (_selectedImagePath == null)
-                                          ? 'Enter your message...'
-                                          : null,
-                                      border: InputBorder.none,
-                                      enabledBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(50),
-                                        borderSide: const BorderSide(color: Colors.grey, width: 1),
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(50),
-                                        borderSide: const BorderSide(color: Colors.black, width: 1),
-                                      ),
-                                    ),
-                                  ),
-                                  if (_selectedImagePath != null)
-                                    Padding(
-                                      padding: const EdgeInsets.all(4),
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          border: Border.all(
-                                            color: Colors.grey.withOpacity(0.5),
-                                            width: 1,
-                                          ),
-                                          borderRadius: BorderRadius.circular(8),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.grey.withOpacity(0.1),
-                                              spreadRadius: 1,
-                                              blurRadius: 1,
-                                            ),
-                                          ],
-                                        ),
-                                        child: Stack(
-                                          children: [
-                                            ClipRRect(
-                                              borderRadius: BorderRadius.circular(8),
-                                              child: Image.file(
-                                                File(_selectedImagePath!),
-                                                width: 60,
-                                                height: 60,
-                                                fit: BoxFit.cover,
-                                              ),
-                                            ),
-                                            Positioned(
-                                              top: -15,
-                                              right: -15,
-                                              child: IconButton(
-                                                icon: const Icon(
-                                                  Icons.close,
-                                                  size: 20,
-                                                  color: Colors.black54,
-                                                ),
-                                                onPressed: () {
-                                                  setState(() {
-                                                    _selectedImagePath = null;
-                                                  });
-                                                },
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.send),
-                            onPressed: _hasText || _selectedImagePath != null ? _sendMessage : null,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 5),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
-          );
-        },
-      ),
-      bottomNavigationBar: CustomBottomNavigationBar(
-        currentIndex: _selectedBottomItemIndex,
-        onTap: _onTappedBottomItem,
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      FocusScope.of(context).unfocus();
+                      if (_isOpenDeviceWidget) {
+                        _toggleDeviceVisibility();
+                      }
+                    },
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.only(
+                                left: 10, bottom: 10, right: 10),
+                            child: !botModel.isChatWithMyBot
+                                ? Column(
+                                    children: [
+                                      Expanded(
+                                        child: ListView.builder(
+                                          controller: _scrollController,
+                                          itemCount:
+                                              messageModel.messages.length,
+                                          itemBuilder: (context, index) {
+                                            final message =
+                                                messageModel.messages[index];
+                                            return BuildMessage(
+                                                message: message);
+                                          },
+                                        ),
+                                      ),
+                                      if (_showSlash)
+                                        Consumer<PromptListViewModel>(
+                                          builder:
+                                              (context, promptList, child) {
+                                            if (promptList.isLoading) {
+                                              return const CircularProgressIndicator();
+                                            } else if (promptList.hasError) {
+                                              return Text(
+                                                  'Error occur: ${promptList.error}');
+                                            } else {
+                                              return Padding(
+                                                padding:
+                                                    const EdgeInsets.all(5),
+                                                child: Container(
+                                                  width: MediaQuery.of(context)
+                                                          .size
+                                                          .width /
+                                                      3 *
+                                                      2,
+                                                  decoration: BoxDecoration(
+                                                    border: Border.all(
+                                                      color:
+                                                          const Color.fromARGB(
+                                                              255,
+                                                              158,
+                                                              198,
+                                                              232),
+                                                      width: 1.0,
+                                                    ),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            20.0),
+                                                  ),
+                                                  constraints: BoxConstraints(
+                                                    maxHeight:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .height /
+                                                            3,
+                                                  ),
+                                                  child: ListView.builder(
+                                                    itemCount: promptList
+                                                        .allPrompts
+                                                        .items
+                                                        .length,
+                                                    itemBuilder:
+                                                        (context, index) {
+                                                      return ListTile(
+                                                        title: Text(promptList
+                                                            .allPrompts
+                                                            .items[index]
+                                                            .title),
+                                                        onTap: () {
+                                                          _controller.text = "";
+                                                          _showSlash = false;
+                                                          _openPromptDetailsDialog(
+                                                              context,
+                                                              promptList
+                                                                  .allPrompts
+                                                                  .items[index]);
+                                                        },
+                                                      );
+                                                    },
+                                                  ),
+                                                ),
+                                              );
+                                            }
+                                          },
+                                        ),
+                                      InputWidget(
+                                        focusNode: _focusNode,
+                                        controller: _controller,
+                                        onTextChanged: _onTextChanged,
+                                        sendMessage: _sendMessage,
+                                        isOpenDeviceWidget: _isOpenDeviceWidget,
+                                        toggleDeviceVisibility:
+                                            _toggleDeviceVisibility,
+                                        hasText: _hasText,
+                                      ),
+                                      const SizedBox(height: 5),
+                                    ],
+                                  )
+                                : ChatWidget(),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+        bottomNavigationBar: CustomBottomNavigationBar(
+          currentIndex: _selectedBottomItemIndex,
+          onTap: _onTappedBottomItem,
+        ),
       ),
     );
   }

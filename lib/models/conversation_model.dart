@@ -1,7 +1,7 @@
 class Conversation {
   final String title;
   final String id;
-  final int createdAt;
+  final String createdAt;
 
   Conversation({
     required this.title,
@@ -13,7 +13,7 @@ class Conversation {
     return Conversation(
       title: json['title'] ?? '',
       id: json['id'] ?? '',
-      createdAt: json['createdAt'] ?? 0,
+      createdAt: json['createdAt'] ?? '',
     );
   }
 

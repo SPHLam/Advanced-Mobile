@@ -6,97 +6,49 @@ class PublicBot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20.0),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                'Publish to Platforms',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                ),
+                'Publish to',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
+              const Spacer(),
               IconButton(
-                icon: const Icon(Icons.close, color: Colors.grey),
+                icon: const Icon(Icons.close),
                 onPressed: () => Navigator.pop(context),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          Center(
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.red[50],
-              ),
-              child: const Icon(
-                Icons.info,
-                color: Colors.red,
-                size: 32,
-              ),
-            ),
+          const SizedBox(height: 10),
+          const Icon(
+            Icons.warning,
+            color: Colors.red,
+            size: 30,
           ),
-          const SizedBox(height: 16),
-          const Center(
-            child: Text(
-              'By publishing your bot on the following platforms, you agree to comply with each platform\'s Terms of Service.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey,
-                height: 1.5,
-              ),
-            ),
+          const Text(
+            'By publishing your bot on the following platforms, you fully understand and agree to abide by Terms of service for each publishing channel.',
+            style: TextStyle(fontSize: 14),
           ),
-          const SizedBox(height: 24),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.grey[50],
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey[200]!),
-            ),
-            child: const Column(
-              children: [
-                PublishPlatform(
-                  platformName: "Slack",
-                  imagePath:
-                  "assets/logo/slack.png",
-                ),
-                PublishPlatform(
-                  platformName: 'Messenger',
-                  imagePath:
-                  "assets/logo/messenger.png",
-                ),
-                PublishPlatform(
-                  platformName: 'Telegram',
-                  imagePath:
-                  "assets/logo/telegram.png",
-                ),
-                PublishPlatform(
-                  platformName: 'Facebook',
-                  imagePath:
-                  "assets/logo/facebook.png",
-                ),
-                PublishPlatform(
-                  platformName: 'Discord',
-                  imagePath:
-                  "assets/logo/discord.png",
-                ),
-              ],
-            ),
+          const SizedBox(height: 20),
+          const PublishPlatform(
+            platformName: "Slack",
+            imagePath:
+                "https://static-00.iconduck.com/assets.00/slack-icon-2048x2048-vhdso1nk.png",
+          ),
+          const PublishPlatform(
+            platformName: 'Messenger',
+            imagePath:
+                "https://cdn4.iconfinder.com/data/icons/social-media-2285/1024/logo-512.png",
+          ),
+          const PublishPlatform(
+            platformName: 'Telegram',
+            imagePath:
+                "https://cdn.pixabay.com/photo/2021/12/27/10/50/telegram-icon-6896828_1280.png",
           ),
         ],
       ),

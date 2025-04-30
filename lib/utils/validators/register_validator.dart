@@ -1,16 +1,16 @@
 String? validateEmail(String? value) {
   if (value == null || value.isEmpty) {
-    return 'Please enter the email';
+    return 'Please input email';
   }
-  if (!RegExp(r'^[\w-]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-    return 'Email is invalid';
+  if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+    return 'Email is not valid';
   }
   return null;
 }
 
 String? validatePassword(String? value) {
-  if (value == null || value.isEmpty || value.length < 8) {
-    return 'Password must be at least 8 characters';
+  if (value == null || value.isEmpty || value.length < 6) {
+    return 'Password must be at least 6 characters long';
   }
 
   // pattern for validate password, it must have at least 1 uppercase letter, at least 1 number
@@ -24,7 +24,7 @@ String? validatePassword(String? value) {
 
 String? validateConfirmPassword(String? confirmPassword, String? password) {
   if (confirmPassword == null || confirmPassword.isEmpty) {
-    return 'Please confirm password';
+    return 'Please confirm your password';
   }
   if (confirmPassword != password) {
     return 'Confirmation password does not match';

@@ -1,12 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:jarvis/view_models/knowledge_base_view_model.dart';
-import 'package:jarvis/views/Knowledge/model/knowledge.dart';
+import 'package:jarvis/viewmodels/knowledge_base_view_model.dart';
+import 'package:jarvis/models/knowledge.dart';
+import 'package:jarvis/views/Knowledge/widgets/load_data_knowledge.dart';
 import 'package:provider/provider.dart';
 
 class NewKnowledge extends StatefulWidget {
   const NewKnowledge({super.key, required this.addNewKnowledge});
-  final void Function(Knowledge newKnowledge) addNewKnowledge;
+  final void Function(String knowledgeName, String description) addNewKnowledge;
 
   @override
   State<NewKnowledge> createState() => _NewKnowledgeState();
@@ -22,20 +23,10 @@ class _NewKnowledgeState extends State<NewKnowledge> {
       _formKey.currentState!.save();
 
       widget.addNewKnowledge(
-        Knowledge(
-            name: _enteredName,
-            description: _enteredPrompt,
-            imageUrl:
-                "https://img.freepik.com/premium-photo/green-white-graphic-stack-barrels-with-green-top_1103290-132885.jpg",
-            listFiles: [],
-            listGGDrives: [],
-            listUrlWebsite: [],
-            listConfluenceFiles: [],
-            listSlackFiles: []),
+        _enteredName,
+        _enteredPrompt,
       );
 
-      Provider.of<KnowledgeBase>(context, listen: false)
-          .addKnowledgeBase(_enteredName);
       Navigator.pop(context);
     }
   }
@@ -106,7 +97,7 @@ class _NewKnowledgeState extends State<NewKnowledge> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a name';
+                    return 'Please input name';
                   }
                   return null;
                 },
@@ -142,7 +133,7 @@ class _NewKnowledgeState extends State<NewKnowledge> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a description';
+                    return 'Please input the description';
                   }
                   return null;
                 },
@@ -160,7 +151,7 @@ class _NewKnowledgeState extends State<NewKnowledge> {
                 children: [
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: Navigator.of(context).pop,
+                      onPressed: () => Navigator.of(context).pop(),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
                         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -191,13 +182,25 @@ class _NewKnowledgeState extends State<NewKnowledge> {
                         ),
                         elevation: 2,
                       ),
-                      child: const Text(
-                        'Create',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
+                      child: Consumer<KnowledgeBaseProvider>(
+                        builder: (context, kbProvider, child) {
+                          return kbProvider.isLoading
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Text(
+                                  'Create',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                );
+                        },
                       ),
                     ),
                   ),
