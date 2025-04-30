@@ -1,8 +1,16 @@
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:jarvis/viewmodels/knowledge_base_view_model.dart';
+import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class FormLoadDataConfluence extends StatefulWidget {
-  const FormLoadDataConfluence({super.key, required this.addNewData});
+  const FormLoadDataConfluence(
+      {super.key, required this.addNewData, required this.knowledgeId});
   final void Function(String newData) addNewData;
+  final String knowledgeId;
 
   @override
   State<FormLoadDataConfluence> createState() => _FormLoadDataConfluenceState();
@@ -11,12 +19,47 @@ class FormLoadDataConfluence extends StatefulWidget {
 class _FormLoadDataConfluenceState extends State<FormLoadDataConfluence> {
   final _formKey = GlobalKey<FormState>();
   String _enteredName = "";
+  String _enteredWikiPageUrl = "";
+  String _enteredUsername = "";
+  String _enteredAccessToken = "";
+  final String url =
+      'https://jarvis.cx/help/knowledge-base/connectors/confluence';
 
-  void _saveFile() {
+  void _saveFile() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
+
+      bool isSuccess =
+          await Provider.of<KnowledgeBaseProvider>(context, listen: false)
+              .uploadConfluence(widget.knowledgeId, _enteredName,
+                  _enteredWikiPageUrl, _enteredUsername, _enteredAccessToken);
+
+      if (isSuccess) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Successfully connected '),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Fail connected '),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+
       widget.addNewData(_enteredName);
       Navigator.pop(context);
+    }
+  }
+
+  Future<void> _openLink() async {
+    if (await canLaunchUrl(Uri.parse(url))) {
+      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    } else {
+      throw 'Cannot open URL: $url';
     }
   }
 
@@ -42,23 +85,42 @@ class _FormLoadDataConfluenceState extends State<FormLoadDataConfluence> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Image.network(
-                    "https://static.wixstatic.com/media/f9d4ea_637d021d0e444d07bead34effcb15df1~mv2.png/v1/fill/w_340,h_340,al_c,lg_1,q_85,enc_auto/Apt-website-icon-confluence.png",
-                    width: 40,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Icon(Icons.storage,
-                          size: 40, color: Colors.blue.shade600);
-                    },
+                  Row(
+                    children: [
+                      Image.network(
+                        "https://static.wixstatic.com/media/f9d4ea_637d021d0e444d07bead34effcb15df1~mv2.png/v1/fill/w_340,h_340,al_c,lg_1,q_85,enc_auto/Apt-website-icon-confluence.png",
+                        width: 40,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Icon(Icons.storage,
+                              size: 40, color: Colors.blue.shade600);
+                        },
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        "Add Unit",
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.blue.shade800,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 12),
-                  Text(
-                    "Confluence Unit",
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.blue.shade800,
+                  InkWell(
+                    onTap: _openLink,
+                    child: Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: Colors.blue,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Text(
+                        'Docs',
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
                     ),
                   ),
                 ],
@@ -83,7 +145,7 @@ class _FormLoadDataConfluenceState extends State<FormLoadDataConfluence> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter a name';
+                          return 'Please input unit knowledge name';
                         }
                         return null;
                       },
@@ -107,11 +169,13 @@ class _FormLoadDataConfluenceState extends State<FormLoadDataConfluence> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter a URL';
+                          return 'Please input wiki page url';
                         }
                         return null;
                       },
-                      onSaved: (value) {},
+                      onSaved: (value) {
+                        _enteredWikiPageUrl = value!;
+                      },
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
@@ -129,11 +193,13 @@ class _FormLoadDataConfluenceState extends State<FormLoadDataConfluence> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter a username';
+                          return 'Please input confluence username';
                         }
                         return null;
                       },
-                      onSaved: (value) {},
+                      onSaved: (value) {
+                        _enteredUsername = value!;
+                      },
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
@@ -151,11 +217,13 @@ class _FormLoadDataConfluenceState extends State<FormLoadDataConfluence> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter an access token';
+                          return 'Please input confluence access token';
                         }
                         return null;
                       },
-                      onSaved: (value) {},
+                      onSaved: (value) {
+                        _enteredAccessToken = value!;
+                      },
                     ),
                   ],
                 ),
@@ -165,7 +233,7 @@ class _FormLoadDataConfluenceState extends State<FormLoadDataConfluence> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   ElevatedButton(
-                    onPressed: Navigator.of(context).pop,
+                    onPressed: () => Navigator.of(context).pop(),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 24, vertical: 12),
@@ -196,13 +264,25 @@ class _FormLoadDataConfluenceState extends State<FormLoadDataConfluence> {
                       ),
                       elevation: 3,
                     ),
-                    child: const Text(
-                      "Create",
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w500,
-                      ),
+                    child: Consumer<KnowledgeBaseProvider>(
+                      builder: (context, kbProvider, child) {
+                        return kbProvider.isLoading
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Text(
+                                "Save",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              );
+                      },
                     ),
                   ),
                 ],

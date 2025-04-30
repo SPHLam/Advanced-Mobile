@@ -7,10 +7,10 @@ class AIDropdown extends StatelessWidget {
   final ValueChanged<String?> onChanged;
 
   const AIDropdown({
-    super.key,
+    Key? key,
     required this.listAIItems,
     required this.onChanged,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -18,9 +18,9 @@ class AIDropdown extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          color: Colors.grey[50],
+          color: const Color.fromARGB(255, 238, 240, 243),
         ),
-        height: 38,
+        height: 30,
         child: DropdownButtonFormField<String>(
           value: listAIItems.first.name,
           isExpanded: true,
@@ -30,43 +30,38 @@ class AIDropdown extends StatelessWidget {
               value: item.name,
               child: Row(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8.0),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
                     child: Image.asset(
                       fit: BoxFit.cover,
                       item.logoPath,
-                      width: 25,
-                      height: 25,
+                      width: 20,
+                      height: 20,
                     ),
+                  ),
+                  const SizedBox(
+                    width: 5,
                   ),
                   Expanded(
                     child: Text(
                       item.name,
-                      style: const TextStyle(fontSize: 12),
+                      style: const TextStyle(
+                          fontSize: 12, overflow: TextOverflow.ellipsis),
+                      maxLines: 1,
                     ),
                   ),
                 ],
               ),
             );
           }).toList(),
-          selectedItemBuilder: (BuildContext context) {
-            return listAIItems.map<Widget>((AIItem item) {
-              return Image.asset(
-                fit: BoxFit.cover,
-                item.logoPath,
-                width: 25,
-                height: 25,
-              );
-            }).toList();
-          },
           decoration: InputDecoration(
-            contentPadding: const EdgeInsets.only(left: 10, right: 10),
+            contentPadding: EdgeInsets.only(left: 10, right: 10),
             enabledBorder: OutlineInputBorder(
-              borderSide: const BorderSide(color: Colors.grey, width: 1),
+              borderSide: BorderSide(color: Colors.grey, width: 1),
               borderRadius: BorderRadius.circular(20),
             ),
             focusedBorder: OutlineInputBorder(
-              borderSide: const BorderSide(color: Colors.grey, width: 1),
+              borderSide: BorderSide(color: Colors.grey, width: 1),
               borderRadius: BorderRadius.circular(20),
             ),
           ),

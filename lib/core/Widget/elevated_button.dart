@@ -6,18 +6,21 @@ import '../../constants/sizes.dart';
 
 class ElevatedButtonCustom extends StatelessWidget {
   final String text;
-  final VoidCallback onPressed;
+  final void Function() onPressed;
+
 
   const ElevatedButtonCustom({
-    super.key,
+    Key? key,
     required this.text,
     required this.onPressed,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-        onPressed: onPressed,
+        onPressed: () {
+          onPressed();
+        },
         style: ElevatedButton.styleFrom(
           elevation: 0,
           shape: RoundedRectangleBorder(),

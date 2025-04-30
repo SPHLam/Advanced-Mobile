@@ -1,48 +1,34 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:jarvis/views/Bot/model/bot.dart';
+import 'package:jarvis/models/bot_request.dart';
 
 class NewBot extends StatefulWidget {
   const NewBot({super.key, required this.addBot});
-  final void Function(Bot newBot) addBot;
+  final void Function(BotRequest newBot) addBot;
 
   @override
   State<NewBot> createState() => _NewBotState();
 }
 
 class _NewBotState extends State<NewBot> {
-  String? _selectedImagePath;
-
   final _formKey = GlobalKey<FormState>();
-  int _accessOption = 1;
+
+  // TextFormField
   String _enteredName = "";
   String _enteredPrompt = "";
+  String _enteredDescription = "";
 
   void _saveBot() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
+
       widget.addBot(
-        Bot(
-          name: _enteredName,
-          prompt: _enteredPrompt,
-          team: "JarvisCopi Team",
-          imageUrl: _selectedImagePath ?? "assets/logo/default-bot.png",
-          isPublish: _accessOption == 1,
-          listKnowledge: [],
+        BotRequest(
+          assistantName: _enteredName,
+          instructions: _enteredPrompt,
+          description: _enteredDescription,
         ),
       );
       Navigator.pop(context);
-    }
-  }
-
-  Future<void> _openGallery() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      setState(() {
-        _selectedImagePath = image.path;
-      });
     }
   }
 
@@ -82,44 +68,10 @@ class _NewBotState extends State<NewBot> {
                 ],
               ),
               const SizedBox(height: 16),
-              Center(
-                child: GestureDetector(
-                  onTap: _openGallery,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: const LinearGradient(
-                        colors: [Colors.blue, Colors.cyan],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.blue.withOpacity(0.3),
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: CircleAvatar(
-                      radius: 30,
-                      backgroundColor: Colors.transparent,
-                      backgroundImage: _selectedImagePath != null
-                          ? FileImage(File(_selectedImagePath!))
-                          : const AssetImage("assets/logo/default-bot.png")
-                      as ImageProvider<Object>,
-                      child: _selectedImagePath == null
-                          ? const Icon(Icons.add, size: 32, color: Colors.white)
-                          : null,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
               TextFormField(
                 decoration: InputDecoration(
                   labelText: 'Name',
-                  hintText: 'Enter bot name',
+                  hintText: 'Enter a AI Bot\'s Name...',
                   suffixIcon: const Icon(Icons.edit, color: Colors.grey),
                   filled: true,
                   fillColor: Colors.grey[100],
@@ -148,14 +100,40 @@ class _NewBotState extends State<NewBot> {
               ),
               const SizedBox(height: 12),
               const Text(
-                'Example: JarvisCopi | Professional Translator | Writing Expert | Code Assistant',
+                'Example: Professional Translator | Writing Expert | Code Assistant',
                 style: TextStyle(color: Colors.grey, fontSize: 12),
+              ),
+              const SizedBox(height: 20),
+              TextFormField(
+                decoration: InputDecoration(
+                  labelText: 'Description',
+                  hintText: 'Enter a description...',
+                  suffixIcon: const Icon(Icons.description, color: Colors.grey),
+                  filled: true,
+                  fillColor: Colors.grey[100],
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey[300]!),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Colors.blue),
+                  ),
+                ),
+                onSaved: (value) {
+                  _enteredDescription = value ?? "";
+                },
               ),
               const SizedBox(height: 20),
               TextFormField(
                 maxLines: 4,
                 decoration: InputDecoration(
-                  hintText: 'Enter bot description...',
+                  labelText: 'Prompt',
+                  hintText: 'Enter a AI Bot\'s Prompt Content...',
                   filled: true,
                   fillColor: Colors.grey[100],
                   border: OutlineInputBorder(
@@ -171,56 +149,14 @@ class _NewBotState extends State<NewBot> {
                     borderSide: const BorderSide(color: Colors.blue),
                   ),
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a prompt';
-                  }
-                  return null;
-                },
                 onSaved: (value) {
-                  _enteredPrompt = value!;
+                  _enteredPrompt = value ?? "";
                 },
               ),
               const SizedBox(height: 12),
               const Text(
-                'Example: You are an experienced translator with skills in multiple global languages.',
+                'Example: You are an experienced translator with skills in multiple languages worldwide.',
                 style: TextStyle(color: Colors.grey, fontSize: 12),
-              ),
-              const SizedBox(height: 20),
-              DropdownButtonFormField<int>(
-                value: _accessOption,
-                items: const [
-                  DropdownMenuItem(
-                    value: 1,
-                    child: Text('Publish'),
-                  ),
-                  DropdownMenuItem(
-                    value: 2,
-                    child: Text('Private'),
-                  ),
-                ],
-                onChanged: (int? newValue) {
-                  setState(() {
-                    _accessOption = newValue!;
-                  });
-                },
-                decoration: InputDecoration(
-                  labelText: 'Access',
-                  filled: true,
-                  fillColor: Colors.grey[100],
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey[300]!),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Colors.blue),
-                  ),
-                ),
               ),
             ],
           ),
@@ -230,45 +166,62 @@ class _NewBotState extends State<NewBot> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+            Expanded(
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  elevation: 2,
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                elevation: 2,
-              ),
-              child: const Text(
-                "Cancel",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.white,
+                child: const Text(
+                  "Cancel",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),
-            ElevatedButton(
-              onPressed: _saveBot,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
+            const SizedBox(width: 16),
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Colors.blue, Colors.cyan],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                elevation: 2,
-              ),
-              child: const Text(
-                "Create",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.white,
+                child: ElevatedButton(
+                  onPressed: _saveBot,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 12),
+                    elevation: 2,
+                  ),
+                  child: const Text(
+                    "Create",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ),
             ),

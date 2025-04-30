@@ -1,8 +1,16 @@
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:jarvis/viewmodels/knowledge_base_view_model.dart';
+import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class FormLoadDataSlack extends StatefulWidget {
-  const FormLoadDataSlack({super.key, required this.addNewData});
+  const FormLoadDataSlack(
+      {super.key, required this.addNewData, required this.knowledgeId});
   final void Function(String newData) addNewData;
+  final String knowledgeId;
 
   @override
   State<FormLoadDataSlack> createState() => _FormLoadDataSlackState();
@@ -11,13 +19,45 @@ class FormLoadDataSlack extends StatefulWidget {
 class _FormLoadDataSlackState extends State<FormLoadDataSlack> {
   final _formKey = GlobalKey<FormState>();
   String _enteredName = "";
+  String _enteredSlackWorkspace = "";
+  String _enteredSlackBotToken = "";
+  final String url = 'https://jarvis.cx/help/knowledge-base/connectors/slack/';
 
-  void _saveFile() {
+  void _saveFile() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
+      bool isSuccess =
+          await Provider.of<KnowledgeBaseProvider>(context, listen: false)
+              .uploadSlack(widget.knowledgeId, _enteredName,
+                  _enteredSlackWorkspace, _enteredSlackBotToken);
+
+      if (isSuccess) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Successfully connected '),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Fail connected '),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+
       widget.addNewData(_enteredName);
       Navigator.pop(context);
+    }
+  }
+
+  Future<void> _openLink() async {
+    if (await canLaunchUrl(Uri.parse(url))) {
+      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    } else {
+      throw 'Cannot open URL: $url';
     }
   }
 
@@ -43,23 +83,42 @@ class _FormLoadDataSlackState extends State<FormLoadDataSlack> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Image.network(
-                    "https://static-00.iconduck.com/assets.00/slack-icon-2048x2048-vhdso1nk.png",
-                    width: 40,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Icon(Icons.storage,
-                          size: 40, color: Colors.blue.shade600);
-                    },
+                  Row(
+                    children: [
+                      Image.network(
+                        "https://static-00.iconduck.com/assets.00/slack-icon-2048x2048-vhdso1nk.png",
+                        width: 40,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Icon(Icons.storage,
+                              size: 40, color: Colors.blue.shade600);
+                        },
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        "Add Unit",
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.blue.shade800,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 12),
-                  Text(
-                    "Slack Unit",
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.blue.shade800,
+                  InkWell(
+                    onTap: _openLink,
+                    child: Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: Colors.blue,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Text(
+                        'Docs',
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
                     ),
                   ),
                 ],
@@ -84,7 +143,7 @@ class _FormLoadDataSlackState extends State<FormLoadDataSlack> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter a name';
+                          return 'Please input unit knowledge name';
                         }
                         return null;
                       },
@@ -108,11 +167,13 @@ class _FormLoadDataSlackState extends State<FormLoadDataSlack> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter a Slack Workspace';
+                          return 'Please input slack workspace';
                         }
                         return null;
                       },
-                      onSaved: (value) {},
+                      onSaved: (value) {
+                        _enteredSlackWorkspace = value!;
+                      },
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
@@ -130,11 +191,13 @@ class _FormLoadDataSlackState extends State<FormLoadDataSlack> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter a Slack Bot Token';
+                          return 'Please input slack bot token';
                         }
                         return null;
                       },
-                      onSaved: (value) {},
+                      onSaved: (value) {
+                        _enteredSlackBotToken = value!;
+                      },
                     ),
                   ],
                 ),
@@ -144,7 +207,7 @@ class _FormLoadDataSlackState extends State<FormLoadDataSlack> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   ElevatedButton(
-                    onPressed: Navigator.of(context).pop,
+                    onPressed: () => Navigator.of(context).pop(),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 24, vertical: 12),
@@ -175,13 +238,25 @@ class _FormLoadDataSlackState extends State<FormLoadDataSlack> {
                       ),
                       elevation: 3,
                     ),
-                    child: const Text(
-                      "Create",
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w500,
-                      ),
+                    child: Consumer<KnowledgeBaseProvider>(
+                      builder: (context, kbProvider, child) {
+                        return kbProvider.isLoading
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Text(
+                                "Save",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              );
+                      },
                     ),
                   ),
                 ],

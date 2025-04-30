@@ -1,107 +1,164 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:jarvis/view_models/knowledge_base_view_model.dart';
+import 'package:jarvis/models/knowledge.dart';
+import 'package:jarvis/viewmodels/bot_view_model.dart';
+import 'package:jarvis/viewmodels/knowledge_base_view_model.dart';
 import 'package:provider/provider.dart';
 
-class NewBotKnowledge extends StatelessWidget {
-  const NewBotKnowledge({super.key, required this.arrKnowledgeAdded});
-  final List<String> arrKnowledgeAdded;
+class NewBotKnowledge extends StatefulWidget {
+  const NewBotKnowledge({super.key});
 
-  void _addKnowledge(BuildContext context, String nameKnowledge) {
-    Navigator.of(context).pop(nameKnowledge);
+  @override
+  State<NewBotKnowledge> createState() => _NewBotKnowledgeState();
+}
+
+class _NewBotKnowledgeState extends State<NewBotKnowledge> {
+  late ScrollController _scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _scrollController = ScrollController()
+      ..addListener(() {
+        // Khi cuộn đến cuối danh sách
+        if (_scrollController.position.pixels ==
+            _scrollController.position.maxScrollExtent) {
+          Provider.of<KnowledgeBaseProvider>(context, listen: false)
+              .fetchAllKnowledgeBases(isLoadMore: true);
+        }
+      });
+  }
+
+  void _addKnowledge(BuildContext context, String knowledgeId) {
+    Provider.of<BotViewModel>(context, listen: false)
+        .importKnowledge(knowledgeId);
+    Navigator.of(context).pop(knowledgeId);
   }
 
   @override
   Widget build(BuildContext context) {
-    final arrKnowledge =
-    Provider.of<KnowledgeBase>(context, listen: false)
-        .knowledgeBases
-        .where((element) => !arrKnowledgeAdded.contains(element));
+    final botModel = context.read<BotViewModel>();
 
-    return Container(
-      padding: const EdgeInsets.all(20.0),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+    // final arrKnowledge =
+    //     Provider.of<KnowledgeBaseProvider>(context, listen: false)
+    //         .knowledgeBases
+    //         .where((element) => !botModel.knowledgeList.contains(element.id))
+    //         .map((element) => element.id).toList();
+
+    // final List<Knowledge> arrKnowledge =
+    //     Provider.of<KnowledgeBaseProvider>(context, listen: false)
+    //         .knowledgeBases
+    //         .where((element) =>
+    //             !botModel.knowledgeList.any((item) => item.id == element.id))
+    //         .toList();
+
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                'Add Knowledge Base',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                ),
+                'Thêm bộ dữ liệu tri thức',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
+              const Spacer(),
               IconButton(
-                icon: const Icon(Icons.close, color: Colors.grey),
+                icon: const Icon(Icons.close),
                 onPressed: () => Navigator.pop(context),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          Center(
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.blue[50],
-              ),
-              child: const Icon(
-                Icons.library_add,
-                color: Colors.blue,
-                size: 32,
-              ),
+          const SizedBox(height: 10),
+          const Icon(
+            Icons.addchart,
+            color: Colors.blue,
+            size: 30,
+          ),
+          const SizedBox(height: 20),
+          Expanded(
+            child: Consumer<KnowledgeBaseProvider>(
+              builder: (context, kbProvider, child) {
+                if (kbProvider.isLoading && kbProvider.knowledgeBases.isEmpty) {
+                  // Display loading indicator while fetching conversations
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (kbProvider.error != null &&
+                    kbProvider.knowledgeBases.isEmpty) {
+                  // Display error message if there's an error
+                  return Center(
+                    child: Text(
+                      kbProvider.error ?? 'Server error, please try again',
+                      style: const TextStyle(color: Colors.red, fontSize: 16),
+                    ),
+                  );
+                }
+                final List<Knowledge> arrKnowledge = kbProvider.knowledgeBases
+                    .where((element) => !botModel.knowledgeList
+                        .any((item) => item.id == element.id))
+                    .toList();
+
+                return ListView.builder(
+                  controller: _scrollController,
+                  shrinkWrap: true,
+                  itemCount: arrKnowledge.length + 1,
+                  itemBuilder: (context, index) {
+                    if (index == arrKnowledge.length) {
+                      // Loader khi đang tải thêm
+                      if (kbProvider.hasNext) {
+                        return const Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      } else {
+                        return const SizedBox.shrink(); // Không còn dữ liệu
+                      }
+                    }
+
+                    return Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          children: [
+                            Image.network(
+                              'assets/images/open-book.png',
+                              width: 30,
+                              errorBuilder: (context, error, stackTrace) {
+                                return const Icon(Icons
+                                    .storage); // Hiển thị icon lỗi nếu không load được hình
+                              },
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                arrKnowledge[index].name,
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                            ),
+                            Row(
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.add),
+                                  iconSize: 20,
+                                  color: Colors.blue,
+                                  onPressed: () {
+                                    _addKnowledge(
+                                        context, arrKnowledge[index].id);
+                                  },
+                                )
+                              ],
+                            )
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
             ),
           ),
-          const SizedBox(height: 24),
-          if (arrKnowledge.isEmpty)
-            const Center(
-              child: Text(
-                'No available knowledge bases',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey,
-                ),
-              ),
-            )
-          else
-            ...arrKnowledge.map(
-                  (knowledge) => Container(
-                margin: const EdgeInsets.only(bottom: 8),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey[200]!),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.1),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: ListTile(
-                  leading: const Icon(Icons.book, color: Colors.blue),
-                  title: Text(
-                    knowledge,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  trailing: IconButton(
-                    icon: Icon(Icons.add_circle, color: Colors.blue[700]),
-                    onPressed: () => _addKnowledge(context, knowledge),
-                  ),
-                ),
-              ),
-            ),
         ],
       ),
     );

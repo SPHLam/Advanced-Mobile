@@ -1,5 +1,6 @@
 import 'package:jarvis/models/prompt.dart';
 
+// Model cho PromptList
 class PromptList {
   final bool hasNext;
   List<Prompt> items;
@@ -7,12 +8,13 @@ class PromptList {
   final int offset;
   int total;
 
+  // Constructor rỗng
   PromptList.empty()
       : hasNext = false,
         items = [],
         limit = 0,
         offset = 0,
-        total = 0;
+        total = -1;
 
   PromptList({
     required this.hasNext,
@@ -22,6 +24,7 @@ class PromptList {
     required this.total,
   });
 
+  // Tạo từ JSON
   factory PromptList.fromJson(Map<String, dynamic> json) {
     return PromptList(
       hasNext: json['hasNext'] ?? false,
@@ -35,6 +38,7 @@ class PromptList {
     );
   }
 
+  // Convert về JSON
   Map<String, dynamic> toJson() {
     return {
       'hasNext': hasNext,

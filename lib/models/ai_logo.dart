@@ -4,31 +4,31 @@ class AIItem {
   final String id;
 
   AIItem({
-    required this.id,
     required this.name,
     required this.logoPath,
+    required this.id,
   });
 
   factory AIItem.fromJson(Map<String, dynamic> json) {
     return AIItem(
-      id: json['id'] ?? '',
       name: json['name'] ?? '',
       logoPath: json['logoPath'] ?? '',
+      id: json['id'] ?? '',
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
       'name': name,
       'logoPath': logoPath,
+      'id': id,
     };
   }
 
   AIItem copyWith({
-    String? id,
     String? name,
     String? logoPath,
+    String? id,
   }) {
     return AIItem(
       name: name ?? this.name,

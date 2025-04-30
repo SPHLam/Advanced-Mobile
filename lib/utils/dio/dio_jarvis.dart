@@ -17,11 +17,14 @@ class DioJarvis {
         receiveTimeout: const Duration(seconds: 30),
         headers: {
           'Content-Type': 'application/json',
-          'x-jarvis-guid': '',
+          'Accept': 'application/json',
         },
       ),
     );
 
+    dio.interceptors.add(AuthInterceptor(dio: dio));
+
+    // Thêm interceptor để log request/response
     dio.interceptors.add(LogInterceptor(
       request: true,
       requestHeader: true,
@@ -30,7 +33,5 @@ class DioJarvis {
       responseBody: true,
       error: true,
     ));
-
-    dio.interceptors.add(AuthInterceptor(dio: dio));
   }
 }

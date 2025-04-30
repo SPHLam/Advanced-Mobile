@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:jarvis/views/HomeChat/home.dart';
 import 'package:jarvis/views/Register/register_screen.dart';
 import 'package:jarvis/constants/colors.dart';
 import 'package:jarvis/constants/image_strings.dart';
 import 'package:jarvis/constants/sizes.dart';
 import 'package:jarvis/constants/text_strings.dart';
+import 'package:jarvis/core/Widget/elevated_button.dart';
 import 'package:jarvis/core/Widget/outlined_button.dart';
-import 'package:jarvis/view_models/auth_view_model.dart';
+// import 'package:jarvis/services/analytics_service.dart';
+import 'package:jarvis/viewmodels/auth_view_model.dart';
 import 'package:provider/provider.dart';
+
 import '../ForgetPassword/forget_password.dart';
 import 'package:jarvis/utils/validators/login_validator.dart';
 
@@ -15,10 +19,10 @@ class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  LoginScreenState createState() => LoginScreenState();
+  _LoginScreenState createState() => _LoginScreenState();
 }
 
-class LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -27,13 +31,17 @@ class LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
+
+    // Sử dụng addPostFrameCallback để tránh lỗi khi gọi setState trong build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final shouldShowMessage =
           ModalRoute.of(context)?.settings.arguments as bool? ?? false;
+
       if (shouldShowMessage) {
+        ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("Session expired, please login again."),
+            content: Text("Session expired, please log in again."),
             backgroundColor: Colors.red,
           ),
         );
@@ -51,27 +59,52 @@ class LoginScreenState extends State<LoginScreen> {
 
   void _login() async {
     if (_formKey.currentState!.validate()) {
-      final success = await Provider.of<AuthViewModel>(context, listen: false).login(
+      final success =
+          await Provider.of<AuthViewModel>(context, listen: false).login(
         email: _emailController.text,
         password: _passwordController.text,
       );
+      // AnalyticsService().logEvent(
+      //   "login",
+      //   {
+      //     "email": _emailController.text,
+      //   },
+      // );
 
       if (success && mounted) {
+        // Chuyển sang màn hình HomeChat
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const HomeChat()),
         );
       } else if (mounted) {
+        // Hiển thị thông báo lỗi
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
                 Provider.of<AuthViewModel>(context, listen: false).error ??
-                    'Login failed'),
+                    'Đăng nhập thất bại'),
             backgroundColor: Colors.red,
           ),
         );
       }
     }
+  }
+
+  void _logInGoogle() async {
+    final GoogleSignIn googleSignIn = GoogleSignIn(
+      scopes: <String>[
+        'email',
+        'openid',
+      ],
+    );
+
+    // Get the user after successful sign in
+    final GoogleSignInAccount? googleAccount = await googleSignIn.signIn();
+    final GoogleSignInAuthentication googleAuthentication =
+        await googleAccount!.authentication;
+    print("token1: ${googleAuthentication.accessToken}");
+    print("token2: ${googleAuthentication.idToken}");
   }
 
   @override
@@ -148,7 +181,7 @@ class LoginScreenState extends State<LoginScreen> {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) =>
-                                    const ForgetPasswordScreen(),
+                                        ForgetPasswordScreen(),
                                   ),
                                 );
                               },
@@ -167,12 +200,13 @@ class LoginScreenState extends State<LoginScreen> {
                                 foregroundColor: Colors.white,
                                 backgroundColor: secondaryColor,
                                 side: const BorderSide(color: secondaryColor),
-                                padding:
-                                const EdgeInsets.symmetric(vertical: tButtonHeight),
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: tButtonHeight),
                               ),
-                              onPressed: context.watch<AuthViewModel>().isLoading
-                                  ? null
-                                  : _login,
+                              onPressed:
+                                  context.watch<AuthViewModel>().isLoading
+                                      ? null
+                                      : _login,
                               child: context.watch<AuthViewModel>().isLoading
                                   ? const CircularProgressIndicator()
                                   : const Text('LOGIN'),
@@ -196,7 +230,7 @@ class LoginScreenState extends State<LoginScreen> {
                             image: AssetImage(googleLogoImage),
                             width: 20.0,
                           ),
-                          onPressed: () {},
+                          onPressed: _logInGoogle,
                           label: loginWithGoogleString,
                         ),
                       ),
@@ -212,7 +246,7 @@ class LoginScreenState extends State<LoginScreen> {
                         },
                         child: Text.rich(
                           TextSpan(
-                            text: dontHaveAnAccountString,
+                            text: notHaveAnAccountString,
                             style: Theme.of(context).textTheme.bodyLarge,
                             children: const [
                               TextSpan(
@@ -222,9 +256,9 @@ class LoginScreenState extends State<LoginScreen> {
                             ],
                           ),
                         ),
-                      )
+                      ),
                     ],
-                  )
+                  ),
                 ],
               ),
             ),

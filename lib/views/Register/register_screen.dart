@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:jarvis/constants/colors.dart';
 import 'package:jarvis/views/Login/login_screen.dart';
+import 'package:jarvis/constants/colors.dart';
 import 'package:jarvis/constants/sizes.dart';
 import 'package:jarvis/constants/text_strings.dart';
-import 'package:jarvis/view_models/auth_view_model.dart';
+import 'package:jarvis/viewmodels/auth_view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:jarvis/utils/validators/register_validator.dart';
 
@@ -11,10 +11,10 @@ class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
   @override
-  RegisterScreenState createState() => RegisterScreenState();
+  _RegisterScreenState createState() => _RegisterScreenState();
 }
 
-class RegisterScreenState extends State<RegisterScreen> {
+class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -36,19 +36,19 @@ class RegisterScreenState extends State<RegisterScreen> {
   void _register() async {
     if (_formKey.currentState!.validate()) {
       final success = await context.read<AuthViewModel>().register(
-        username: _usernameController.text,
-        email: _emailController.text,
-        password: _passwordController.text,
-      );
-      print('Success: $success');
+            username: _usernameController.text,
+            email: _emailController.text,
+            password: _passwordController.text,
+          );
 
       if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Sign up successful! Please login'),
+            content: Text('Registration successful! Please log in'),
             backgroundColor: Colors.green,
           ),
         );
+
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const LoginScreen()),
@@ -56,8 +56,8 @@ class RegisterScreenState extends State<RegisterScreen> {
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content:
-            Text(context.read<AuthViewModel>().error ?? 'Sign up failed'),
+            content: Text(
+                context.read<AuthViewModel>().error ?? 'Registration failed'),
             backgroundColor: Colors.red,
           ),
         );
@@ -114,7 +114,7 @@ class RegisterScreenState extends State<RegisterScreen> {
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Please enter username';
+                              return 'Please input username';
                             }
                             return null;
                           },
@@ -155,10 +155,11 @@ class RegisterScreenState extends State<RegisterScreen> {
                             style: ElevatedButton.styleFrom(
                               elevation: 0,
                               shape: const RoundedRectangleBorder(),
-                              foregroundColor: Colors.white,
+                              foregroundColor: whiteColor,
                               backgroundColor: secondaryColor,
                               side: const BorderSide(color: secondaryColor),
-                              padding: const EdgeInsets.symmetric(vertical: tButtonHeight),
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: tButtonHeight),
                             ),
                             onPressed: context.watch<AuthViewModel>().isLoading
                                 ? null

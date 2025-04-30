@@ -1,9 +1,11 @@
 import 'package:dio/dio.dart';
 import 'package:jarvis/main.dart';
+import 'package:jarvis/utils/dio/dio_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthInterceptor extends Interceptor {
   final Dio dio;
+  final Dio dioAuth = DioAuth().dio;
   AuthInterceptor({required this.dio});
 
   @override
@@ -26,7 +28,7 @@ class AuthInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
     if (err.response?.statusCode == 401 &&
-        !err.requestOptions.path.contains('/auth/refresh')) {
+        !err.requestOptions.path.contains('/auth/sessions/current/refresh')) {
       // Thử làm mới accessToken
 
       final isTokenRefreshed = await _refreshAccessToken();
@@ -53,12 +55,6 @@ class AuthInterceptor extends Interceptor {
       } else {
         // Nếu làm mới token không thành công, đăng xuất
         await _logout();
-        // handler.next(err);
-        // handler.reject(DioException(
-        //   requestOptions: err.requestOptions,
-        //   type: DioExceptionType.cancel,
-        //   error: "Session expired, please log in again",
-        // ));
       }
     }
     handler.next(err); // Trả về lỗi nếu không xử lý được
@@ -70,11 +66,17 @@ class AuthInterceptor extends Interceptor {
 
     if (refreshToken != null) {
       try {
-        final response =
-        await dio.get('/auth/refresh?refreshToken=$refreshToken');
+        final response = await dioAuth.post(
+          '/auth/sessions/current/refresh',
+          options: Options(
+            headers: {
+              'X-Stack-Refresh-Token': refreshToken,
+            },
+          ),
+        );
 
         if (response.statusCode == 200) {
-          final newAccessToken = response.data['token']['accessToken'];
+          final newAccessToken = response.data['access_token'];
           await prefs.setString('accessToken', newAccessToken);
           return true;
         }

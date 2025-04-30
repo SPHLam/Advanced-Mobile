@@ -1,4 +1,8 @@
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class FormLoadDataGGDrive extends StatefulWidget {
   const FormLoadDataGGDrive({super.key, required this.addNewData});
@@ -11,6 +15,8 @@ class FormLoadDataGGDrive extends StatefulWidget {
 class _FormLoadDataGGDriveState extends State<FormLoadDataGGDrive> {
   final _formKey = GlobalKey<FormState>();
   String _enteredName = "";
+  final String url =
+      'https://jarvis.cx/help/knowledge-base/connectors/google-drive/';
 
   void _saveFile() {
     if (_formKey.currentState!.validate()) {
@@ -18,6 +24,14 @@ class _FormLoadDataGGDriveState extends State<FormLoadDataGGDrive> {
 
       widget.addNewData(_enteredName);
       Navigator.pop(context);
+    }
+  }
+
+  Future<void> _openLink() async {
+    if (await canLaunchUrl(Uri.parse(url))) {
+      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    } else {
+      throw 'Cannot open URL: $url';
     }
   }
 
@@ -43,23 +57,42 @@ class _FormLoadDataGGDriveState extends State<FormLoadDataGGDrive> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Image.network(
-                    "https://static-00.iconduck.com/assets.00/google-drive-icon-1024x1024-h7igbgsr.png",
-                    width: 40,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Icon(Icons.storage,
-                          size: 40, color: Colors.blue.shade600);
-                    },
+                  Row(
+                    children: [
+                      Image.network(
+                        "https://static-00.iconduck.com/assets.00/google-drive-icon-1024x1024-h7igbgsr.png",
+                        width: 40,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Icon(Icons.storage,
+                              size: 40, color: Colors.blue.shade600);
+                        },
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        "Add Unit",
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.blue.shade800,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 12),
-                  Text(
-                    "Google Drive Unit",
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.blue.shade800,
+                  InkWell(
+                    onTap: _openLink,
+                    child: Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: Colors.blue,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Text(
+                        'Docs',
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
                     ),
                   ),
                 ],
@@ -84,7 +117,7 @@ class _FormLoadDataGGDriveState extends State<FormLoadDataGGDrive> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter a name';
+                          return 'Vui lòng nhập tên';
                         }
                         return null;
                       },
@@ -154,7 +187,7 @@ class _FormLoadDataGGDriveState extends State<FormLoadDataGGDrive> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter a URL';
+                          return 'Vui lòng nhập tên';
                         }
                         return null;
                       },
@@ -168,7 +201,7 @@ class _FormLoadDataGGDriveState extends State<FormLoadDataGGDrive> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   ElevatedButton(
-                    onPressed: Navigator.of(context).pop,
+                    onPressed: () => Navigator.of(context).pop(),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 24, vertical: 12),
@@ -200,7 +233,7 @@ class _FormLoadDataGGDriveState extends State<FormLoadDataGGDrive> {
                       elevation: 3,
                     ),
                     child: const Text(
-                      "Create",
+                      "Save",
                       style: TextStyle(
                         fontSize: 16,
                         color: Colors.white,

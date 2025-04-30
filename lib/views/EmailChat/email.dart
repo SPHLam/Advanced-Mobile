@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
-import '../../core/Widget/dropdown_button.dart';
+import 'package:jarvis/views/EmailChat/widgets/button_custom.dart';
+import 'package:jarvis/views/EmailChat/widgets/textformfield_custom.dart';
+import 'package:jarvis/core/Widget/dropdown_button.dart';
+// import 'package:jarvis/viewmodels/emailchat_view_model.dart';
+import 'package:jarvis/viewmodels/homechat_view_model.dart';
 import 'package:provider/provider.dart';
-
+import '../../viewmodels/aichat_list_view_model.dart';
 import '../../models/ai_logo.dart';
-import '../../view_models/ai_chat_list_view_model.dart';
 
 class EmailComposer extends StatefulWidget {
   @override
@@ -13,14 +16,28 @@ class EmailComposer extends StatefulWidget {
 class _EmailComposerState extends State<EmailComposer> {
   final TextEditingController _emailReceivedController =
       TextEditingController();
-  final TextEditingController _emailReplyController = TextEditingController();
-  late int _countToken;
-  late List<AIItem> _listAIItems;
+  final TextEditingController _aiActionController = TextEditingController();
+  final TextEditingController _subjectController = TextEditingController();
+  final TextEditingController _senderController = TextEditingController();
+  final TextEditingController _receiverController = TextEditingController();
+  final TextEditingController _languageController = TextEditingController();
+  late String selectedAIItem;
+  late List<AIItem> _listAIItem;
+  int? _token;
+  final _formKey = GlobalKey<FormState>();
+  String? _selectedIdea;
   @override
   void initState() {
-    _listAIItems = Provider.of<AIChatList>(context, listen: false).aiItems;
-    _countToken = 30;
     super.initState();
+    _listAIItem = Provider.of<AIChatList>(context, listen: false).aiItems;
+    int? maxtoken = Provider.of<MessageModel>(context, listen: false).maxTokens;
+    if (maxtoken == 99999)
+      _token = 99999;
+    else {
+      int remaningToken =
+          Provider.of<MessageModel>(context, listen: false).remainingUsage;
+      _token = remaningToken;
+    }
   }
 
   void _createDraft(String action) {
@@ -48,61 +65,23 @@ class _EmailComposerState extends State<EmailComposer> {
         draft = '';
     }
     setState(() {
-      _emailReplyController.text = draft;
+      _aiActionController.text = draft;
     });
   }
 
-  Widget _buildTextField(String label, TextEditingController controller) {
-    return Expanded(
-      child: TextField(
-        controller: controller,
-        decoration: InputDecoration(
-          labelText: label,
-          filled: true,
-          fillColor: Colors.grey[50],
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(
-              color: Colors.blue,
-              width: 1.0,
-            ),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(
-              color: Colors.blue,
-              width: 1.0,
-            ),
-          ),
-        ),
-        maxLines: 20,
-      ),
-    );
-  }
+  void _updateSelectedAIItem(String newValue) {
+    setState(() {
+      selectedAIItem = newValue;
+      AIItem aiItem =
+          _listAIItem.firstWhere((aiItem) => aiItem.name == newValue);
 
-  Widget _buildButton(String label, VoidCallback onPressed) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.grey[200],
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(50),
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-            ),
-          ),
-        ],
-      ),
-    );
+      // Cập nhật selectedAIItem trong AIChatList
+      Provider.of<AIChatList>(context, listen: false).setSelectedAIItem(aiItem);
+
+      // Di chuyển item được chọn lên đầu danh sách
+      _listAIItem.removeWhere((aiItem) => aiItem.name == newValue);
+      _listAIItem.insert(0, aiItem);
+    });
   }
 
   @override
@@ -116,107 +95,273 @@ class _EmailComposerState extends State<EmailComposer> {
           },
         ),
         actions: [
-          const Spacer(),
-          SizedBox(
-            width: 140,
-            child: AIDropdown(
-              listAIItems: _listAIItems,
-              onChanged: (value) {
-                setState(() {
-                  _countToken -= 1;
-                });
-              },
-            ),
+          Spacer(),
+          AIDropdown(
+            listAIItems: _listAIItem,
+            onChanged: (String? newValue) {
+              if (newValue != null) {
+                _updateSelectedAIItem(newValue);
+              }
+            },
           ),
-          const SizedBox(
+          SizedBox(
             width: 10,
           ),
           Container(
-            padding:
-                const EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
+            padding: EdgeInsets.all(5),
             decoration: BoxDecoration(
-              color: Colors.grey[200],
-              borderRadius: BorderRadius.circular(50),
+              color: const Color.fromARGB(255, 238, 240, 243),
+              borderRadius: BorderRadius.circular(12.0),
             ),
-            child: Row(
-              children: [
-                Icon(
-                  size: 20,
-                  Icons.flash_on,
-                  color: Colors.orangeAccent,
-                ),
-                Text(
-                  '$_countToken',
-                  style: TextStyle(
-                    color: Colors.grey[700],
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-              ],
-            ),
+            // child: Consumer<EmailChatViewModel>(
+            //     builder: (context, emailViewModel, _) {
+            //   int? tokenCount = emailViewModel.remainingUsage;
+            //   return Row(
+            //     children: [
+            //       const Icon(
+            //         Icons.flash_on,
+            //         color: Colors.orange,
+            //       ),
+            //       _token == 99999
+            //           ? const Text(
+            //               "Unlimited",
+            //               style: TextStyle(
+            //                 fontSize: 10,
+            //                 color: Colors.orange,
+            //               ),
+            //             )
+            //           : Text(
+            //               '${tokenCount != null ? tokenCount : _token}',
+            //               style: const TextStyle(
+            //                   color: Color.fromRGBO(119, 117, 117, 1.0)),
+            //             ),
+            //     ],
+            //   );
+            // }),
           ),
           SizedBox(
-            width: 10,
+            width: 15,
           )
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            _buildTextField('Email received', _emailReceivedController),
-            const SizedBox(height: 20),
-            _buildTextField('AI reply', _emailReplyController),
-            const SizedBox(height: 20),
-            Wrap(
-              spacing: 10,
-              children: [
-                _buildButton('Thanks', () => _createDraft('Thanks')),
-                _buildButton('Explain more detail for me',
-                    () => _createDraft('Explain more detail for me')),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      border: Border.all(color: Colors.grey, width: 1.0),
-                      borderRadius: BorderRadius.circular(50),
-                    ),
-                    child: TextField(
-                      decoration: InputDecoration(
-                        hintText: 'Enter your message...',
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 10),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(50),
-                          borderSide: BorderSide(color: Colors.grey, width: 1),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(50),
-                          borderSide: BorderSide(color: Colors.black, width: 1),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                IconButton(
-                  onPressed: () {},
-                  icon: Icon(Icons.send),
-                  color: Colors.grey[600], // Icon color
-                ),
-              ],
-            ),
-            const SizedBox(
-              height: 30,
-            )
-          ],
-        ),
-      ),
+      // body: Consumer<EmailChatViewModel>(
+      //   builder: (context, emailViewModel, child) {
+      //     if (emailViewModel.isLoading) {
+      //       return Center(child: CircularProgressIndicator());
+      //     }
+      //     return SingleChildScrollView(
+      //       child: Padding(
+      //         padding: const EdgeInsets.only(
+      //             top: 10.0, left: 16.0, right: 16.0, bottom: 10.0),
+      //         child: Form(
+      //           key: _formKey,
+      //           child: Column(
+      //             crossAxisAlignment: CrossAxisAlignment.start,
+      //             children: [
+      //               Container(
+      //                 width: MediaQuery.of(context).size.width,
+      //                 decoration: BoxDecoration(
+      //                   color: Colors.grey[100],
+      //                   border: Border.all(color: Colors.grey),
+      //                   borderRadius: BorderRadius.circular(20),
+      //                 ),
+      //                 child: Padding(
+      //                   padding: const EdgeInsets.all(16.0),
+      //                   child: Column(
+      //                     crossAxisAlignment: CrossAxisAlignment.start,
+      //                     children: [
+      //                       Text(
+      //                         'Received Email',
+      //                         style: TextStyle(
+      //                             fontSize: 18, fontWeight: FontWeight.bold),
+      //                       ),
+      //                       SizedBox(height: 10),
+      //                       buildTextFormField(
+      //                           'Action', _aiActionController, 1),
+      //                       const SizedBox(height: 10),
+      //                       buildTextFormField(
+      //                           'Email content', _emailReceivedController, 5),
+      //                       const SizedBox(height: 10),
+      //                       buildTextFormField(
+      //                           'Subject', _subjectController, 1),
+      //                       const SizedBox(height: 10),
+      //                       buildTextFormField('Sender', _senderController, 1),
+      //                       const SizedBox(height: 10),
+      //                       buildTextFormField(
+      //                           'Receiver', _receiverController, 1),
+      //                       const SizedBox(height: 10),
+      //                       buildTextFormField(
+      //                           'Language', _languageController, 1),
+      //                       const SizedBox(height: 20),
+      //                     ],
+      //                   ),
+      //                 ),
+      //               ),
+      //               if (emailViewModel.ideas != null) ...[
+      //                 const SizedBox(height: 20),
+      //                 Column(
+      //                   children: [
+      //                     Text(
+      //                       'Please choose idea',
+      //                       style: TextStyle(
+      //                         fontSize: 18,
+      //                         fontWeight: FontWeight.bold,
+      //                       ),
+      //                     ),
+      //                     SizedBox(
+      //                       height: 10,
+      //                     ),
+      //                     Wrap(
+      //                       spacing: 10,
+      //                       runSpacing: 10,
+      //                       children: emailViewModel.ideas!.map((idea) {
+      //                         return ElevatedButton(
+      //                             style: ElevatedButton.styleFrom(
+      //                               backgroundColor: _selectedIdea == idea
+      //                                   ? Colors.blue[300]
+      //                                   : Colors.grey[200],
+      //                               shape: RoundedRectangleBorder(
+      //                                 borderRadius: BorderRadius.circular(12),
+      //                               ),
+      //                             ),
+      //                             onPressed: () async {
+      //                               await Provider.of<EmailChatViewModel>(
+      //                                       context,
+      //                                       listen: false)
+      //                                   .fetchEmailResponse(
+      //                                       mainIdea: idea,
+      //                                       action: _aiActionController.text,
+      //                                       email:
+      //                                           _emailReceivedController.text,
+      //                                       subject: _subjectController.text,
+      //                                       sender: _senderController.text,
+      //                                       receiver: _receiverController.text,
+      //                                       language: _languageController.text);
+      //                               setState(() {
+      //                                 _selectedIdea = idea;
+      //                               });
+      //                             },
+      //                             child: Text(
+      //                               idea,
+      //                               style: TextStyle(
+      //                                 color: _selectedIdea == idea
+      //                                     ? Colors.white
+      //                                     : Colors.black87,
+      //                                 fontSize: 14,
+      //                               ),
+      //                               maxLines: 2,
+      //                               overflow: TextOverflow.ellipsis,
+      //                             ));
+      //                       }).toList(),
+      //                     ),
+      //                   ],
+      //                 ),
+      //               ],
+      //               if (emailViewModel.emailReply != null) ...[
+      //                 SizedBox(
+      //                   height: 15,
+      //                 ),
+      //                 Container(
+      //                   width: MediaQuery.of(context).size.width,
+      //                   decoration: BoxDecoration(
+      //                     color: Colors.grey[100],
+      //                     border: Border.all(color: Colors.grey),
+      //                     borderRadius: BorderRadius.circular(20),
+      //                   ),
+      //                   child: Padding(
+      //                     padding: const EdgeInsets.only(
+      //                         top: 10.0, left: 16.0, right: 16.0, bottom: 10.0),
+      //                     child: Container(
+      //                       constraints: BoxConstraints(
+      //                         minHeight: 100,
+      //                       ),
+      //                       child: Column(
+      //                         crossAxisAlignment: CrossAxisAlignment.start,
+      //                         children: [
+      //                           Text(
+      //                             'Reply Email',
+      //                             style: TextStyle(
+      //                                 fontSize: 18,
+      //                                 fontWeight: FontWeight.bold),
+      //                           ),
+      //                           SizedBox(
+      //                             height: 10,
+      //                           ),
+      //                           if (emailViewModel.emailReply != null)
+      //                             Text(
+      //                               '${emailViewModel.emailReply}',
+      //                             ),
+      //                         ],
+      //                       ),
+      //                     ),
+      //                   ),
+      //                 ),
+      //               ],
+      //               const SizedBox(height: 15),
+      //               Wrap(
+      //                 spacing: 10,
+      //                 runSpacing: 10,
+      //                 children: [
+      //                   buildButton('Thanks', () => _createDraft('Thanks')),
+      //                   buildButton('Sorry', () => _createDraft('Sorry')),
+      //                   buildButton('Yes', () => _createDraft('Yes')),
+      //                   buildButton('No', () => _createDraft('No')),
+      //                   buildButton(
+      //                       'Follow Up', () => _createDraft('Follow Up')),
+      //                   buildButton('Request for more information',
+      //                       () => _createDraft('Request for more information')),
+      //                 ],
+      //               ),
+      //               const SizedBox(height: 20),
+      //               Row(
+      //                 children: [
+      //                   Expanded(
+      //                     child: Container(
+      //                       decoration: BoxDecoration(
+      //                         color: Colors.grey[200],
+      //                         border:
+      //                             Border.all(color: Colors.grey, width: 1.0),
+      //                         borderRadius: BorderRadius.circular(12.0),
+      //                       ),
+      //                       child: TextField(
+      //                         decoration: InputDecoration(
+      //                           hintText: 'Enter your message...',
+      //                           border: InputBorder.none,
+      //                           contentPadding:
+      //                               EdgeInsets.symmetric(horizontal: 10),
+      //                         ),
+      //                       ),
+      //                     ),
+      //                   ),
+      //                   IconButton(
+      //                     onPressed: () async {
+      //                       if (_formKey.currentState!.validate()) {
+      //                         await Provider.of<EmailChatViewModel>(context,
+      //                                 listen: false)
+      //                             .getEmailSuggestions(
+      //                                 action: _aiActionController.text,
+      //                                 email: _emailReceivedController.text,
+      //                                 subject: _subjectController.text,
+      //                                 sender: _senderController.text,
+      //                                 receiver: _receiverController.text,
+      //                                 language: _languageController.text);
+      //                       }
+      //                     },
+      //                     icon: Icon(Icons.send),
+      //                     color: Colors.black87,
+      //                   ),
+      //                 ],
+      //               ),
+      //               const SizedBox(
+      //                 height: 30,
+      //               ),
+      //             ],
+      //           ),
+      //         ),
+      //       ),
+      //     );
+      //   },
+      // ),
     );
   }
 }

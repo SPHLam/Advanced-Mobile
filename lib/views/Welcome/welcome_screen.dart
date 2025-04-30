@@ -29,11 +29,15 @@ class WelcomeScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Image(
-                  image: AssetImage(welcomeScreenImage), height: height * 0.5),
+                image: AssetImage(welcomeScreenImage),
+                height: height * 0.5,
+              ),
               Column(
                 children: [
-                  Text(welcomeString,
-                      style: Theme.of(context).textTheme.headlineSmall),
+                  Text(
+                    welcomeString,
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
                   Text(
                     welcomeSubtitleString,
                     style: Theme.of(context).textTheme.bodyLarge,
@@ -50,7 +54,8 @@ class WelcomeScreen extends StatelessWidget {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => LoginScreen()),
+                            builder: (context) => LoginScreen(),
+                          ),
                         );
                       },
                       label: loginString.toUpperCase(),
@@ -65,13 +70,14 @@ class WelcomeScreen extends StatelessWidget {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => RegisterScreen()),
+                            builder: (context) => RegisterScreen(),
+                          ),
                         );
                       },
                     ),
                   ),
                 ],
-              )
+              ),
             ],
           ),
         ),

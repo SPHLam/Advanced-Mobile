@@ -13,9 +13,9 @@ class ConversationMessagesResponse {
 
   factory ConversationMessagesResponse.fromJson(Map<String, dynamic> json) {
     return ConversationMessagesResponse(
-      cursor: json['cursor'],
+      cursor: json['cursor'] ?? '',
       hasMore: json['has_more'],
-      limit: json['limit'],
+      limit: json['limit'] ?? 100,
       items: (json['items'] as List)
           .map((item) => ConversationMessage.fromJson(item))
           .toList(),
@@ -25,14 +25,14 @@ class ConversationMessagesResponse {
 
 class ConversationMessage {
   final String answer;
-  final int createdAt;
-  final List<String> files;
+  final String createdAt;
+  final List<String>? files;
   final String query;
 
   ConversationMessage({
     required this.answer,
     required this.createdAt,
-    required this.files,
+    this.files,
     required this.query,
   });
 
@@ -40,7 +40,7 @@ class ConversationMessage {
     return ConversationMessage(
       answer: json['answer'],
       createdAt: json['createdAt'],
-      files: List<String>.from(json['files']),
+      files: json['files'] != null ? List<String>.from(json['files']) : null,
       query: json['query'],
     );
   }
