@@ -61,7 +61,7 @@ class _MenuState extends State<Menu> {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => const LoginScreen()),
-        (Route<dynamic> route) => false,
+            (Route<dynamic> route) => false,
       );
     }
   }
@@ -128,8 +128,7 @@ class _MenuState extends State<Menu> {
                   const SizedBox(height: 20),
                   ElevatedButton.icon(
                     onPressed: _logout,
-                    icon:
-                        const Icon(Icons.logout, size: 18, color: Colors.white),
+                    icon: const Icon(Icons.logout, size: 18, color: Colors.white),
                     label: const Text("Logout"),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red[400],
@@ -146,13 +145,13 @@ class _MenuState extends State<Menu> {
               ),
             ),
             Expanded(
-              child: ListView(
-                padding: EdgeInsets.zero,
+              child: Column(
                 children: [
-                  const SizedBox(height: 16),
                   _buildMainMenuSection(),
                   const Divider(height: 32),
-                  _buildConversationsSection(),
+                  Expanded(
+                    child: _buildConversationsSection(),
+                  ),
                 ],
               ),
             ),
@@ -192,33 +191,33 @@ class _MenuState extends State<Menu> {
               Expanded(
                 child: _isSearching
                     ? TextField(
-                        controller: _searchController,
-                        decoration: InputDecoration(
-                          hintText: 'Search...',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          suffixIcon: IconButton(
-                            icon: const Icon(Icons.clear),
-                            onPressed: () {
-                              setState(() {
-                                _searchController.clear();
-                                _isSearching = false;
-                              });
-                            },
-                          ),
-                        ),
-                        autofocus: true,
-                      )
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Search...',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        setState(() {
+                          _searchController.clear();
+                          _isSearching = false;
+                        });
+                      },
+                    ),
+                  ),
+                  autofocus: true,
+                )
                     : const Text(
-                        'All Conversations',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                  'All Conversations',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
               IconButton(
                 icon: Icon(_isSearching ? Icons.search_off : Icons.search,
@@ -237,92 +236,93 @@ class _MenuState extends State<Menu> {
             ],
           ),
         ),
-        Consumer<MessageModel>(
-          builder: (context, messageModel, child) {
-            if (messageModel.isLoading && messageModel.conversations.isEmpty) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (messageModel.errorMessage != null &&
-                messageModel.conversations.isEmpty) {
-              return Center(
-                child: Text(
-                  messageModel.errorMessage ?? 'Server error, please try again',
-                  style: const TextStyle(color: Colors.red, fontSize: 16),
-                ),
-              );
-            }
-
-            final filteredConversations = _searchQuery.isEmpty
-                ? messageModel.conversations
-                : messageModel.conversations
-                    .where((conversation) => conversation.title
-                        .toLowerCase()
-                        .contains(_searchQuery.toLowerCase()))
-                    .toList();
-
-            return ListView.builder(
-              controller: _scrollController,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: filteredConversations.length +
-                  (messageModel.hasMoreConversation && _searchQuery.isEmpty
-                      ? 1
-                      : 0),
-              itemBuilder: (context, index) {
-                if (index == filteredConversations.length &&
-                    _searchQuery.isEmpty) {
-                  return const Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Center(child: CircularProgressIndicator()),
-                  );
-                }
-                final conversation = filteredConversations[index];
-                String previewText = conversation.title.isNotEmpty
-                    ? conversation.title.substring(
-                        0,
-                        conversation.title.length > 30
-                            ? 30
-                            : conversation.title.length)
-                    : "Empty conversation";
-                if (previewText.length == 30) previewText += "...";
-
-                return ListTile(
-                  title: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        previewText,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                          fontSize: 14,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _formatTimestamp(conversation.createdAt),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
+        Expanded(
+          child: Consumer<MessageModel>(
+            builder: (context, messageModel, child) {
+              if (messageModel.isLoading && messageModel.conversations.isEmpty) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (messageModel.errorMessage != null &&
+                  messageModel.conversations.isEmpty) {
+                return Center(
+                  child: Text(
+                    messageModel.errorMessage ?? 'Server error, please try again',
+                    style: const TextStyle(color: Colors.red, fontSize: 16),
                   ),
-                  onTap: () async {
-                    await Provider.of<MessageModel>(context, listen: false)
-                        .loadConversationHistory(currentAI.id, conversation.id);
-                    Provider.of<BotViewModel>(context, listen: false)
-                        .isChatWithMyBot = false;
-                    Navigator.pop(context);
-                  },
                 );
-              },
-            );
-          },
+              }
+
+              final filteredConversations = _searchQuery.isEmpty
+                  ? messageModel.conversations
+                  : messageModel.conversations
+                  .where((conversation) => conversation.title
+                  .toLowerCase()
+                  .contains(_searchQuery.toLowerCase()))
+                  .toList();
+
+              return ListView.builder(
+                controller: _scrollController,
+                physics: const AlwaysScrollableScrollPhysics(),
+                itemCount: filteredConversations.length +
+                    (messageModel.hasMoreConversation && _searchQuery.isEmpty
+                        ? 1
+                        : 0),
+                itemBuilder: (context, index) {
+                  if (index == filteredConversations.length &&
+                      _searchQuery.isEmpty) {
+                    return const Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+                  final conversation = filteredConversations[index];
+                  String previewText = conversation.title.isNotEmpty
+                      ? conversation.title.substring(
+                      0,
+                      conversation.title.length > 30
+                          ? 30
+                          : conversation.title.length)
+                      : "Empty conversation";
+                  if (previewText.length == 30) previewText += "...";
+
+                  return ListTile(
+                    title: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          previewText,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                            fontSize: 14,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          _formatTimestamp(conversation.createdAt),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                    onTap: () async {
+                      await Provider.of<MessageModel>(context, listen: false)
+                          .loadConversationHistory(currentAI.id, conversation.id);
+                      Provider.of<BotViewModel>(context, listen: false)
+                          .isChatWithMyBot = false;
+                      Navigator.pop(context);
+                    },
+                  );
+                },
+              );
+            },
+          ),
         ),
       ],
     );
@@ -364,8 +364,7 @@ class _MenuState extends State<Menu> {
             } else if (index == 1) {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                    builder: (context) => const KnowledgeScreen()),
+                MaterialPageRoute(builder: (context) => const KnowledgeScreen()),
               );
             }
           },
@@ -388,7 +387,7 @@ class _MenuState extends State<Menu> {
                     title,
                     style: TextStyle(
                       fontWeight:
-                          isSelected ? FontWeight.bold : FontWeight.normal,
+                      isSelected ? FontWeight.bold : FontWeight.normal,
                       fontSize: 16,
                     ),
                     overflow: TextOverflow.ellipsis,

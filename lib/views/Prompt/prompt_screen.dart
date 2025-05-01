@@ -364,88 +364,87 @@ class _PromptScreenState extends State<PromptScreen> {
               itemBuilder: (context, index) {
                 final prompt = prompts[index];
                 final isFavorite = _favoriteStates[prompt.id] ?? false;
-                if (!prompt.category.isEmpty)
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: MouseRegion(
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: MouseRegion(
+                            cursor: SystemMouseCursors.click,
+                            child: GestureDetector(
+                              onTap: () =>
+                                  _openPromptDetailsDialog(context, prompt),
+                              child: Text(
+                                prompt.title,
+                                style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            MouseRegion(
+                              cursor: SystemMouseCursors.click,
+                              child: GestureDetector(
+                                onTap: () =>
+                                    _toggleFavorite(prompt.id, isFavorite),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Icon(
+                                    isFavorite
+                                        ? Icons.star
+                                        : Icons.star_border,
+                                    color: isFavorite
+                                        ? Colors.yellow[700]
+                                        : Colors.grey,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            if (!(prompt.isPublic))
+                              MouseRegion(
+                                cursor: SystemMouseCursors.click,
+                                child: GestureDetector(
+                                  onTap: () => _deletePrompt(prompt.id),
+                                  child: const Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Icon(Icons.delete_outline,
+                                        color: Colors.grey),
+                                  ),
+                                ),
+                              ),
+                            MouseRegion(
                               cursor: SystemMouseCursors.click,
                               child: GestureDetector(
                                 onTap: () =>
                                     _openPromptDetailsDialog(context, prompt),
-                                child: Text(
-                                  prompt.title,
-                                  style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold),
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Icon(Icons.arrow_right,
+                                      color: Colors.grey[600]),
                                 ),
                               ),
                             ),
-                          ),
-                          Row(
-                            children: [
-                              MouseRegion(
-                                cursor: SystemMouseCursors.click,
-                                child: GestureDetector(
-                                  onTap: () =>
-                                      _toggleFavorite(prompt.id, isFavorite),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Icon(
-                                      isFavorite
-                                          ? Icons.star
-                                          : Icons.star_border,
-                                      color: isFavorite
-                                          ? Colors.yellow[700]
-                                          : Colors.grey,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              if (!(prompt.isPublic))
-                                MouseRegion(
-                                  cursor: SystemMouseCursors.click,
-                                  child: GestureDetector(
-                                    onTap: () => _deletePrompt(prompt.id),
-                                    child: const Padding(
-                                      padding: EdgeInsets.all(8.0),
-                                      child: Icon(Icons.delete_outline,
-                                          color: Colors.grey),
-                                    ),
-                                  ),
-                                ),
-                              MouseRegion(
-                                cursor: SystemMouseCursors.click,
-                                child: GestureDetector(
-                                  onTap: () =>
-                                      _openPromptDetailsDialog(context, prompt),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Icon(Icons.arrow_right,
-                                        color: Colors.grey[600]),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        prompt.description,
-                        style: TextStyle(color: Colors.grey[600]),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 2,
-                      ),
-                      const Divider(),
-                    ],
-                  );
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      prompt.description,
+                      style: TextStyle(color: Colors.grey[600]),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 2,
+                    ),
+                    const Divider(),
+                  ],
+                );
               },
             );
           },
