@@ -8,10 +8,10 @@ import 'package:jarvis/views/SplashScreen/splash_screen.dart';
 import 'package:jarvis/firebase_options.dart';
 import 'package:jarvis/services/bot_service.dart';
 import 'package:jarvis/services/chat_service.dart';
-// import 'package:jarvis/services/email_chat_service.dart';
+import 'package:jarvis/services/email_chat_service.dart';
 import 'package:jarvis/utils/theme/theme.dart';
 import 'package:jarvis/viewmodels/bot_view_model.dart';
-// import 'package:jarvis/viewmodels/emailchat_view_model.dart';
+import 'package:jarvis/viewmodels/emailchat_view_model.dart';
 import 'package:jarvis/viewmodels/knowledge_base_view_model.dart';
 import 'package:jarvis/viewmodels/aichat_list_view_model.dart';
 import 'package:jarvis/viewmodels/auth_view_model.dart';
@@ -41,9 +41,9 @@ void main() async {
             prefs: prefs,
           ),
         ),
-        // Provider<EmailChatService>(
-        //   create: (_) => EmailChatService(),
-        // ),
+        Provider<EmailChatService>(
+          create: (_) => EmailChatService(),
+        ),
         Provider<PromptService>(
           create: (_) => PromptService(
               // dio: dio,
@@ -61,7 +61,7 @@ void main() async {
             context.read<ChatService>(),
           ),
         ),
-        // ChangeNotifierProvider(create: (context) => EmailChatViewModel()),
+        ChangeNotifierProvider(create: (context) => EmailChatViewModel()),
         ChangeNotifierProvider(create: (context) => PromptListViewModel()),
         ChangeNotifierProvider(create: (context) => BotViewModel()),
         ChangeNotifierProvider(create: (context) => KnowledgeBaseProvider()),

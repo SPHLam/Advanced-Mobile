@@ -70,6 +70,7 @@ class AuthInterceptor extends Interceptor {
           '/auth/sessions/current/refresh',
           options: Options(
             headers: {
+              'Content-Type': null,
               'X-Stack-Refresh-Token': refreshToken,
             },
           ),

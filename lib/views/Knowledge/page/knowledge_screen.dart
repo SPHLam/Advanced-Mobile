@@ -5,7 +5,7 @@ import 'package:jarvis/models/knowledge.dart';
 import 'package:jarvis/views/Knowledge/page/edit_knowledge.dart';
 import 'package:jarvis/views/Knowledge/page/new_knowledge.dart';
 import 'package:jarvis/views/Knowledge/widgets/knowledge_card.dart';
-// import 'package:jarvis/services/analytics_service.dart';
+import 'package:jarvis/services/analytics_service.dart';
 import 'package:jarvis/viewmodels/knowledge_base_view_model.dart';
 import 'package:provider/provider.dart';
 
@@ -55,13 +55,13 @@ class _KnowledgeScreenState extends State<KnowledgeScreen> {
       );
     }
 
-    // AnalyticsService().logEvent(
-    //   "new_knowledge",
-    //   {
-    //     "name": knowledgeName,
-    //     "description": description,
-    //   },
-    // );
+    AnalyticsService().logEvent(
+      "new_knowledge",
+      {
+        "name": knowledgeName,
+        "description": description,
+      },
+    );
   }
 
   void _editKnowledge(
