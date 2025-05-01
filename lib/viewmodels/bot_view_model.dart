@@ -241,14 +241,14 @@ class BotViewModel extends ChangeNotifier {
         _myAiBotMessages.add(MyAiBotMessage(
           role: 'model',
           content: e.statusCode == 500
-              ? 'Đã xảy ra lỗi máy chủ. Vui lòng thử lại sau hoặc liên hệ hỗ trợ.'
+              ? 'Internal server error when sending message'
               : e.message,
           isErrored: true,
         ));
       } else {
         _myAiBotMessages.add(MyAiBotMessage(
           role: 'model',
-          content: 'Lỗi không xác định khi gửi tin nhắn: ${e.toString()}',
+          content: 'Unknown error when sending message: ${e.toString()}',
           isErrored: true,
         ));
       }

@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-// import 'package:jarvis/services/analytics_service.dart';
+import 'package:jarvis/services/analytics_service.dart';
 import 'package:jarvis/viewmodels/knowledge_base_view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -52,12 +52,12 @@ class _FormLoadDataState extends State<FormLoadData> {
       );
     }
 
-    // AnalyticsService().logEvent(
-    //   "upload_file",
-    //   {
-    //     "name": _fileName,
-    //   },
-    // );
+    AnalyticsService().logEvent(
+      "upload_file",
+      {
+        "name": _fileName,
+      },
+    );
     widget.addNewData(_fileName);
     Navigator.pop(context);
   }

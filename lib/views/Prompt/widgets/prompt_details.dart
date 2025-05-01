@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jarvis/viewmodels/prompt_list_view_model.dart';
 import 'package:jarvis/models/prompt_model.dart';
+import '../enums.dart';
 
 class PromptDetails extends StatefulWidget {
   final String promptId, itemTitle, content, category, description, language;
@@ -53,35 +54,31 @@ class PromptDetails extends StatefulWidget {
 
 class _PromptDetails extends State<PromptDetails> {
   bool isPromptVisible = false, hasChanges = false;
-  late String selectedLanguage, selectedCategory;
+  late Language selectedLanguage;
+  late Category selectedCategory;
   late TextEditingController titleController,
       contentController,
       descriptionController;
   late List<String> placeholders, inputs;
   final viewModel = PromptListViewModel();
-  final categoryItems = [
-    'other',
-    'business',
-    'marketing',
-    'seo',
-    'writing',
-    'coding',
-    'career',
-    'chatbot',
-    'education',
-    'fun',
-    'productivity'
-  ];
 
   @override
   void initState() {
     super.initState();
-    selectedLanguage = widget.isPublic ? 'English' : widget.language;
-    selectedCategory = widget.category;
+    selectedLanguage = widget.isPublic
+        ? Language.English
+        : Language.values.firstWhere(
+            (e) => e.value == widget.language.toLowerCase(),
+            orElse: () => Language.English,
+          );
+    selectedCategory = Category.values.firstWhere(
+      (e) => e.value == widget.category.toLowerCase(),
+      orElse: () => Category.other,
+    );
     titleController = TextEditingController(text: widget.itemTitle);
     contentController = TextEditingController(text: widget.content);
     descriptionController = TextEditingController(text: widget.description);
-    placeholders = RegExp(r'\[(.+?)\]')
+    placeholders = RegExp(r'$$   (.+?)   $$')
         .allMatches(widget.content)
         .map((m) => m.group(1) ?? '')
         .toList();
@@ -103,17 +100,14 @@ class _PromptDetails extends State<PromptDetails> {
     setState(() {
       hasChanges = titleController.text != widget.itemTitle ||
           contentController.text != widget.content ||
-          selectedCategory != widget.category ||
+          selectedCategory.value != widget.category.toLowerCase() ||
           descriptionController.text != widget.description ||
-          selectedLanguage != widget.language;
+          selectedLanguage.value != widget.language.toLowerCase();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final dropdownItems = categoryItems.contains(widget.category)
-        ? categoryItems
-        : [...categoryItems, widget.category];
     return DraggableScrollableSheet(
       initialChildSize: 0.9,
       minChildSize: 0.5,
@@ -128,9 +122,8 @@ class _PromptDetails extends State<PromptDetails> {
               child: SingleChildScrollView(
                 controller: scrollController,
                 padding: const EdgeInsets.all(20),
-                child: widget.isPublic
-                    ? _buildPublicView(dropdownItems)
-                    : _buildEditableView(dropdownItems),
+                child:
+                    widget.isPublic ? _buildPublicView() : _buildEditableView(),
               ),
             ),
           ],
@@ -159,13 +152,13 @@ class _PromptDetails extends State<PromptDetails> {
         ),
       );
 
-  Widget _buildPublicView(List<String> dropdownItems) => Column(
+  Widget _buildPublicView() => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildCard([
             _buildReadOnlyField('Title', widget.itemTitle),
             const SizedBox(height: 16),
-            _buildReadOnlyField('Category', widget.category),
+            _buildReadOnlyField('Category', selectedCategory.label),
             const SizedBox(height: 16),
             _buildReadOnlyField('Description', widget.description),
           ]),
@@ -187,21 +180,22 @@ class _PromptDetails extends State<PromptDetails> {
         ],
       );
 
-  Widget _buildEditableView(List<String> dropdownItems) => Column(
+  Widget _buildEditableView() => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildCard([
             _buildTextField('Title', titleController, isRequired: true),
             const SizedBox(height: 16),
             _buildDropdown(
-                'Category',
-                selectedCategory,
-                dropdownItems,
-                (v) => setState(() {
-                      selectedCategory = v!;
-                      _checkForChanges();
-                    }),
-                isRequired: true),
+              'Category',
+              selectedCategory,
+              Category.values,
+              (v) => setState(() {
+                selectedCategory = v!;
+                _checkForChanges();
+              }),
+              isRequired: true,
+            ),
             const SizedBox(height: 16),
             _buildTextField('Description', descriptionController),
           ]),
@@ -302,10 +296,10 @@ class _PromptDetails extends State<PromptDetails> {
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                     color: Colors.black87)),
-            DropdownButton<String>(
+            DropdownButton<Language>(
               value: selectedLanguage,
-              items: ['English', 'Japanese', 'Spanish', 'French', 'German']
-                  .map((v) => DropdownMenuItem(value: v, child: Text(v)))
+              items: Language.values
+                  .map((v) => DropdownMenuItem(value: v, child: Text(v.label)))
                   .toList(),
               onChanged: (v) => setState(() {
                 selectedLanguage = v!;
@@ -339,14 +333,14 @@ class _PromptDetails extends State<PromptDetails> {
         child: ElevatedButton(
           onPressed: () {
             String updatedContent = contentController.text;
-            final regex = RegExp(r'\[(.+?)\]');
+            final regex = RegExp(r'$$   (.+?)   $$');
             int index = 0;
             updatedContent = updatedContent.replaceAllMapped(
                 regex,
                 (m) => index < inputs.length && inputs[index].isNotEmpty
                     ? inputs[index++]
                     : m.group(0)!);
-            updatedContent += "\nRespond in $selectedLanguage";
+            updatedContent += "\nRespond in ${selectedLanguage.label}";
             Navigator.pop(
                 context, {'action': 'send', 'content': updatedContent});
           },
@@ -388,9 +382,9 @@ class _PromptDetails extends State<PromptDetails> {
               return;
             }
             final newPrompt = PromptRequest(
-              language: selectedLanguage,
+              language: selectedLanguage.value,
               title: titleController.text,
-              category: selectedCategory.toLowerCase(),
+              category: selectedCategory.value,
               description: descriptionController.text,
               content: contentController.text,
               isPublic: widget.isPublic,
@@ -425,7 +419,7 @@ class _PromptDetails extends State<PromptDetails> {
                   fontWeight: FontWeight.w600,
                   color: Colors.grey.shade800)),
           const SizedBox(height: 8),
-          Text(value.isEmpty ? 'N/A' : value,
+          Text(value,
               style: const TextStyle(fontSize: 14, color: Colors.black87)),
         ],
       );
@@ -464,13 +458,13 @@ class _PromptDetails extends State<PromptDetails> {
         ],
       );
 
-  Widget _buildDropdown(String label, String value, List<String> items,
-      ValueChanged<String?>? onChanged,
-      {bool isRequired = false}) {
-    final uniqueItems = items.toSet().toList();
-    final adjustedValue = uniqueItems.firstWhere(
-        (item) => item.toLowerCase() == value.toLowerCase(),
-        orElse: () => uniqueItems.first);
+  Widget _buildDropdown<T extends Enum>(
+    String label,
+    T value,
+    List<T> items,
+    ValueChanged<T?>? onChanged, {
+    bool isRequired = false,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -488,11 +482,14 @@ class _PromptDetails extends State<PromptDetails> {
           ],
         ),
         const SizedBox(height: 8),
-        DropdownButtonFormField<String>(
-          value: adjustedValue,
-          items: uniqueItems
-              .map((item) => DropdownMenuItem(value: item, child: Text(item)))
-              .toList(),
+        DropdownButtonFormField<T>(
+          value: value,
+          items: items.map((item) {
+            String displayLabel = item is Language
+                ? (item as Language).label
+                : (item as Category).label;
+            return DropdownMenuItem(value: item, child: Text(displayLabel));
+          }).toList(),
           onChanged: onChanged,
           decoration: InputDecoration(
             filled: true,

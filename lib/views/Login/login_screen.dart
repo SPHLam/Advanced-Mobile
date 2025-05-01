@@ -8,7 +8,7 @@ import 'package:jarvis/constants/sizes.dart';
 import 'package:jarvis/constants/text_strings.dart';
 import 'package:jarvis/core/Widget/elevated_button.dart';
 import 'package:jarvis/core/Widget/outlined_button.dart';
-// import 'package:jarvis/services/analytics_service.dart';
+import 'package:jarvis/services/analytics_service.dart';
 import 'package:jarvis/viewmodels/auth_view_model.dart';
 import 'package:provider/provider.dart';
 
@@ -64,12 +64,12 @@ class _LoginScreenState extends State<LoginScreen> {
         email: _emailController.text,
         password: _passwordController.text,
       );
-      // AnalyticsService().logEvent(
-      //   "login",
-      //   {
-      //     "email": _emailController.text,
-      //   },
-      // );
+      AnalyticsService().logEvent(
+        "login",
+        {
+          "email": _emailController.text,
+        },
+      );
 
       if (success && mounted) {
         // Chuyển sang màn hình HomeChat
