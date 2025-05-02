@@ -3,13 +3,10 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:jarvis/models/response/my_aibot_message_response.dart';
 import 'package:jarvis/utils/exceptions/chat_exception.dart';
 import 'package:jarvis/viewmodels/bot_view_model.dart';
-import 'package:jarvis/viewmodels/prompt_list_view_model.dart';
-import 'dart:io';
+import 'package:jarvis/viewmodels/auth_view_model.dart';
 
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-import '../../viewmodels/homechat_view_model.dart';
 
 class ChatWidget extends StatefulWidget {
   final bool isPreview;
@@ -167,6 +164,19 @@ class _ChatWidgetState extends State<ChatWidget> {
     bool isUser = message.role == 'user';
     bool isError = message.isErrored ?? false;
 
+    // Lấy thông tin từ BotViewModel
+    final botViewModel = Provider.of<BotViewModel>(context, listen: false);
+    // Lấy thông tin người dùng từ AuthViewModel
+    final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
+
+    // Username và avatar
+    final String username = authViewModel.user?.username ?? 'User';
+    final String firstLetter =
+        username.isNotEmpty ? username[0].toUpperCase() : '';
+
+    // Tên assistant
+    final String assistantName = botViewModel.currentChatBot.assistantName;
+
     Future<void> _launchURL(String url) async {
       final Uri uri = Uri.parse(url);
       if (await canLaunchUrl(uri)) {
@@ -182,73 +192,127 @@ class _ChatWidgetState extends State<ChatWidget> {
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-        padding: const EdgeInsets.all(12.0),
-        decoration: BoxDecoration(
-          color: isError
-              ? Colors.red[100]
-              : (isUser ? Colors.blue[100] : Colors.grey[200]),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Consumer<BotViewModel>(builder: (context, messageModel, child) {
-          // Hiển thị loading nếu là tin nhắn model rỗng và đang trong trạng thái gửi
-          if (!isUser && message.content.isEmpty && messageModel.isSending) {
-            return Row(
+        child: Column(
+          crossAxisAlignment:
+              isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          children: [
+            Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
-                  ),
-                ),
+                isUser
+                    ? Container(
+                        width: 30,
+                        height: 30,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.blue,
+                        ),
+                        child: Center(
+                          child: Text(
+                            firstLetter,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      )
+                    : ClipOval(
+                        child: Image.asset(
+                        'assets/logo/default-bot.png',
+                        width: 30,
+                        height: 30,
+                        fit: BoxFit.cover,
+                      )),
                 const SizedBox(width: 8),
+                // Tên
                 Text(
-                  'Loading...',
+                  isUser ? username : assistantName,
                   style: TextStyle(
+                    fontWeight: FontWeight.bold,
                     color: isError ? Colors.red : Colors.black,
                   ),
                 ),
               ],
-            );
-          }
-
-          // Sử dụng Markdown widget cho tin nhắn model
-          return Column(
-            children: [
-              isUser
-                  ? Column(
+            ),
+            const SizedBox(height: 4),
+            // Nội dung tin nhắn
+            Container(
+              padding: const EdgeInsets.all(12.0),
+              decoration: BoxDecoration(
+                color: isError
+                    ? Colors.red[100]
+                    : (isUser ? Colors.blue[100] : Colors.grey[200]),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Consumer<BotViewModel>(
+                builder: (context, messageModel, child) {
+                  // Hiển thị loading nếu là tin nhắn model rỗng và đang trong trạng thái gửi
+                  if (!isUser &&
+                      message.content.isEmpty &&
+                      messageModel.isSending) {
+                    return Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
+                        const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.blue),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
                         Text(
-                          message.content,
+                          'Loading...',
                           style: TextStyle(
-                              color: isError ? Colors.red : Colors.black),
+                            color: isError ? Colors.red : Colors.black,
+                          ),
                         ),
                       ],
-                    )
-                  : MarkdownBody(
-                      data: message.content,
-                      styleSheet: MarkdownStyleSheet(
-                        p: TextStyle(
-                            color: isError ? Colors.red : Colors.black),
-                        a: const TextStyle(
-                          color: Colors.blue,
-                          decoration: TextDecoration.underline,
-                        ),
-                        listBullet: TextStyle(
-                            color: isError ? Colors.red : Colors.black),
-                      ),
-                      selectable: true,
-                      onTapLink: (text, href, title) {
-                        if (href != null) {
-                          _launchURL(href);
-                        }
-                      },
-                    )
-            ],
-          );
-        }),
+                    );
+                  }
+
+                  // Sử dụng Markdown widget cho tin nhắn model
+                  return Column(
+                    children: [
+                      isUser
+                          ? Text(
+                              message.content,
+                              style: TextStyle(
+                                color: isError ? Colors.red : Colors.black,
+                              ),
+                            )
+                          : MarkdownBody(
+                              data: message.content,
+                              styleSheet: MarkdownStyleSheet(
+                                p: TextStyle(
+                                  color: isError ? Colors.red : Colors.black,
+                                ),
+                                a: const TextStyle(
+                                  color: Colors.blue,
+                                  decoration: TextDecoration.underline,
+                                ),
+                                listBullet: TextStyle(
+                                  color: isError ? Colors.red : Colors.black,
+                                ),
+                              ),
+                              selectable: true,
+                              onTapLink: (text, href, title) {
+                                if (href != null) {
+                                  _launchURL(href);
+                                }
+                              },
+                            ),
+                    ],
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

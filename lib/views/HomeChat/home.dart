@@ -8,7 +8,6 @@ import 'package:jarvis/viewmodels/auth_view_model.dart';
 import 'package:jarvis/viewmodels/bot_view_model.dart';
 import 'package:jarvis/viewmodels/knowledge_base_view_model.dart';
 import 'package:jarvis/viewmodels/prompt_list_view_model.dart';
-import '../../constants/text_strings.dart';
 import '../../core/Widget/dropdown_button.dart';
 import '../../models/prompt.dart';
 import '../../utils/helpers/ads/ads_helper.dart';

@@ -258,10 +258,7 @@ class MessageModel extends ChangeNotifier {
         final url = _removeHttpPrefix(match[3]!); // URL
         final desc = match[4]; // Mô tả
 
-        return '''$number$name- $url
-  • $desc
-
-''';
+        return '''$number$name- $url • $desc''';
       });
 
       _messages.removeLast(); // Xóa tin nhắn tạm
