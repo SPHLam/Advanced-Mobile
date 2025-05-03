@@ -16,10 +16,6 @@ class CustomBottomNavigationBar extends StatelessWidget {
       type: BottomNavigationBarType.fixed,
       items: const <BottomNavigationBarItem>[
         BottomNavigationBarItem(
-          icon: Icon(Icons.chat_bubble_outline),
-          label: 'Chat',
-        ),
-        BottomNavigationBarItem(
           icon: Icon(Icons.list),
           label: 'Prompt',
         ),
@@ -37,8 +33,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
         ),
       ],
       currentIndex: currentIndex,
-      unselectedItemColor: Colors.grey[600],
-      selectedItemColor: Colors.blue,
+      selectedItemColor: Colors.grey[600],
       onTap: onTap,
     );
   }

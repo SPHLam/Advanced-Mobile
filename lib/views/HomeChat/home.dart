@@ -8,7 +8,6 @@ import 'package:jarvis/viewmodels/auth_view_model.dart';
 import 'package:jarvis/viewmodels/bot_view_model.dart';
 import 'package:jarvis/viewmodels/knowledge_base_view_model.dart';
 import 'package:jarvis/viewmodels/prompt_list_view_model.dart';
-import '../../constants/text_strings.dart';
 import '../../core/Widget/dropdown_button.dart';
 import '../../models/prompt.dart';
 import '../../utils/helpers/ads/ads_helper.dart';
@@ -179,7 +178,7 @@ class _HomeChatState extends State<HomeChat> {
     setState(() {
       _selectedBottomItemIndex = index;
     });
-    if (index == 1) {
+    if (index == 0) {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const PromptScreen()),
@@ -194,17 +193,17 @@ class _HomeChatState extends State<HomeChat> {
         }
         _loadAllPrompt();
       });
-    } else if (index == 2) {
+    } else if (index == 1) {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const BotScreen()),
       );
-    } else if (index == 3) {
+    } else if (index == 2) {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => EmailComposer()),
       );
-    } else if (index == 4) {
+    } else if (index == 3) {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const AccountScreen()),

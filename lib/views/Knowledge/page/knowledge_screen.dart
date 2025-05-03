@@ -24,6 +24,9 @@ class _KnowledgeScreenState extends State<KnowledgeScreen> {
   void initState() {
     super.initState();
 
+    Provider.of<KnowledgeBaseProvider>(context, listen: false)
+        .fetchAllKnowledgeBases();
+
     _scrollController = ScrollController()
       ..addListener(() {
         if (_scrollController.position.pixels ==

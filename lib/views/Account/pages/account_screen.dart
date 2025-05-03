@@ -129,8 +129,8 @@ class _AccountScreenState extends State<AccountScreen> {
                           children: [
                             Text(
                               authViewModel.versionName.isNotEmpty
-                                  ? authViewModel.versionName
-                                  : 'Free Version',
+                                  ? authViewModel.versionName.toUpperCase()
+                                  : 'Free',
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,

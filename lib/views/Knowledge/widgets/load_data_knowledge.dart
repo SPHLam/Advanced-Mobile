@@ -121,7 +121,15 @@ class _LoadDataKnowledgeState extends State<LoadDataKnowledge> {
             final option = entry.value;
             final bool isSelected = _selectedIndex == index;
             return Card(
-              color: Colors.white,
+              color: isSelected ? Colors.blue[100] : Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+                side: BorderSide(
+                  color:
+                      isSelected ? Colors.blue : Colors.grey.withOpacity(0.2),
+                  width: isSelected ? 2 : 1,
+                ),
+              ),
               margin: EdgeInsets.symmetric(vertical: 8),
               child: GestureDetector(
                 onTap: () => _handleOptionTap(index),

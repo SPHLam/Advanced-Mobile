@@ -5,14 +5,19 @@ import '../models/ai_logo.dart';
 class AIChatList extends ChangeNotifier {
   List<AIItem> aiItems = [
     AIItem(
-      name: 'Claude 3 Haiku',
-      logoPath: 'assets/logo/claude-3-haiku.png',
-      id: 'claude-3-haiku-20240307',
-    ),
-    AIItem(
       name: 'GPT-4o mini',
       logoPath: 'assets/logo/gpt-4o-mini.png',
       id: 'gpt-4o-mini',
+    ),
+    AIItem(
+      name: 'GPT-4o',
+      logoPath: 'assets/logo/gpt-4o.png',
+      id: 'gpt-4o',
+    ),
+    AIItem(
+      name: 'Gemini 1.5 Flash',
+      logoPath: 'assets/logo/gemini-1.5-flash.png',
+      id: 'gemini-1.5-flash-latest',
     ),
     AIItem(
       name: 'Gemini 1.5 Pro',
@@ -20,9 +25,9 @@ class AIChatList extends ChangeNotifier {
       id: 'gemini-1.5-pro-latest',
     ),
     AIItem(
-      name: 'Gemini 1.5 Flash',
-      logoPath: 'assets/logo/gemini-1.5-flash.png',
-      id: 'gemini-1.5-flash-latest',
+      name: 'Claude 3 Haiku',
+      logoPath: 'assets/logo/claude-3-haiku.png',
+      id: 'claude-3-haiku-20240307',
     ),
     AIItem(
       name: 'Claude 3 Sonnet',

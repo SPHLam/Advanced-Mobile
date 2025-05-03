@@ -379,8 +379,7 @@ class _PromptScreenState extends State<PromptScreen> {
                               child: Text(
                                 prompt.title,
                                 style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold),
+                                    fontSize: 16, fontWeight: FontWeight.bold),
                                 overflow: TextOverflow.ellipsis,
                                 maxLines: 1,
                               ),
@@ -397,9 +396,7 @@ class _PromptScreenState extends State<PromptScreen> {
                                 child: Padding(
                                   padding: const EdgeInsets.all(8.0),
                                   child: Icon(
-                                    isFavorite
-                                        ? Icons.star
-                                        : Icons.star_border,
+                                    isFavorite ? Icons.star : Icons.star_border,
                                     color: isFavorite
                                         ? Colors.yellow[700]
                                         : Colors.grey,
