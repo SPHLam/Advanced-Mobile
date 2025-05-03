@@ -4,6 +4,7 @@ import 'package:jarvis/views/Prompt/widgets/prompt_details.dart';
 import 'package:jarvis/viewmodels/prompt_list_view_model.dart';
 import 'package:jarvis/models/prompt_list.dart';
 import 'package:jarvis/models/prompt.dart';
+import 'package:jarvis/core/Widget/delete_confirm_dialog.dart';
 import 'enums.dart';
 
 class PromptScreen extends StatefulWidget {
@@ -67,6 +68,19 @@ class _PromptScreenState extends State<PromptScreen> {
         const SnackBar(content: Text('Failed to delete prompt.')),
       );
     }
+  }
+
+  void _showDeleteConfirmationDialog(BuildContext context, Prompt prompt) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return DeleteConfirmationDialog(
+          title: 'Delete Prompt',
+          message: 'Are you sure you want to delete the prompt?',
+          onConfirm: () => _deletePrompt(prompt.id),
+        );
+      },
+    );
   }
 
   void _openPromptDetailsDialog(BuildContext context, Prompt prompt) {
@@ -408,7 +422,8 @@ class _PromptScreenState extends State<PromptScreen> {
                               MouseRegion(
                                 cursor: SystemMouseCursors.click,
                                 child: GestureDetector(
-                                  onTap: () => _deletePrompt(prompt.id),
+                                  onTap: () => _showDeleteConfirmationDialog(
+                                      context, prompt),
                                   child: const Padding(
                                     padding: EdgeInsets.all(8.0),
                                     child: Icon(Icons.delete_outline,

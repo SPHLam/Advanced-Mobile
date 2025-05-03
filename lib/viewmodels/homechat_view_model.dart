@@ -7,7 +7,7 @@ import 'package:jarvis/models/conversation_model.dart';
 import 'package:jarvis/models/response/message_response.dart';
 import 'package:jarvis/services/chat_service.dart';
 
-class MessageModel extends ChangeNotifier {
+class HomeChatViewModel extends ChangeNotifier {
   final List<Message> _messages = [];
   final List<Conversation> _conversations = [];
   final ChatService _chatService;
@@ -17,7 +17,7 @@ class MessageModel extends ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
   bool _isSending = false;
-  MessageModel(this._chatService);
+  HomeChatViewModel(this._chatService);
 
   // load more conversations
   String? _cursorConversation;
@@ -423,6 +423,65 @@ class MessageModel extends ChangeNotifier {
         //_errorMessage = e.message;
         notifyListeners();
       }
+    }
+  }
+
+  Future<void> deleteConversationHistory({
+    required String conversationId,
+    required String assistantId,
+  }) async {
+    try {
+      _isLoading = true;
+      notifyListeners();
+
+      await _chatService.deleteConversationHistory(
+        conversationId: conversationId,
+        assistantId: assistantId,
+      );
+
+      if (_currentConversationId == conversationId) {
+        _currentConversationId = null;
+        _messages.clear();
+        _isFirstMessageSent = false;
+      }
+
+      await fetchAllConversations(assistantId, 'dify');
+    } catch (e) {
+      print('❌ Error deleting conversation: $e');
+      _errorMessage = e is ChatException ? e.message : 'Lỗi xóa cuộc hội thoại';
+      notifyListeners();
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> updateConversationTitle({
+    required String conversationId,
+    required String assistantId,
+    required String title,
+  }) async {
+    try {
+      _isLoading = true;
+      notifyListeners();
+
+      await _chatService.updateConversationTitle(
+        conversationId: conversationId,
+        assistantId: assistantId,
+        title: title,
+      );
+
+      await fetchAllConversations(assistantId, 'dify');
+    } catch (e) {
+      print('❌ Error updating conversation name: $e');
+      _errorMessage =
+          e is ChatException ? e.message : 'Lỗi cập nhật tên cuộc hội thoại';
+      notifyListeners();
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
   }
 }

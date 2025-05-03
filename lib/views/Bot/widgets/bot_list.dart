@@ -7,8 +7,8 @@ import 'package:jarvis/views/HomeChat/home.dart';
 import 'package:jarvis/models/bot_request.dart';
 import 'package:jarvis/viewmodels/bot_view_model.dart';
 import 'package:jarvis/models/bot.dart';
-import 'package:jarvis/viewmodels/homechat_view_model.dart';
 import 'package:provider/provider.dart';
+import 'package:jarvis/core/Widget/delete_confirm_dialog.dart';
 
 class BotListWidget extends StatefulWidget {
   const BotListWidget({Key? key}) : super(key: key);
@@ -29,10 +29,7 @@ class _BotListWidgetState extends State<BotListWidget> {
       final viewModel = context.read<BotViewModel>();
       viewModel.fetchBots();
     });
-    // final viewModel = context.read<BotViewModel>();
-    // viewModel.fetchBots();
 
-    // Lắng nghe sự kiện cuộn
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >=
               _scrollController.position.maxScrollExtent &&
@@ -91,7 +88,7 @@ class _BotListWidgetState extends State<BotListWidget> {
                   ),
                   SlidableAction(
                     onPressed: (context) {
-                      _removeBot(bots.data[index]);
+                      _showDeleteConfirmationDialog(context, bots.data[index]);
                     },
                     icon: Icons.delete,
                     backgroundColor: Colors.red,
@@ -117,8 +114,6 @@ class _BotListWidgetState extends State<BotListWidget> {
                     context,
                     MaterialPageRoute(builder: (context) => const HomeChat()),
                   );
-
-                  //viewModel.chatInHome(bots.data[index].id);
                 },
                 child: BotCard(
                   bot: bots.data[index],
@@ -126,20 +121,18 @@ class _BotListWidgetState extends State<BotListWidget> {
               ),
             );
           } else if (viewModel.isLoadingMore) {
-            // Hiển thị loading khi đang tải thêm
             return Padding(
               padding: const EdgeInsets.all(16.0),
               child: Center(child: CircularProgressIndicator()),
             );
           } else {
-            return SizedBox.shrink(); // Không hiển thị gì
+            return SizedBox.shrink();
           }
         },
       ),
       if (isDeleting)
         Positioned.fill(
           child: Container(
-            //color: Colors.black.withOpacity(0.5), // Lớp màu mờ
             child: Center(
               child: CircularProgressIndicator(color: Colors.blueGrey),
             ),
@@ -162,36 +155,54 @@ class _BotListWidgetState extends State<BotListWidget> {
     if (isUpdated) {
       viewModel.fetchBots();
     } else {
-      // Hiển thị thông báo lỗi nếu cập nhật bot không thành công
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
             'Update bot failed',
-            style: TextStyle(color: Colors.white), // Màu chữ trắng
+            style: TextStyle(color: Colors.white),
           ),
-          backgroundColor: Colors.blue[600], // Màu nền xanh dương nhạt
+          backgroundColor: Colors.blue[600],
         ),
       );
     }
   }
 
   Future<void> _removeBot(Bot bot) async {
+    setState(() {
+      isDeleting = true;
+    });
     final viewModel = context.read<BotViewModel>();
     bool isDeleted = await viewModel.deleteBot(bot.id);
+    setState(() {
+      isDeleting = false;
+    });
     if (isDeleted) {
       viewModel.fetchBots();
     } else {
-      // Hiển thị thông báo lỗi nếu xóa bot không thành công
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Update bot failed',
-            style: TextStyle(color: Colors.white), // Màu chữ trắng
+            'Delete bot failed',
+            style: TextStyle(color: Colors.white),
           ),
-          backgroundColor: Colors.blue[600], // Màu nền xanh dương nhạt
+          backgroundColor: Colors.blue[600],
         ),
       );
     }
+  }
+
+  void _showDeleteConfirmationDialog(BuildContext context, Bot bot) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return DeleteConfirmationDialog(
+          title: 'Delete Bot',
+          message:
+              'Are you sure you want to delete the bot "${bot.assistantName}"?',
+          onConfirm: () => _removeBot(bot),
+        );
+      },
+    );
   }
 
   void _openEditBotDialog(BuildContext context, Bot bot, String id) {

@@ -1,9 +1,9 @@
 enum Language {
-  English('English'),
-  Japanese('Japanese'),
-  Spanish('Spanish'),
-  German('German'),
-  French('French');
+  english('English'),
+  japanese('Japanese'),
+  spanish('Spanish'),
+  german('German'),
+  french('French');
 
   final String label; // Dùng để hiển thị trên UI
   const Language(this.label);

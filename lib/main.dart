@@ -57,7 +57,7 @@ void main() async {
               ),
         ),
         ChangeNotifierProvider(
-          create: (context) => MessageModel(
+          create: (context) => HomeChatViewModel(
             context.read<ChatService>(),
           ),
         ),

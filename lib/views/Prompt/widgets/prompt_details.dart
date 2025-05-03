@@ -12,9 +12,9 @@ class PromptDetails extends StatefulWidget {
     required this.promptId,
     required this.itemTitle,
     this.content = '',
-    this.category = 'other',
+    this.category = '',
     this.description = '',
-    this.language = 'English',
+    this.language = '',
     this.isPublic = false,
     this.isFavorite = false,
   });
@@ -66,10 +66,10 @@ class _PromptDetails extends State<PromptDetails> {
   void initState() {
     super.initState();
     selectedLanguage = widget.isPublic
-        ? Language.English
+        ? Language.english
         : Language.values.firstWhere(
             (e) => e.value == widget.language.toLowerCase(),
-            orElse: () => Language.English,
+            orElse: () => Language.english,
           );
     selectedCategory = Category.values.firstWhere(
       (e) => e.value == widget.category.toLowerCase(),

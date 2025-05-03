@@ -89,7 +89,8 @@ class _HomeChatState extends State<HomeChat> {
     _selectedAIItem = aiChatList.selectedAIItem.name;
 
     // Hiển thị token
-    Provider.of<MessageModel>(context, listen: false).updateRemainingUsage();
+    Provider.of<HomeChatViewModel>(context, listen: false)
+        .updateRemainingUsage();
 
     // Lấy danh sách Knowledgebase
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -140,10 +141,10 @@ class _HomeChatState extends State<HomeChat> {
     final aiItem =
         _listAIItem.firstWhere((aiItem) => aiItem.name == _selectedAIItem);
     try {
-      Provider.of<MessageModel>(context, listen: false)
+      Provider.of<HomeChatViewModel>(context, listen: false)
           .fetchAllConversations(aiItem.id, 'dify')
           .then((_) async {
-        await Provider.of<MessageModel>(context, listen: false)
+        await Provider.of<HomeChatViewModel>(context, listen: false)
             .checkCurrentConversation(aiItem.id);
       });
     } catch (e) {
@@ -224,7 +225,7 @@ class _HomeChatState extends State<HomeChat> {
       final aiItem =
           _listAIItem.firstWhere((aiItem) => aiItem.name == _selectedAIItem);
 
-      await Provider.of<MessageModel>(context, listen: false).sendMessage(
+      await Provider.of<HomeChatViewModel>(context, listen: false).sendMessage(
         _controller.text.isEmpty ? '' : _controller.text,
         aiItem,
         imagePaths: _imagePaths ?? null,
@@ -302,7 +303,7 @@ class _HomeChatState extends State<HomeChat> {
       child: Scaffold(
         key: _scaffoldKey,
         drawer: Menu(),
-        body: Consumer<MessageModel>(
+        body: Consumer<HomeChatViewModel>(
           builder: (context, messageModel, child) {
             return Column(
               children: [
@@ -390,7 +391,8 @@ class _HomeChatState extends State<HomeChat> {
                         IconButton(
                           icon: const Icon(Icons.add_circle_outline),
                           onPressed: () {
-                            Provider.of<MessageModel>(context, listen: false)
+                            Provider.of<HomeChatViewModel>(context,
+                                    listen: false)
                                 .clearMessage();
                             botModel.isChatWithMyBot = false;
                           },
