@@ -103,8 +103,7 @@ class MessageModel extends ChangeNotifier {
     if (conversations.isEmpty)
       initializeChat(assistantId);
     else {
-      loadConversationHistory(assistantId, conversations.first.id,
-          isClearMessage: false);
+      loadConversationHistory(assistantId, conversations.first.id);
     }
   }
 
