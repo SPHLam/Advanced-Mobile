@@ -314,4 +314,99 @@ class ChatService {
       );
     }
   }
+
+  Future<void> deleteConversationHistory({
+    required String conversationId,
+    required String assistantId,
+  }) async {
+    try {
+      final queryParams = {
+        'assistantId': assistantId,
+        'assistantModel': 'dify',
+      };
+
+      print('🚀 REQUEST DATA:');
+      print(
+          'URL: ${dio.options.baseUrl}/api/v1/ai-chat/conversations/$conversationId');
+      print('Headers: ${dio.options.headers}');
+      print('Query params: $queryParams');
+
+      final response = await dio.delete(
+        '/ai-chat/conversations/$conversationId',
+        queryParameters: queryParams,
+      );
+
+      print('✅ RESPONSE DATA: ${response.data}');
+
+      if (response.statusCode != 200 && response.statusCode != 204) {
+        throw ChatException(
+          message: 'Failed to delete conversation',
+          statusCode: response.statusCode ?? 500,
+        );
+      }
+    } on DioException catch (e) {
+      print('❌ DioException:');
+      print('Status: ${e.response?.statusCode}');
+      print('Data: ${e.response?.data}');
+      print('Message: ${e.message}');
+
+      throw ChatException(
+        message: e.response?.data?['message'] ??
+            e.message ??
+            'Lỗi kết nối tới server',
+        statusCode: e.response?.statusCode ?? 500,
+      );
+    }
+  }
+
+  Future<void> updateConversationTitle({
+    required String conversationId,
+    required String assistantId,
+    required String title,
+  }) async {
+    try {
+      final queryParams = {
+        'assistantId': assistantId,
+        'assistantModel': 'dify',
+      };
+
+      final requestData = {
+        'name': title,
+      };
+
+      print('🚀 REQUEST DATA:');
+      print(
+          'URL: ${dio.options.baseUrl}/api/v1/ai-chat/conversations/$conversationId/name');
+      print('Headers: ${dio.options.headers}');
+      print('Query params: $queryParams');
+      print('Body: $requestData');
+
+      final response = await dio.post(
+        '/ai-chat/conversations/$conversationId/name',
+        queryParameters: queryParams,
+        data: requestData,
+      );
+
+      print('✅ RESPONSE DATA: ${response.data}');
+
+      if (response.statusCode != 200) {
+        throw ChatException(
+          message: 'Failed to update conversation name',
+          statusCode: response.statusCode ?? 500,
+        );
+      }
+    } on DioException catch (e) {
+      print('❌ DioException:');
+      print('Status: ${e.response?.statusCode}');
+      print('Data: ${e.response?.data}');
+      print('Message: ${e.message}');
+
+      throw ChatException(
+        message: e.response?.data?['message'] ??
+            e.message ??
+            'Lỗi kết nối tới server',
+        statusCode: e.response?.statusCode ?? 500,
+      );
+    }
+  }
 }

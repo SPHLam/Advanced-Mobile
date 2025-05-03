@@ -8,6 +8,7 @@ import 'package:jarvis/views/Knowledge/widgets/knowledge_card.dart';
 import 'package:jarvis/services/analytics_service.dart';
 import 'package:jarvis/viewmodels/knowledge_base_view_model.dart';
 import 'package:provider/provider.dart';
+import 'package:jarvis/core/Widget/delete_confirm_dialog.dart';
 
 class KnowledgeScreen extends StatefulWidget {
   const KnowledgeScreen({super.key});
@@ -37,6 +38,13 @@ class _KnowledgeScreenState extends State<KnowledgeScreen> {
       });
   }
 
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _searchController.dispose();
+    super.dispose();
+  }
+
   void _addKnowledge(String knowledgeName, String description) async {
     bool isSuccess =
         await Provider.of<KnowledgeBaseProvider>(context, listen: false)
@@ -45,14 +53,14 @@ class _KnowledgeScreenState extends State<KnowledgeScreen> {
     if (isSuccess) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Successfully created '),
+          content: Text('Successfully created'),
           backgroundColor: Colors.green,
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Fail created '),
+          content: Text('Failed to create'),
           backgroundColor: Colors.red,
         ),
       );
@@ -76,14 +84,14 @@ class _KnowledgeScreenState extends State<KnowledgeScreen> {
     if (isSuccess) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Successfully edited '),
+          content: Text('Successfully edited'),
           backgroundColor: Colors.green,
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Fail edited '),
+          content: Text('Failed to edit'),
           backgroundColor: Colors.red,
         ),
       );
@@ -116,6 +124,20 @@ class _KnowledgeScreenState extends State<KnowledgeScreen> {
     );
   }
 
+  void _showDeleteConfirmationDialog(
+      BuildContext context, Knowledge knowledge, int index) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return DeleteConfirmationDialog(
+          title: 'Delete Knowledge Base',
+          message: 'Are you sure you want to delete this knowledge base?',
+          onConfirm: () => _removeKnowledge(knowledge.id, index),
+        );
+      },
+    );
+  }
+
   void _removeKnowledge(String id, int index) async {
     bool isSuccess =
         await Provider.of<KnowledgeBaseProvider>(context, listen: false)
@@ -124,14 +146,14 @@ class _KnowledgeScreenState extends State<KnowledgeScreen> {
     if (isSuccess) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Successfully deleted '),
+          content: Text('Successfully deleted'),
           backgroundColor: Colors.green,
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Fail deleted '),
+          content: Text('Failed to delete'),
           backgroundColor: Colors.red,
         ),
       );
@@ -263,8 +285,8 @@ class _KnowledgeScreenState extends State<KnowledgeScreen> {
                             ),
                             SlidableAction(
                               onPressed: (context) {
-                                _removeKnowledge(
-                                    _listKnowledges[index].id, index);
+                                _showDeleteConfirmationDialog(
+                                    context, _listKnowledges[index], index);
                               },
                               icon: Icons.delete,
                               backgroundColor: Colors.red,

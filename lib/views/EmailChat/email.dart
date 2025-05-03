@@ -30,12 +30,13 @@ class _EmailComposerState extends State<EmailComposer> {
   void initState() {
     super.initState();
     _listAIItem = Provider.of<AIChatList>(context, listen: false).aiItems;
-    int? maxtoken = Provider.of<MessageModel>(context, listen: false).maxTokens;
+    int? maxtoken =
+        Provider.of<HomeChatViewModel>(context, listen: false).maxTokens;
     if (maxtoken == 99999)
       _token = 99999;
     else {
       int remaningToken =
-          Provider.of<MessageModel>(context, listen: false).remainingUsage;
+          Provider.of<HomeChatViewModel>(context, listen: false).remainingUsage;
       _token = remaningToken;
     }
   }

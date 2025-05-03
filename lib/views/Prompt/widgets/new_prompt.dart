@@ -25,7 +25,7 @@ class NewPromptContent extends StatefulWidget {
 }
 
 class NewPromptContentState extends State<NewPromptContent> {
-  Language selectedLanguage = Language.English;
+  Language selectedLanguage = Language.english;
   Category selectedCategory = Category.other;
   final TextEditingController titleController = TextEditingController();
   final TextEditingController contentController = TextEditingController();

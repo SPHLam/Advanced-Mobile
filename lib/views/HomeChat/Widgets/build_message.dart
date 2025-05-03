@@ -114,7 +114,7 @@ class BuildMessage extends StatelessWidget {
                     : (isUser ? Colors.blue[100] : Colors.grey[200]),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Consumer<MessageModel>(
+              child: Consumer<HomeChatViewModel>(
                 builder: (context, messageModel, child) {
                   if (!isUser &&
                       message.content.isEmpty &&
