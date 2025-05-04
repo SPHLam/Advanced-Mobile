@@ -82,8 +82,8 @@ class AuthInterceptor extends Interceptor {
           return true;
         }
       } catch (e) {
+        print('Lỗi làm mới token: $e');
         return false;
-        // print('Lỗi làm mới token: $e');
       }
     }
     return false;

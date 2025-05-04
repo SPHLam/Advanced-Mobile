@@ -107,7 +107,8 @@ class HomeChatViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> createNewChat(String assistantId, String content) async {
+  Future<void> createNewChat(
+      String assistantId, String content, List<String>? files) async {
     try {
       _isLoading = true;
       notifyListeners();
@@ -116,6 +117,7 @@ class HomeChatViewModel extends ChangeNotifier {
 
       final response = await _chatService.fetchAIChat(
         content: content,
+        files: files,
         assistantId: assistantId,
       );
 
@@ -169,7 +171,7 @@ class HomeChatViewModel extends ChangeNotifier {
   }
 
   Future<void> sendMessage(String content, AIItem assistant,
-      {List<String>? imagePaths}) async {
+      {List<String>? files}) async {
     try {
       _isSending = true;
 
@@ -178,6 +180,7 @@ class HomeChatViewModel extends ChangeNotifier {
         _messages.add(Message(
           role: 'user',
           content: content,
+          files: files,
           assistant: Assistant(
             id: assistant.id,
             model: "dify",
@@ -195,7 +198,7 @@ class HomeChatViewModel extends ChangeNotifier {
           ),
           isErrored: false,
         ));
-        await createNewChat(assistant.id, content);
+        await createNewChat(assistant.id, content, files);
         fetchAllConversations(assistant.id, "dify");
         notifyListeners();
         _isFirstMessageSent = true; // Đánh dấu đã gửi tin nhắn đầu tiên
@@ -206,7 +209,7 @@ class HomeChatViewModel extends ChangeNotifier {
       _messages.add(Message(
         role: 'user',
         content: content,
-        imagePaths: imagePaths,
+        files: files,
         assistant: Assistant(
           id: assistant.id,
           model: "dify",
@@ -229,10 +232,10 @@ class HomeChatViewModel extends ChangeNotifier {
       notifyListeners();
       ChatResponse response;
       // Gửi tin nhắn hoặc hình ảnh
-      if (imagePaths != null && imagePaths.isNotEmpty) {
+      if (files != null && files.isNotEmpty) {
         response = await _chatService.sendImageMessages(
           content: content,
-          imagePaths: imagePaths,
+          files: files,
           assistantId: assistant.id,
           conversationId: _currentConversationId,
           previousMessages: _messages,
@@ -371,6 +374,7 @@ class HomeChatViewModel extends ChangeNotifier {
         _messages.add(Message(
           role: 'user',
           content: message.query,
+          files: message.files,
           assistant: Assistant(
             id: assistantId,
             model: "dify",
