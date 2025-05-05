@@ -70,7 +70,6 @@ class AuthInterceptor extends Interceptor {
           '/auth/sessions/current/refresh',
           options: Options(
             headers: {
-              'Content-Type': null,
               'X-Stack-Refresh-Token': refreshToken,
             },
           ),
@@ -82,8 +81,8 @@ class AuthInterceptor extends Interceptor {
           return true;
         }
       } catch (e) {
+        print('Lỗi làm mới token: $e');
         return false;
-        // print('Lỗi làm mới token: $e');
       }
     }
     return false;

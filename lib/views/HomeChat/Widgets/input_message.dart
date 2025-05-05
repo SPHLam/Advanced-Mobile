@@ -13,6 +13,7 @@ class InputWidget extends StatefulWidget {
   final Function sendMessage;
   final Function onTextChanged;
   final bool hasText;
+  final Function(List<String>?) updateImagePaths;
 
   InputWidget({
     Key? key,
@@ -23,6 +24,7 @@ class InputWidget extends StatefulWidget {
     required this.sendMessage,
     required this.onTextChanged,
     required this.hasText,
+    required this.updateImagePaths,
   }) : super(key: key);
 
   @override
@@ -32,12 +34,14 @@ class InputWidget extends StatefulWidget {
 class _InputWidgetState extends State<InputWidget> {
   final ScreenshotController _screenshotController = ScreenshotController();
   List<String>? imagePaths;
+
   Future<void> _openGallery() async {
     final ImagePicker _picker = ImagePicker();
     final List<XFile>? images = await _picker.pickMultiImage();
     if (images != null && images.isNotEmpty) {
       setState(() {
-        imagePaths = images.map((e) => e.path).toList();
+        imagePaths = [...(imagePaths ?? []), ...images.map((e) => e.path).toList()];
+        widget.updateImagePaths(imagePaths);
         widget.toggleDeviceVisibility();
       });
     }
@@ -56,7 +60,8 @@ class _InputWidgetState extends State<InputWidget> {
     final XFile? image = await _picker.pickImage(source: ImageSource.camera);
     if (image != null) {
       setState(() {
-        imagePaths = [image.path];
+        imagePaths = [...(imagePaths ?? []), image.path];
+        widget.updateImagePaths(imagePaths);
         widget.toggleDeviceVisibility();
       });
     }
@@ -69,10 +74,18 @@ class _InputWidgetState extends State<InputWidget> {
       final file = File('${directory.path}/screenshot.png');
       await file.writeAsBytes(image);
       setState(() {
+        imagePaths = [...(imagePaths ?? []), file.path];
+        widget.updateImagePaths(imagePaths);
         widget.toggleDeviceVisibility();
-        imagePaths = [file.path];
       });
     }
+  }
+
+  void _removeImage(String path) {
+    setState(() {
+      imagePaths?.remove(path);
+      widget.updateImagePaths(imagePaths);
+    });
   }
 
   @override
@@ -122,7 +135,7 @@ class _InputWidgetState extends State<InputWidget> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (imagePaths != null) ...[
+                if (imagePaths != null && imagePaths!.isNotEmpty) ...[
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
@@ -151,13 +164,7 @@ class _InputWidgetState extends State<InputWidget> {
                                     size: 20,
                                     color: Color.fromARGB(136, 245, 237, 237),
                                   ),
-                                  onPressed: () {
-                                    setState(() {
-                                      imagePaths = imagePaths!
-                                          .where((element) => element != path)
-                                          .toList();
-                                    });
-                                  },
+                                  onPressed: () => _removeImage(path),
                                 ),
                               ),
                             ],
@@ -177,7 +184,7 @@ class _InputWidgetState extends State<InputWidget> {
                       horizontal: 12,
                       vertical: 8,
                     ),
-                    hintText: (imagePaths == null)
+                    hintText: (imagePaths == null || imagePaths!.isEmpty)
                         ? 'Enter your message...'
                         : null,
                     hintStyle: TextStyle(
@@ -210,12 +217,17 @@ class _InputWidgetState extends State<InputWidget> {
         ),
         IconButton(
           icon: const Icon(Icons.send),
-          onPressed: widget.hasText || imagePaths != null
-              ? () => widget.sendMessage()
-              : null,
+          onPressed: widget.hasText ? () {
+            widget.sendMessage();
+            setState(() {
+              imagePaths = null;
+              widget.updateImagePaths(null);
+            });
+          } : null,
           style: IconButton.styleFrom(
-            foregroundColor:
-            widget.hasText || imagePaths != null ? Colors.black : Colors.grey,
+            foregroundColor: widget.hasText || (imagePaths != null && imagePaths!.isNotEmpty)
+                ? Colors.black
+                : Colors.grey,
           ),
         ),
       ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:jarvis/constants/colors.dart'; // Use old code's color constants
+import 'package:jarvis/constants/text_strings.dart';
 import 'package:jarvis/views/Login/login_screen.dart';
 import 'package:jarvis/viewmodels/auth_view_model.dart';
 import 'package:provider/provider.dart';
@@ -151,8 +152,7 @@ class _AccountScreenState extends State<AccountScreen> {
                         ),
                         ElevatedButton(
                           onPressed: () async {
-                            final Uri url = Uri.parse(
-                                'https://admin.dev.jarvis.cx/pricing/overview');
+                            final Uri url = Uri.parse(linkUpgrade);
                             if (await canLaunchUrl(url)) {
                               await launchUrl(url);
                             } else {

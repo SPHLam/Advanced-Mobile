@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:jarvis/models/response/api_response.dart';
 import 'package:jarvis/utils/exceptions/chat_exception.dart';
@@ -37,7 +38,6 @@ class ChatService {
         "assistant": {
           "id": assistantId,
           "model": "dify",
-          "name": "Claude 3 Haiku"
         }
       };
 
@@ -71,64 +71,43 @@ class ChatService {
 
   Future<ChatResponse> sendImageMessages({
     required String content,
-    required List<String> imagePaths,
+    required List<String> files,
     required String assistantId,
     String? conversationId,
     List<Message>? previousMessages,
   }) async {
     try {
-      // Tạo FormData để gửi hình ảnh và nội dung
-      final formData = FormData();
-
-      // Thêm nội dung vào formData
-      formData.fields.add(MapEntry('content', content));
-      formData.fields.add(MapEntry('assistantId', assistantId));
-      formData.fields
-          .add(MapEntry('conversation', conversationId ?? const Uuid().v4()));
-
-      // Thêm metadata cho previousMessages
-      formData.fields.add(MapEntry(
-          'messages',
-          previousMessages?.map((msg) => msg.toJson()).toList().toString() ??
-              ''));
-
-      // Thêm hình ảnh vào formData
-      for (var path in imagePaths) {
-        formData.files
-            .add(MapEntry('files', await MultipartFile.fromFile(path)));
+      // Tải file lên Firebase Storage và lấy download URL
+      final requestFiles = [];
+      for (var file in files) {
+        requestFiles.add(file);
       }
 
-      // Thêm metadata cho assistant
-      formData.fields.add(MapEntry('assistant',
-          '{"id": "$assistantId", "model": "dify", "name": "Claude 3 Haiku"}'));
+      // Log request data
+      final requestData = {
+        "content": content,
+        "files": requestFiles,
+        "metadata": {
+          "conversation": {
+            "id": conversationId ?? const Uuid().v4(),
+            "messages":
+                previousMessages?.map((msg) => msg.toJson()).toList() ?? [],
+          }
+        },
+        "assistant": {
+          "id": assistantId,
+          "model": "dify",
+        }
+      };
 
-      // final requestData = {
-      //   "content": content,
-      //   "metadata": {
-      //     "conversation": {
-      //       "id": conversationId ?? const Uuid().v4(),
-      //       "messages":
-      //           previousMessages?.map((msg) => msg.toJson()).toList() ?? [],
-      //     }
-      //   },
-      //   "assistant": {
-      //     "id": assistantId,
-      //     "model": "dify",
-      //     "name": "Claude 3 Haiku"
-      //   },
-      //   "files": [] // Khởi tạo mảng files
-      // };
-
-      // // Thêm hình ảnh vào mảng files
-      // for (var path in imagePaths) {
-      //   (requestData['files'] as List)
-      //       .add(path); // Thêm đường dẫn hình ảnh vào mảng
-      // }
-      print('🚀 REQUEST DATA: $formData');
+      print('🚀 REQUEST DATA:');
+      print('URL: ${dio.options.baseUrl}/api/v1/ai-chat/messages');
+      print('Headers: ${dio.options.headers}');
+      print('Body: $requestData');
 
       final response = await dio.post(
         '/ai-chat/messages',
-        data: formData,
+        data: requestData,
       );
 
       print('✅ RESPONSE DATA: ${response.data}');
@@ -152,11 +131,21 @@ class ChatService {
   Future<ChatResponse> fetchAIChat({
     required String content,
     required String assistantId,
+    List<String>? files,
   }) async {
     try {
+      // Tải file lên Firebase Storage và lấy download URL
+      final requestFiles = <String>[];
+      if (files != null && files.isNotEmpty) {
+        for (var file in files) {
+          requestFiles.add(file);
+        }
+      }
+
       final requestData = {
         "assistant": {"id": assistantId, "model": "dify"},
-        "content": content
+        "content": content,
+        "files": requestFiles,
       };
 
       print('🚀 REQUEST DATA:');
@@ -234,9 +223,7 @@ class ChatService {
         }
 
         final errorData = e.response!.data;
-        // Check for custom error messages in the response data
         if (errorData['details'] != null && errorData['details'].isNotEmpty) {
-          // Collect all issues in `details` into a single message
           List<String> issues = (errorData['details'] as List<dynamic>)
               .map<String>((detail) => detail['issue'] ?? 'Unknown issue')
               .toList();

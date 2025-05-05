@@ -47,7 +47,7 @@ class _HomeChatState extends State<HomeChat> {
   bool _hasText = false;
   bool _showSlash = false;
   int _selectedBottomItemIndex = 0;
-  List<String>? _imagePaths;
+  List<String>? _files;
   late List<AIItem> _listAIItem;
   late String _selectedAIItem;
 
@@ -219,7 +219,7 @@ class _HomeChatState extends State<HomeChat> {
   }
 
   void _sendMessage() async {
-    if (_imagePaths == null && _controller.text.isEmpty) return;
+    if (_files == null && _controller.text.isEmpty) return;
 
     try {
       final aiItem =
@@ -228,12 +228,12 @@ class _HomeChatState extends State<HomeChat> {
       await Provider.of<HomeChatViewModel>(context, listen: false).sendMessage(
         _controller.text.isEmpty ? '' : _controller.text,
         aiItem,
-        imagePaths: _imagePaths ?? null,
+        files: _files ?? [],
       );
 
       _controller.clear();
       setState(() {
-        _imagePaths = null; // Clear image paths after sending
+        _files = null; // Clear image paths after sending
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -381,9 +381,8 @@ class _HomeChatState extends State<HomeChat> {
                                     : Text(
                                         '${messageModel.remainingUsage}',
                                         style: const TextStyle(
-                                          color: Color.fromRGBO(
-                                              119, 117, 117, 1.0),
-                                        ),
+                                            color: Color.fromRGBO(
+                                                119, 117, 117, 1.0)),
                                       ),
                               ],
                             ),
@@ -509,6 +508,11 @@ class _HomeChatState extends State<HomeChat> {
                                         toggleDeviceVisibility:
                                             _toggleDeviceVisibility,
                                         hasText: _hasText,
+                                        updateImagePaths: (paths) {
+                                          setState(() {
+                                            _files = paths;
+                                          });
+                                        },
                                       ),
                                       const SizedBox(height: 5),
                                     ],

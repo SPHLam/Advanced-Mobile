@@ -19,6 +19,9 @@ class AuthService {
     try {
       final response = await dioAuth.post(
         '/auth/password/sign-up',
+        options: Options(headers: {
+          'Content-Type': 'application/json',
+        }),
         data: {
           'email': user.email,
           'password': user.password,
@@ -71,6 +74,9 @@ class AuthService {
     try {
       final response = await dioAuth.post(
         '/auth/password/sign-in',
+        options: Options(headers: {
+          'Content-Type': 'application/json',
+        }),
         data: {
           'email': email,
           'password': password,
@@ -167,12 +173,15 @@ class AuthService {
   Future<ApiResponse> logout() async {
     try {
       final prefs = await SharedPreferences.getInstance();
+      final accessToken = prefs.getString('accessToken');
       final refreshToken = prefs.getString('refreshToken');
 
       final response = await dioAuth.delete(
         '/auth/sessions/current',
         options: Options(
           headers: {
+            'Authorization': 'Bearer $accessToken',
+            'Content-Type': 'application/json',
             'X-Stack-Refresh-Token': refreshToken,
           },
         ),
