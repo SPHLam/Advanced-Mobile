@@ -1,4 +1,3 @@
-
 // -- Generic Text
 const String loginString = "Login";
 const String registerString = "Register";
@@ -8,7 +7,6 @@ const String forgetPasswordString = "Forget Password?";
 const String loginWithGoogleString = "Login with Google";
 const String fullNameString = "Full Name";
 const String phoneNumberString = "Phone Number";
-
 
 // -- Splash Screen Text
 const String appNameString = "JarvisCopi";
@@ -30,4 +28,4 @@ const String registerSubtitleString = "Sign up your account";
 const String alreadyHaveAnAccountString = "Already have an Account?";
 
 //Link upgrade
-const String linkUpgrade = 'https://admin.dev.jarvis.cx/pricing/overview';
+const String linkUpgrade = 'https://dev.jarvis.cx/pricing';
