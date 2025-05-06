@@ -1,4 +1,4 @@
-import 'package:jarvis/models/bot.dart';
+import 'package:project_ai_chat/models/bot.dart';
 
 class BotList {
   final List<Bot> data;
@@ -24,10 +24,7 @@ class BotList {
 
   factory BotList.fromJson(Map<String, dynamic> json) {
     return BotList(
-      data: (json['data'] as List<dynamic>)
-              .map((e) => Bot.fromJson(e))
-              .toList() ??
-          [],
+      data: (json['data'] as List<dynamic>).map((e) => Bot.fromJson(e)).toList() ?? [],
       limit: json['meta']['limit'] ?? 0,
       total: json['meta']['total'] ?? 0,
       offset: json['meta']['offset'] ?? 0,

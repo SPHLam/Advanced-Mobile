@@ -1,4 +1,4 @@
-import 'package:jarvis/models/response/assistant_response.dart';
+import 'package:project_ai_chat/models/response/assistant_response.dart';
 
 class Message {
   final String role;

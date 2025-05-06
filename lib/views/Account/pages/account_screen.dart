@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:jarvis/constants/colors.dart'; // Use old code's color constants
-import 'package:jarvis/constants/text_strings.dart';
-import 'package:jarvis/views/Login/login_screen.dart';
-import 'package:jarvis/viewmodels/auth_view_model.dart';
+import 'package:project_ai_chat/constants/colors.dart'; // Use old code's color constants
+import 'package:project_ai_chat/constants/text_strings.dart';
+import 'package:project_ai_chat/views/Login/login_screen.dart';
+import 'package:project_ai_chat/viewmodels/auth_view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -70,8 +70,7 @@ class _AccountScreenState extends State<AccountScreen> {
                         backgroundColor: Colors.purple,
                         child: Center(
                           child: Text(
-                            authViewModel.user?.username[0].toUpperCase() ??
-                                'U',
+                            authViewModel.user?.username[0].toUpperCase() ?? 'U',
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 40,
@@ -195,12 +194,9 @@ class _AccountScreenState extends State<AccountScreen> {
                   LinearProgressIndicator(
                     value: authViewModel.maxTokens == 99999
                         ? 1.0
-                        : authViewModel.maxTokens != null &&
-                                authViewModel.remainingTokens != null
-                            ? (authViewModel.remainingTokens! /
-                                    authViewModel.maxTokens!)
-                                .toDouble()
-                            : 0.0,
+                        : authViewModel.maxTokens != null && authViewModel.remainingTokens != null
+                          ? (authViewModel.remainingTokens! / authViewModel.maxTokens!).toDouble()
+                          : 0.0,
                     backgroundColor: Colors.grey[300],
                     color: Colors.blue,
                   ),

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:jarvis/views/HomeChat/home.dart';
-import 'package:jarvis/views/Welcome/welcome_screen.dart';
-import 'package:jarvis/constants/image_strings.dart';
-import 'package:jarvis/viewmodels/auth_view_model.dart';
+import 'package:project_ai_chat/views/HomeChat/home.dart';
+import 'package:project_ai_chat/views/Welcome/welcome_screen.dart';
+import 'package:project_ai_chat/constants/image_strings.dart';
+import 'package:project_ai_chat/viewmodels/auth_view_model.dart';
 import 'package:provider/provider.dart';
 
 class SplashScreen extends StatefulWidget {

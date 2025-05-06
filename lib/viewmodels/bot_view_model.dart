@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:jarvis/models/bot.dart';
-import 'package:jarvis/models/bot_request.dart';
-import 'package:jarvis/models/knowledge.dart';
-import 'package:jarvis/models/response/my_aibot_message_response.dart';
-import 'package:jarvis/services/bot_service.dart';
-import 'package:jarvis/utils/exceptions/chat_exception.dart';
+import 'package:project_ai_chat/models/bot.dart';
+import 'package:project_ai_chat/models/bot_request.dart';
+import 'package:project_ai_chat/models/knowledge.dart';
+import 'package:project_ai_chat/models/response/my_aibot_message_response.dart';
+import 'package:project_ai_chat/services/bot_service.dart';
+import 'package:project_ai_chat/utils/exceptions/chat_exception.dart';
 import '../models/bot_list.dart';
 
 class BotViewModel extends ChangeNotifier {

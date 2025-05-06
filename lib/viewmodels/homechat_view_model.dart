@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:jarvis/models/ai_logo.dart';
-import 'package:jarvis/models/response/assistant_response.dart';
-import 'package:jarvis/models/response/chat_response.dart';
-import 'package:jarvis/utils/exceptions/chat_exception.dart';
-import 'package:jarvis/models/conversation_model.dart';
-import 'package:jarvis/models/response/message_response.dart';
-import 'package:jarvis/services/chat_service.dart';
+import 'package:project_ai_chat/models/ai_logo.dart';
+import 'package:project_ai_chat/models/response/assistant_response.dart';
+import 'package:project_ai_chat/models/response/chat_response.dart';
+import 'package:project_ai_chat/utils/exceptions/chat_exception.dart';
+import 'package:project_ai_chat/models/conversation_model.dart';
+import 'package:project_ai_chat/models/response/message_response.dart';
+import 'package:project_ai_chat/services/chat_service.dart';
 
 class HomeChatViewModel extends ChangeNotifier {
   final List<Message> _messages = [];
@@ -107,8 +107,7 @@ class HomeChatViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> createNewChat(
-      String assistantId, String content, List<String>? files) async {
+  Future<void> createNewChat(String assistantId, String content, List<String>? files) async {
     try {
       _isLoading = true;
       notifyListeners();

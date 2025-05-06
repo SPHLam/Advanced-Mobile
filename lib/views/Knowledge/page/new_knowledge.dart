@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:jarvis/viewmodels/knowledge_base_view_model.dart';
-import 'package:jarvis/models/knowledge.dart';
-import 'package:jarvis/views/Knowledge/widgets/load_data_knowledge.dart';
+import 'package:project_ai_chat/viewmodels/knowledge_base_view_model.dart';
+import 'package:project_ai_chat/models/knowledge.dart';
+import 'package:project_ai_chat/views/Knowledge/widgets/load_data_knowledge.dart';
 import 'package:provider/provider.dart';
 
 class NewKnowledge extends StatefulWidget {
@@ -92,8 +92,7 @@ class _NewKnowledgeState extends State<NewKnowledge> {
                     borderRadius: BorderRadius.circular(12),
                     borderSide: const BorderSide(color: Colors.blue, width: 2),
                   ),
-                  prefixIcon:
-                      const Icon(Icons.title_rounded, color: Colors.blue),
+                  prefixIcon: const Icon(Icons.title_rounded, color: Colors.blue),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -186,20 +185,20 @@ class _NewKnowledgeState extends State<NewKnowledge> {
                         builder: (context, kbProvider, child) {
                           return kbProvider.isLoading
                               ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                  ),
-                                )
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                            ),
+                          )
                               : const Text(
-                                  'Create',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                );
+                            'Create',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          );
                         },
                       ),
                     ),

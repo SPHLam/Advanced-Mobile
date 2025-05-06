@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:jarvis/utils/dio/interceptor.dart/auth_interceptor.dart';
+import 'package:project_ai_chat/utils/dio/interceptor.dart/auth_interceptor.dart';
 
 class DioJarvis {
   static final DioJarvis _instance = DioJarvis._internal();

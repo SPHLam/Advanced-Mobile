@@ -2,8 +2,8 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:jarvis/services/analytics_service.dart';
-import 'package:jarvis/viewmodels/knowledge_base_view_model.dart';
+import 'package:project_ai_chat/services/analytics_service.dart';
+import 'package:project_ai_chat/viewmodels/knowledge_base_view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -32,11 +32,10 @@ class _FormLoadDataState extends State<FormLoadData> {
       );
       return;
     }
-    bool isSuccess =
-        await Provider.of<KnowledgeBaseProvider>(context, listen: false)
-            .uploadLocalFile(_selectedFile!, widget.knowledgeId);
+    bool isSuccess = await Provider.of<KnowledgeBaseProvider>(context, listen: false)
+        .uploadLocalFile(_selectedFile!, widget.knowledgeId);
 
-    if (isSuccess) {
+    if(isSuccess){
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Successfully connected '),
@@ -55,7 +54,7 @@ class _FormLoadDataState extends State<FormLoadData> {
     AnalyticsService().logEvent(
       "upload_file",
       {
-        "name": _fileName,
+      "name": _fileName,
       },
     );
     widget.addNewData(_fileName);
@@ -181,8 +180,7 @@ class _FormLoadDataState extends State<FormLoadData> {
                 ElevatedButton(
                   onPressed: () => Navigator.of(context).pop(),
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                     backgroundColor: Colors.red,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -202,8 +200,7 @@ class _FormLoadDataState extends State<FormLoadData> {
                 ElevatedButton(
                   onPressed: _saveFile,
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                     backgroundColor: Colors.blue.shade600,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -214,20 +211,20 @@ class _FormLoadDataState extends State<FormLoadData> {
                     builder: (context, kbProvider, child) {
                       return kbProvider.isLoading
                           ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                              ),
-                            )
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                        ),
+                      )
                           : const Text(
-                              "Save",
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.white,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            );
+                        "Save",
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      );
                     },
                   ),
                 ),

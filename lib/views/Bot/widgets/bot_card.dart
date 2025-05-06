@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:jarvis/models/bot.dart';
+import 'package:project_ai_chat/models/bot.dart';
 
 class BotCard extends StatelessWidget {
   final Bot bot;

@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:jarvis/views/Bot/page/edit_bot.dart';
-import 'package:jarvis/views/Bot/page/public_bot.dart';
-import 'package:jarvis/views/Bot/widgets/bot_card.dart';
-import 'package:jarvis/views/HomeChat/home.dart';
-import 'package:jarvis/models/bot_request.dart';
-import 'package:jarvis/viewmodels/bot_view_model.dart';
-import 'package:jarvis/models/bot.dart';
+import 'package:project_ai_chat/views/Bot/page/edit_bot.dart';
+import 'package:project_ai_chat/views/Bot/page/public_bot.dart';
+import 'package:project_ai_chat/views/Bot/widgets/bot_card.dart';
+import 'package:project_ai_chat/views/HomeChat/home.dart';
+import 'package:project_ai_chat/models/bot_request.dart';
+import 'package:project_ai_chat/viewmodels/bot_view_model.dart';
+import 'package:project_ai_chat/models/bot.dart';
 import 'package:provider/provider.dart';
-import 'package:jarvis/core/Widget/delete_confirm_dialog.dart';
+import 'package:project_ai_chat/core/Widget/delete_confirm_dialog.dart';
 
 class BotListWidget extends StatefulWidget {
   const BotListWidget({Key? key}) : super(key: key);
@@ -32,7 +32,7 @@ class _BotListWidgetState extends State<BotListWidget> {
 
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >=
-              _scrollController.position.maxScrollExtent &&
+          _scrollController.position.maxScrollExtent &&
           !viewModel.isLoadingMore) {
         viewModel.loadMoreBots();
       }
@@ -197,8 +197,7 @@ class _BotListWidgetState extends State<BotListWidget> {
       builder: (BuildContext context) {
         return DeleteConfirmationDialog(
           title: 'Delete Bot',
-          message:
-              'Are you sure you want to delete the bot "${bot.assistantName}"?',
+          message: 'Are you sure you want to delete the bot "${bot.assistantName}"?',
           onConfirm: () => _removeBot(bot),
         );
       },

@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:jarvis/views/Bot/widgets/filter_button.dart';
+import 'package:project_ai_chat/views/Bot/widgets/filter_button.dart';
 
 class FilterButtonList extends StatelessWidget {
   const FilterButtonList({super.key});

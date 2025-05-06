@@ -1,10 +1,10 @@
 import 'dart:developer';
-import 'package:jarvis/models/response/subscription_response.dart';
-import 'package:jarvis/models/response/token_usage_response.dart';
-import 'package:jarvis/utils/dio/dio_auth.dart';
-import 'package:jarvis/utils/dio/dio_jarvis.dart';
-import 'package:jarvis/utils/dio/dio_knowledge_base.dart';
-import 'package:jarvis/utils/exceptions/chat_exception.dart';
+import 'package:project_ai_chat/models/response/subscription_response.dart';
+import 'package:project_ai_chat/models/response/token_usage_response.dart';
+import 'package:project_ai_chat/utils/dio/dio_auth.dart';
+import 'package:project_ai_chat/utils/dio/dio_jarvis.dart';
+import 'package:project_ai_chat/utils/dio/dio_knowledge_base.dart';
+import 'package:project_ai_chat/utils/exceptions/chat_exception.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_model.dart';
 import '../models/response/api_response.dart';
@@ -19,14 +19,15 @@ class AuthService {
     try {
       final response = await dioAuth.post(
         '/auth/password/sign-up',
-        options: Options(headers: {
-          'Content-Type': 'application/json',
-        }),
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        ),
         data: {
           'email': user.email,
           'password': user.password,
-          'verification_callback_url':
-              'https://auth.dev.jarvis.cx/handler/email-verification?after_auth_return_to=%2Fauth%2Fsignin%3Fclient_id%3Djarvis_chat%26redirect%3Dhttps%253A%252F%252Fchat.dev.jarvis.cx%252Fauth%252Foauth%252Fsuccess',
+          'verification_callback_url': 'https://auth.dev.jarvis.cx/handler/email-verification?after_auth_return_to=%2Fauth%2Fsignin%3Fclient_id%3Djarvis_chat%26redirect%3Dhttps%253A%252F%252Fchat.dev.jarvis.cx%252Fauth%252Foauth%252Fsuccess',
         },
       );
 
@@ -74,9 +75,11 @@ class AuthService {
     try {
       final response = await dioAuth.post(
         '/auth/password/sign-in',
-        options: Options(headers: {
-          'Content-Type': 'application/json',
-        }),
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        ),
         data: {
           'email': email,
           'password': password,

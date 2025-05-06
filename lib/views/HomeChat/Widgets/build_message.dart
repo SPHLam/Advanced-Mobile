@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:jarvis/models/response/message_response.dart';
-import 'package:jarvis/utils/exceptions/chat_exception.dart';
+import 'package:project_ai_chat/models/response/message_response.dart';
+import 'package:project_ai_chat/utils/exceptions/chat_exception.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../viewmodels/aichat_list_view_model.dart';
@@ -42,8 +42,7 @@ class BuildMessage extends StatelessWidget {
 
     // Username và avatar
     final String username = authViewModel.user?.username ?? 'User';
-    final String firstLetter =
-        username.isNotEmpty ? username[0].toUpperCase() : '';
+    final String firstLetter = username.isNotEmpty ? username[0].toUpperCase() : '';
 
     // Tên và logo assistant
     final String assistantName = matchedAIItem.name;
@@ -54,45 +53,43 @@ class BuildMessage extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
         child: Column(
-          crossAxisAlignment:
-              isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          crossAxisAlignment: isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
             // Hiển thị ảnh và tên
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Ảnh
-                isUser
-                    ? Container(
-                        width: 30,
-                        height: 30,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.purple,
-                        ),
-                        child: Center(
-                          child: Text(
-                            firstLetter,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                      )
-                    : ClipOval(
-                        child: Image.asset(
-                        assistantLogo!,
-                        width: 30,
-                        height: 30,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          print('Error loading AI logo: $error');
-                          return const Icon(Icons.assistant,
-                              size: 30, color: Colors.grey);
-                        },
-                      )),
+                isUser ? Container(
+                  width: 30,
+                  height: 30,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.purple,
+                  ),
+                  child: Center(
+                    child: Text(
+                      firstLetter,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                )
+                : ClipOval(
+                  child: Image.asset(
+                    assistantLogo!,
+                    width: 30,
+                    height: 30,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      print('Error loading AI logo: $error');
+                      return const Icon(Icons.assistant, size: 30, color: Colors.grey);
+                    },
+                  )
+                ),
                 const SizedBox(width: 8),
                 // Tên
                 Text(
@@ -116,9 +113,7 @@ class BuildMessage extends StatelessWidget {
               ),
               child: Consumer<HomeChatViewModel>(
                 builder: (context, messageModel, child) {
-                  if (!isUser &&
-                      message.content.isEmpty &&
-                      messageModel.isSending) {
+                  if (!isUser && message.content.isEmpty && messageModel.isSending) {
                     return Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -127,8 +122,7 @@ class BuildMessage extends StatelessWidget {
                           height: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.blue),
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -144,63 +138,50 @@ class BuildMessage extends StatelessWidget {
 
                   return Column(
                     children: [
-                      isUser
-                          ? Column(
-                              children: [
-                                if (message.files != null &&
-                                    message.files!.isNotEmpty) ...[
-                                  SingleChildScrollView(
-                                    scrollDirection: Axis.horizontal,
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: message.files!.map((path) {
-                                        return ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                          child: Image.file(
-                                            File(path),
-                                            width: 100,
-                                            height: 100,
-                                            fit: BoxFit.cover,
-                                          ),
-                                        );
-                                      }).toList(),
+                      isUser ? Column(
+                        children: [
+                          if (message.files != null &&
+                              message.files!.isNotEmpty) ...[
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: message.files!.map((path) {
+                                  return ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Image.file(
+                                      File(path),
+                                      width: 100,
+                                      height: 100,
+                                      fit: BoxFit.cover,
                                     ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                ],
-                                Text(
-                                  message.content,
-                                  style: TextStyle(
-                                    color: isError ? Colors.red : Colors.black,
-                                  ),
-                                ),
-                              ],
-                            )
-                          : MarkdownBody(
-                              data: message.content,
-                              styleSheet: MarkdownStyleSheet(
-                                p: TextStyle(
-                                  color: isError ? Colors.red : Colors.black,
-                                ),
-                                a: const TextStyle(
-                                  color: Colors.blue,
-                                  decoration: TextDecoration.underline,
-                                ),
-                                listBullet: TextStyle(
-                                  color: isError ? Colors.red : Colors.black,
-                                ),
+                                  );
+                                }).toList(),
                               ),
-                              selectable: true,
-                              onTapLink: (text, href, title) {
-                                if (href != null) {
-                                  _launchURL(href);
-                                }
-                              },
                             ),
+                            const SizedBox(height: 8),
+                          ],
+                          Text(
+                            message.content,
+                            style: TextStyle(color: isError ? Colors.red : Colors.black,),
+                          ),
+                        ],
+                      )
+                      : MarkdownBody(
+                        data: message.content,
+                        styleSheet: MarkdownStyleSheet(
+                          p: TextStyle(color: isError ? Colors.red : Colors.black,),
+                          a: const TextStyle(color: Colors.blue, decoration: TextDecoration.underline,),
+                          listBullet: TextStyle(color: isError ? Colors.red : Colors.black,),
+                        ),
+                        selectable: true,
+                        onTapLink: (text, href, title) {
+                          if (href != null) {
+                            _launchURL(href);
+                          }
+                        },
+                      ),
                     ],
                   );
                 },

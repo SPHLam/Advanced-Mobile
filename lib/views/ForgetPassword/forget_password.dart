@@ -43,7 +43,7 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                 children: [
                   Center(
                     child: Image.asset(
-                      "assets/logoAI.png",
+                      "assets/ic_launcher.png",
                       height: 100,
                     ),
                   ),

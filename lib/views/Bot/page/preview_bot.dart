@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:jarvis/core/Widget/chat_widget.dart';
-import 'package:jarvis/viewmodels/bot_view_model.dart';
+import 'package:project_ai_chat/core/Widget/chat_widget.dart';
+import 'package:project_ai_chat/viewmodels/bot_view_model.dart';
 import 'package:provider/provider.dart';
 
 class PreviewScreen extends StatefulWidget {
@@ -25,8 +25,7 @@ class _PreviewScreenState extends State<PreviewScreen> {
           ),
           TextButton(
             onPressed: () {
-              Provider.of<BotViewModel>(context, listen: false)
-                  .updateAiBotWithThreadPlayGround();
+              Provider.of<BotViewModel>(context, listen: false).updateAiBotWithThreadPlayGround();
               Navigator.pop(context); // Đóng dialog
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Chat has been refreshed!')),

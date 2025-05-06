@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
-import 'package:jarvis/models/knowledge.dart';
-import 'package:jarvis/services/knowledgebase_service.dart';
+import 'package:project_ai_chat/models/knowledge.dart';
+import 'package:project_ai_chat/services/knowledgebase_service.dart';
 
 class KnowledgeBaseProvider with ChangeNotifier {
   final KnowledgebaseService _kbService = KnowledgebaseService();
