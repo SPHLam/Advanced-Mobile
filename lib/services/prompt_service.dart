@@ -1,9 +1,10 @@
 import 'package:dio/dio.dart';
-import 'package:jarvis/models/prompt_model.dart';
-import 'package:jarvis/utils/dio/dio_jarvis.dart';
-import 'package:jarvis/models/prompt_list.dart';
+import 'package:project_ai_chat/models/prompt_model.dart';
+import 'package:project_ai_chat/utils/dio/dio_jarvis.dart';
+import 'package:project_ai_chat/models/prompt_list.dart';
 
 class PromptService {
+
   final dio = DioJarvis().dio;
 
   Future<PromptList> fetchAllPrompts() async {

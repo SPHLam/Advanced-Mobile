@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:jarvis/views/Prompt/widgets/new_prompt.dart';
-import 'package:jarvis/views/Prompt/widgets/prompt_details.dart';
-import 'package:jarvis/viewmodels/prompt_list_view_model.dart';
-import 'package:jarvis/models/prompt_list.dart';
-import 'package:jarvis/models/prompt.dart';
-import 'package:jarvis/core/Widget/delete_confirm_dialog.dart';
+import 'package:project_ai_chat/views/Prompt/widgets/new_prompt.dart';
+import 'package:project_ai_chat/views/Prompt/widgets/prompt_details.dart';
+import 'package:project_ai_chat/viewmodels/prompt_list_view_model.dart';
+import 'package:project_ai_chat/models/prompt_list.dart';
+import 'package:project_ai_chat/models/prompt.dart';
+import 'package:project_ai_chat/core/Widget/delete_confirm_dialog.dart';
 import 'enums.dart';
 
 class PromptScreen extends StatefulWidget {
@@ -154,312 +154,312 @@ class _PromptScreenState extends State<PromptScreen> {
   }
 
   Widget _buildSegmentedControl() => Container(
-        padding: const EdgeInsets.all(4),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
-                spreadRadius: 1,
-                blurRadius: 4)
-          ],
-        ),
-        child: Row(children: [
-          _buildSegmentOption('My Prompts', 0),
-          _buildSegmentOption('Public Prompts', 1),
-        ]),
-      );
+    padding: const EdgeInsets.all(4),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(12),
+      boxShadow: [
+        BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 4)
+      ],
+    ),
+    child: Row(children: [
+      _buildSegmentOption('My Prompts', 0),
+      _buildSegmentOption('Public Prompts', 1),
+    ]),
+  );
 
   Widget _buildSegmentOption(String label, int index) => Expanded(
-        child: MouseRegion(
-          cursor: SystemMouseCursors.click,
-          child: GestureDetector(
-            onTap: () {
+    child: MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            selectedSegment = index;
+            _refreshPrompts();
+          });
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color:
+            selectedSegment == index ? Colors.blue : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color:
+              selectedSegment == index ? Colors.white : Colors.black87,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+
+  Widget _buildSearchBar() => Row(
+    children: [
+      Expanded(
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                  color: Colors.grey.withOpacity(0.1),
+                  spreadRadius: 1,
+                  blurRadius: 4)
+            ],
+          ),
+          child: TextField(
+            controller: _searchController,
+            onChanged: (value) {
               setState(() {
-                selectedSegment = index;
+                searchQuery = value.toLowerCase();
                 _refreshPrompts();
               });
             },
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              decoration: BoxDecoration(
-                color:
-                    selectedSegment == index ? Colors.blue : Colors.transparent,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                label,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color:
-                      selectedSegment == index ? Colors.white : Colors.black87,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
+            decoration: InputDecoration(
+              prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
+              hintText: 'Search...',
+              hintStyle: TextStyle(color: Colors.grey[600]),
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none),
             ),
           ),
         ),
-      );
-
-  Widget _buildSearchBar() => Row(
-        children: [
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                      color: Colors.grey.withOpacity(0.1),
-                      spreadRadius: 1,
-                      blurRadius: 4)
-                ],
-              ),
-              child: TextField(
-                controller: _searchController,
-                onChanged: (value) {
-                  setState(() {
-                    searchQuery = value.toLowerCase();
-                    _refreshPrompts();
-                  });
-                },
-                decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
-                  hintText: 'Search...',
-                  hintStyle: TextStyle(color: Colors.grey[600]),
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none),
-                ),
-              ),
+      ),
+      const SizedBox(width: 12),
+      MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          onTap: () {
+            setState(() {
+              _showFavoritesOnly = !_showFavoritesOnly;
+              _refreshPrompts();
+            });
+          },
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.grey.withOpacity(0.1),
+                    spreadRadius: 1,
+                    blurRadius: 4)
+              ],
+            ),
+            child: Icon(
+              _showFavoritesOnly ? Icons.star : Icons.star_border,
+              color: _showFavoritesOnly
+                  ? Colors.yellow[700]
+                  : Colors.grey[600],
             ),
           ),
-          const SizedBox(width: 12),
-          MouseRegion(
-            cursor: SystemMouseCursors.click,
-            child: GestureDetector(
+        ),
+      ),
+    ],
+  );
+
+  Widget _buildPromptType() => Row(
+    children: [
+      Expanded(
+        child: Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            GestureDetector(
               onTap: () {
                 setState(() {
-                  _showFavoritesOnly = !_showFavoritesOnly;
+                  selectedCategory = null;
                   _refreshPrompts();
                 });
               },
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                        color: Colors.grey.withOpacity(0.1),
-                        spreadRadius: 1,
-                        blurRadius: 4)
-                  ],
+              child: Chip(
+                label: Text(
+                  'All',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: selectedCategory == null
+                        ? Colors.white
+                        : Colors.blue[900],
+                  ),
                 ),
-                child: Icon(
-                  _showFavoritesOnly ? Icons.star : Icons.star_border,
-                  color: _showFavoritesOnly
-                      ? Colors.yellow[700]
-                      : Colors.grey[600],
-                ),
+                backgroundColor: selectedCategory == null
+                    ? Colors.blue
+                    : Colors.blue[50],
+                padding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20)),
               ),
             ),
-          ),
-        ],
-      );
-
-  Widget _buildPromptType() => Row(
-        children: [
-          Expanded(
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      selectedCategory = null;
-                      _refreshPrompts();
-                    });
-                  },
-                  child: Chip(
-                    label: Text(
-                      'All',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: selectedCategory == null
-                            ? Colors.white
-                            : Colors.blue[900],
-                      ),
+            for (var category
+            in (isExpanded ? Category.values : Category.values.take(3)))
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    selectedCategory = category;
+                    _refreshPrompts();
+                  });
+                },
+                child: Chip(
+                  label: Text(
+                    category.label,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: selectedCategory == category
+                          ? Colors.white
+                          : Colors.blue[900],
                     ),
-                    backgroundColor: selectedCategory == null
-                        ? Colors.blue
-                        : Colors.blue[50],
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20)),
                   ),
+                  backgroundColor: selectedCategory == category
+                      ? Colors.blue
+                      : Colors.blue[50],
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 6),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20)),
                 ),
-                for (var category
-                    in (isExpanded ? Category.values : Category.values.take(3)))
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        selectedCategory = category;
-                        _refreshPrompts();
-                      });
-                    },
-                    child: Chip(
-                      label: Text(
-                        category.label,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: selectedCategory == category
-                              ? Colors.white
-                              : Colors.blue[900],
-                        ),
-                      ),
-                      backgroundColor: selectedCategory == category
-                          ? Colors.blue
-                          : Colors.blue[50],
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 6),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20)),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          MouseRegion(
-            cursor: SystemMouseCursors.click,
-            child: IconButton(
-              icon: Icon(isExpanded ? Icons.expand_less : Icons.expand_more),
-              onPressed: () => setState(() => isExpanded = !isExpanded),
-            ),
-          ),
-        ],
-      );
-
-  Widget _buildPromptsList() => Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
-                spreadRadius: 1,
-                blurRadius: 4)
+              ),
           ],
         ),
-        child: FutureBuilder<PromptList>(
-          future: promptsFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
-            }
-            if (!snapshot.hasData || snapshot.data!.items.isEmpty) {
-              return const Center(child: Text('No prompts found'));
-            }
-            final prompts = snapshot.data!.items;
-            for (var prompt in prompts) {
-              _favoriteStates[prompt.id] ??= prompt.isFavorite;
-            }
-            return ListView.builder(
-              padding: const EdgeInsets.all(8),
-              itemCount: prompts.length,
-              itemBuilder: (context, index) {
-                final prompt = prompts[index];
-                final isFavorite = _favoriteStates[prompt.id] ?? false;
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+      ),
+      MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: IconButton(
+          icon: Icon(isExpanded ? Icons.expand_less : Icons.expand_more),
+          onPressed: () => setState(() => isExpanded = !isExpanded),
+        ),
+      ),
+    ],
+  );
+
+  Widget _buildPromptsList() => Container(
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(12),
+      boxShadow: [
+        BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 4)
+      ],
+    ),
+    child: FutureBuilder<PromptList>(
+      future: promptsFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+        if (!snapshot.hasData || snapshot.data!.items.isEmpty) {
+          return const Center(child: Text('No prompts found'));
+        }
+        final prompts = snapshot.data!.items;
+        for (var prompt in prompts) {
+          _favoriteStates[prompt.id] ??= prompt.isFavorite;
+        }
+        return ListView.builder(
+          padding: const EdgeInsets.all(8),
+          itemCount: prompts.length,
+          itemBuilder: (context, index) {
+            final prompt = prompts[index];
+            final isFavorite = _favoriteStates[prompt.id] ?? false;
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    Expanded(
+                      child: MouseRegion(
+                        cursor: SystemMouseCursors.click,
+                        child: GestureDetector(
+                          onTap: () =>
+                              _openPromptDetailsDialog(context, prompt),
+                          child: Text(
+                            prompt.title,
+                            style: const TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        ),
+                      ),
+                    ),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Expanded(
-                          child: MouseRegion(
-                            cursor: SystemMouseCursors.click,
-                            child: GestureDetector(
-                              onTap: () =>
-                                  _openPromptDetailsDialog(context, prompt),
-                              child: Text(
-                                prompt.title,
-                                style: const TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.bold),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
+                        MouseRegion(
+                          cursor: SystemMouseCursors.click,
+                          child: GestureDetector(
+                            onTap: () =>
+                                _toggleFavorite(prompt.id, isFavorite),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Icon(
+                                isFavorite ? Icons.star : Icons.star_border,
+                                color: isFavorite
+                                    ? Colors.yellow[700]
+                                    : Colors.grey,
                               ),
                             ),
                           ),
                         ),
-                        Row(
-                          children: [
-                            MouseRegion(
-                              cursor: SystemMouseCursors.click,
-                              child: GestureDetector(
-                                onTap: () =>
-                                    _toggleFavorite(prompt.id, isFavorite),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Icon(
-                                    isFavorite ? Icons.star : Icons.star_border,
-                                    color: isFavorite
-                                        ? Colors.yellow[700]
-                                        : Colors.grey,
-                                  ),
-                                ),
+                        if (!(prompt.isPublic))
+                          MouseRegion(
+                            cursor: SystemMouseCursors.click,
+                            child: GestureDetector(
+                              onTap: () => _showDeleteConfirmationDialog(
+                                  context, prompt),
+                              child: const Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Icon(Icons.delete_outline,
+                                    color: Colors.grey),
                               ),
                             ),
-                            if (!(prompt.isPublic))
-                              MouseRegion(
-                                cursor: SystemMouseCursors.click,
-                                child: GestureDetector(
-                                  onTap: () => _showDeleteConfirmationDialog(
-                                      context, prompt),
-                                  child: const Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: Icon(Icons.delete_outline,
-                                        color: Colors.grey),
-                                  ),
-                                ),
-                              ),
-                            MouseRegion(
-                              cursor: SystemMouseCursors.click,
-                              child: GestureDetector(
-                                onTap: () =>
-                                    _openPromptDetailsDialog(context, prompt),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Icon(Icons.arrow_right,
-                                      color: Colors.grey[600]),
-                                ),
-                              ),
+                          ),
+                        MouseRegion(
+                          cursor: SystemMouseCursors.click,
+                          child: GestureDetector(
+                            onTap: () =>
+                                _openPromptDetailsDialog(context, prompt),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Icon(Icons.arrow_right,
+                                  color: Colors.grey[600]),
                             ),
-                          ],
+                          ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      prompt.description,
-                      style: TextStyle(color: Colors.grey[600]),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 2,
-                    ),
-                    const Divider(),
                   ],
-                );
-              },
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  prompt.description,
+                  style: TextStyle(color: Colors.grey[600]),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
+                ),
+                const Divider(),
+              ],
             );
           },
-        ),
-      );
+        );
+      },
+    ),
+  );
 }

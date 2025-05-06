@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:jarvis/views/Bot/page/new_bot.dart';
-import 'package:jarvis/views/Bot/widgets/bot_list.dart';
+import 'package:project_ai_chat/views/Bot/page/new_bot.dart';
+import 'package:project_ai_chat/views/Bot/widgets/bot_list.dart';
 import 'package:provider/provider.dart';
 import '../../../constants/colors.dart';
 import '../../../models/bot_request.dart';
@@ -29,6 +29,7 @@ class _BotScreenState extends State<BotScreen> {
     bool isCreated = await viewModel.createBot(newBot);
     if (isCreated) {
       viewModel.fetchBots();
+
     } else {
       // Hiển thị thông báo lỗi nếu tạo bot không thành công
       ScaffoldMessenger.of(context).showSnackBar(
@@ -42,6 +43,7 @@ class _BotScreenState extends State<BotScreen> {
       );
     }
   }
+
 
   void _openAddBotDialog(BuildContext context) {
     showDialog(

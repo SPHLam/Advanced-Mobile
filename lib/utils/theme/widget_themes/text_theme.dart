@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:jarvis/constants/colors.dart';
+import 'package:project_ai_chat/constants/colors.dart';
 
 class TTextTheme {
   TTextTheme._();

@@ -1,11 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:jarvis/views/Bot/page/preview_bot.dart';
-import 'package:jarvis/models/bot_request.dart';
-import 'package:jarvis/viewmodels/bot_view_model.dart';
-import 'package:jarvis/viewmodels/knowledge_base_view_model.dart';
-import 'package:jarvis/views/Bot/page/new_bot_knowledge.dart';
-import 'package:jarvis/models/knowledge.dart';
+import 'package:project_ai_chat/views/Bot/page/preview_bot.dart';
+import 'package:project_ai_chat/models/bot_request.dart';
+import 'package:project_ai_chat/viewmodels/bot_view_model.dart';
+import 'package:project_ai_chat/viewmodels/knowledge_base_view_model.dart';
+import 'package:project_ai_chat/views/Bot/page/new_bot_knowledge.dart';
+import 'package:project_ai_chat/models/knowledge.dart';
 import 'package:provider/provider.dart';
 
 class EditBot extends StatefulWidget {

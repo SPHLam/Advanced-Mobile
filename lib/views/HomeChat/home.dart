@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:jarvis/views/Account/pages/account_screen.dart';
-import 'package:jarvis/views/Bot/page/bot_screen.dart';
-import 'package:jarvis/core/Widget/chat_widget.dart';
-import 'package:jarvis/utils/exceptions/chat_exception.dart';
-import 'package:jarvis/viewmodels/auth_view_model.dart';
-import 'package:jarvis/viewmodels/bot_view_model.dart';
-import 'package:jarvis/viewmodels/knowledge_base_view_model.dart';
-import 'package:jarvis/viewmodels/prompt_list_view_model.dart';
+import 'package:project_ai_chat/views/Account/pages/account_screen.dart';
+import 'package:project_ai_chat/views/Bot/page/bot_screen.dart';
+import 'package:project_ai_chat/core/Widget/chat_widget.dart';
+import 'package:project_ai_chat/utils/exceptions/chat_exception.dart';
+import 'package:project_ai_chat/viewmodels/auth_view_model.dart';
+import 'package:project_ai_chat/viewmodels/bot_view_model.dart';
+import 'package:project_ai_chat/viewmodels/knowledge_base_view_model.dart';
+import 'package:project_ai_chat/viewmodels/prompt_list_view_model.dart';
 import '../../core/Widget/dropdown_button.dart';
 import '../../models/prompt.dart';
 import '../../utils/helpers/ads/ads_helper.dart';
@@ -89,8 +89,7 @@ class _HomeChatState extends State<HomeChat> {
     _selectedAIItem = aiChatList.selectedAIItem.name;
 
     // Hiển thị token
-    Provider.of<HomeChatViewModel>(context, listen: false)
-        .updateRemainingUsage();
+    Provider.of<HomeChatViewModel>(context, listen: false).updateRemainingUsage();
 
     // Lấy danh sách Knowledgebase
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -110,17 +109,16 @@ class _HomeChatState extends State<HomeChat> {
           });
           _interstitialAd?.show();
           _interstitialAd?.fullScreenContentCallback =
-              FullScreenContentCallback(
-            onAdDismissedFullScreenContent: (InterstitialAd ad) {
-              ad.dispose();
-              print("Interstitial Ad dismissed.");
-            },
-            onAdFailedToShowFullScreenContent:
-                (InterstitialAd ad, AdError error) {
-              ad.dispose();
-              print("Failed to show Interstitial Ad: ${error.message}");
-            },
-          );
+            FullScreenContentCallback(
+              onAdDismissedFullScreenContent: (InterstitialAd ad) {
+                ad.dispose();
+                print("Interstitial Ad dismissed.");
+              },
+              onAdFailedToShowFullScreenContent: (InterstitialAd ad, AdError error) {
+                ad.dispose();
+                print("Failed to show Interstitial Ad: ${error.message}");
+              },
+            );
         },
         onAdFailedToLoad: (error) {
           print('Interstitial ad failed to load: $error');
@@ -184,9 +182,7 @@ class _HomeChatState extends State<HomeChat> {
         context,
         MaterialPageRoute(builder: (context) => const PromptScreen()),
       ).then((result) {
-        if (result != null &&
-            result is String &&
-            result.contains('Respond in')) {
+        if (result != null && result is String && result.contains('Respond in')) {
           setState(() {
             _controller.text = result.replaceFirst('Respond in: ', '');
             _sendMessage();
@@ -222,8 +218,7 @@ class _HomeChatState extends State<HomeChat> {
     if (_files == null && _controller.text.isEmpty) return;
 
     try {
-      final aiItem =
-          _listAIItem.firstWhere((aiItem) => aiItem.name == _selectedAIItem);
+      final aiItem = _listAIItem.firstWhere((aiItem) => aiItem.name == _selectedAIItem);
 
       await Provider.of<HomeChatViewModel>(context, listen: false).sendMessage(
         _controller.text.isEmpty ? '' : _controller.text,
@@ -250,8 +245,7 @@ class _HomeChatState extends State<HomeChat> {
   void _updateSelectedAIItem(String newValue) {
     setState(() {
       _selectedAIItem = newValue;
-      AIItem aiItem =
-          _listAIItem.firstWhere((aiItem) => aiItem.name == newValue);
+      AIItem aiItem = _listAIItem.firstWhere((aiItem) => aiItem.name == newValue);
 
       // Cập nhật selectedAIItem trong AIChatList
       Provider.of<AIChatList>(context, listen: false).setSelectedAIItem(aiItem);
@@ -322,39 +316,33 @@ class _HomeChatState extends State<HomeChat> {
                         ),
                         const Spacer(),
                         !botModel.isChatWithMyBot
-                            ? SizedBox(
-                                width: 155,
-                                child: AIDropdown(
-                                  listAIItems: _listAIItem,
-                                  onChanged: (String? newValue) {
-                                    if (newValue != null) {
-                                      _updateSelectedAIItem(newValue);
-                                    }
-                                  },
-                                ),
-                              )
-                            : Expanded(
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(20),
-                                    color: const Color.fromARGB(
-                                        255, 238, 240, 243),
-                                  ),
-                                  height: 30,
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 10),
-                                  child: Center(
-                                    child: Text(
-                                      botModel.currentChatBot.assistantName,
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      maxLines: 1,
-                                    ),
-                                  ),
-                                ),
+                        ? SizedBox(
+                          width: 155,
+                          child: AIDropdown(
+                            listAIItems: _listAIItem,
+                            onChanged: (String? newValue) {
+                              if (newValue != null) {
+                                _updateSelectedAIItem(newValue);
+                              }
+                            },
+                          ),
+                        ) : Expanded(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                              color: const Color.fromARGB(255, 238, 240, 243),
+                            ),
+                            height: 30,
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            child: Center(
+                              child: Text(
+                                botModel.currentChatBot.assistantName,
+                                style: const TextStyle(fontSize: 12, overflow: TextOverflow.ellipsis,),
+                                maxLines: 1,
                               ),
+                            ),
+                          ),
+                        ),
                         const Spacer(),
                         if (!botModel.isChatWithMyBot)
                           Container(
@@ -369,29 +357,25 @@ class _HomeChatState extends State<HomeChat> {
                                   Icons.flash_on,
                                   color: Colors.orange,
                                 ),
-                                messageModel.maxTokens == 99999 &&
-                                        messageModel.maxTokens != null
-                                    ? const Text(
-                                        "Unlimited",
-                                        style: TextStyle(
-                                          fontSize: 10,
-                                          color: Colors.orange,
-                                        ),
-                                      )
-                                    : Text(
-                                        '${messageModel.remainingUsage}',
-                                        style: const TextStyle(
-                                            color: Color.fromRGBO(
-                                                119, 117, 117, 1.0)),
-                                      ),
+                                messageModel.maxTokens == 99999 && messageModel.maxTokens != null
+                                ? const Text(
+                                  "Unlimited",
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: Colors.orange,
+                                  ),
+                                )
+                                : Text(
+                                    '${messageModel.remainingUsage}',
+                                    style: const TextStyle(color: Color.fromRGBO(119, 117, 117, 1.0)),
+                                  ),
                               ],
                             ),
                           ),
                         IconButton(
                           icon: const Icon(Icons.add_circle_outline),
                           onPressed: () {
-                            Provider.of<HomeChatViewModel>(context,
-                                    listen: false)
+                            Provider.of<HomeChatViewModel>(context, listen: false)
                                 .clearMessage();
                             botModel.isChatWithMyBot = false;
                           },
@@ -412,112 +396,77 @@ class _HomeChatState extends State<HomeChat> {
                       children: [
                         Expanded(
                           child: Padding(
-                            padding: EdgeInsets.only(
-                                left: 10, bottom: 10, right: 10),
+                            padding: EdgeInsets.only(left: 10, bottom: 10, right: 10),
                             child: !botModel.isChatWithMyBot
-                                ? Column(
-                                    children: [
-                                      Expanded(
-                                        child: ListView.builder(
-                                          controller: _scrollController,
-                                          itemCount:
-                                              messageModel.messages.length,
-                                          itemBuilder: (context, index) {
-                                            final message =
-                                                messageModel.messages[index];
-                                            return BuildMessage(
-                                                message: message);
-                                          },
-                                        ),
-                                      ),
-                                      if (_showSlash)
-                                        Consumer<PromptListViewModel>(
-                                          builder:
-                                              (context, promptList, child) {
-                                            if (promptList.isLoading) {
-                                              return const CircularProgressIndicator();
-                                            } else if (promptList.hasError) {
-                                              return Text(
-                                                  'Error occur: ${promptList.error}');
-                                            } else {
-                                              return Padding(
-                                                padding:
-                                                    const EdgeInsets.all(5),
-                                                child: Container(
-                                                  width: MediaQuery.of(context)
-                                                          .size
-                                                          .width /
-                                                      3 *
-                                                      2,
-                                                  decoration: BoxDecoration(
-                                                    border: Border.all(
-                                                      color:
-                                                          const Color.fromARGB(
-                                                              255,
-                                                              158,
-                                                              198,
-                                                              232),
-                                                      width: 1.0,
-                                                    ),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            20.0),
-                                                  ),
-                                                  constraints: BoxConstraints(
-                                                    maxHeight:
-                                                        MediaQuery.of(context)
-                                                                .size
-                                                                .height /
-                                                            3,
-                                                  ),
-                                                  child: ListView.builder(
-                                                    itemCount: promptList
-                                                        .allPrompts
-                                                        .items
-                                                        .length,
-                                                    itemBuilder:
-                                                        (context, index) {
-                                                      return ListTile(
-                                                        title: Text(promptList
-                                                            .allPrompts
-                                                            .items[index]
-                                                            .title),
-                                                        onTap: () {
-                                                          _controller.text = "";
-                                                          _showSlash = false;
-                                                          _openPromptDetailsDialog(
-                                                              context,
-                                                              promptList
-                                                                  .allPrompts
-                                                                  .items[index]);
-                                                        },
-                                                      );
-                                                    },
-                                                  ),
-                                                ),
-                                              );
-                                            }
-                                          },
-                                        ),
-                                      InputWidget(
-                                        focusNode: _focusNode,
-                                        controller: _controller,
-                                        onTextChanged: _onTextChanged,
-                                        sendMessage: _sendMessage,
-                                        isOpenDeviceWidget: _isOpenDeviceWidget,
-                                        toggleDeviceVisibility:
-                                            _toggleDeviceVisibility,
-                                        hasText: _hasText,
-                                        updateImagePaths: (paths) {
-                                          setState(() {
-                                            _files = paths;
-                                          });
-                                        },
-                                      ),
-                                      const SizedBox(height: 5),
-                                    ],
-                                  )
-                                : ChatWidget(),
+                              ? Column(children: [
+                                Expanded(
+                                  child: ListView.builder(
+                                    controller: _scrollController,
+                                    itemCount: messageModel.messages.length,
+                                    itemBuilder: (context, index) {
+                                      final message = messageModel.messages[index];
+                                      return BuildMessage(message: message);
+                                    },
+                                  ),
+                                ),
+                                if (_showSlash)
+                                  Consumer<PromptListViewModel>(
+                                    builder: (context, promptList, child) {
+                                      if (promptList.isLoading) {
+                                        return const CircularProgressIndicator();
+                                      } else if (promptList.hasError) {
+                                        return Text('Error occur: ${promptList.error}');
+                                      } else {
+                                        return Padding(
+                                          padding: const EdgeInsets.all(5),
+                                          child: Container(
+                                            width: MediaQuery.of(context).size.width / 3 * 2,
+                                            decoration: BoxDecoration(
+                                              border: Border.all(
+                                                color: const Color.fromARGB(255, 158, 198, 232),
+                                                width: 1.0,
+                                              ),
+                                              borderRadius: BorderRadius.circular(20.0),
+                                            ),
+                                            constraints: BoxConstraints(
+                                              maxHeight: MediaQuery.of(context).size.height / 3,
+                                            ),
+                                            child: ListView.builder(
+                                              itemCount: promptList.allPrompts.items.length,
+                                              itemBuilder: (context, index) {
+                                                return ListTile(
+                                                  title: Text(promptList.allPrompts.items[index].title),
+                                                  onTap: () {
+                                                    _controller.text = "";
+                                                    _showSlash = false;
+                                                    _openPromptDetailsDialog(context, promptList.allPrompts.items[index]);
+                                                  },
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                    },
+                                  ),
+                                InputWidget(
+                                  focusNode: _focusNode,
+                                  controller: _controller,
+                                  onTextChanged: _onTextChanged,
+                                  sendMessage: _sendMessage,
+                                  isOpenDeviceWidget: _isOpenDeviceWidget,
+                                  toggleDeviceVisibility: _toggleDeviceVisibility,
+                                  hasText: _hasText,
+                                  updateImagePaths: (paths) {
+                                    setState(() {
+                                      _files = paths;
+                                    });
+                                  },
+                                ),
+                                const SizedBox(height: 5),
+                              ],
+                            )
+                            : ChatWidget(),
                           ),
                         ),
                       ],

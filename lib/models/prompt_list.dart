@@ -1,4 +1,4 @@
-import 'package:jarvis/models/prompt.dart';
+import 'package:project_ai_chat/models/prompt.dart';
 
 // Model cho PromptList
 class PromptList {

@@ -1,4 +1,4 @@
-import 'package:jarvis/models/bot_request.dart';
+import 'package:project_ai_chat/models/bot_request.dart';
 
 class Bot {
   final String createdAt;

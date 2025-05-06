@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:jarvis/models/response/api_response.dart';
-import 'package:jarvis/utils/dio/dio_knowledge_base.dart';
+import 'package:project_ai_chat/models/response/api_response.dart';
+import 'package:project_ai_chat/utils/dio/dio_knowledge_base.dart';
 
 class KnowledgebaseService {
   final dioKB = DioKnowledgeBase().dio;
@@ -443,8 +443,8 @@ class KnowledgebaseService {
     }
   }
 
-  Future<ApiResponse> uploadSlack(String knowledgeId, String slackName,
-      String slackWorkspace, String slackBotToken) async {
+  Future<ApiResponse> uploadSlack(
+      String knowledgeId, String slackName, String slackWorkspace, String slackBotToken) async {
     try {
       final response = await dioKB.post(
         '/knowledge/$knowledgeId/slack',
@@ -492,11 +492,7 @@ class KnowledgebaseService {
   }
 
   Future<ApiResponse> uploadConfluence(
-      String knowledgeId,
-      String confluenceName,
-      String wikiPageUrl,
-      String username,
-      String accessToken) async {
+      String knowledgeId, String confluenceName, String wikiPageUrl, String username, String accessToken) async {
     try {
       final response = await dioKB.post(
         '/knowledge/$knowledgeId/confluence',
@@ -543,4 +539,5 @@ class KnowledgebaseService {
       );
     }
   }
+
 }

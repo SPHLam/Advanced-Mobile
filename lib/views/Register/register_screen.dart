@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:jarvis/views/Login/login_screen.dart';
-import 'package:jarvis/constants/colors.dart';
-import 'package:jarvis/constants/sizes.dart';
-import 'package:jarvis/constants/text_strings.dart';
-import 'package:jarvis/viewmodels/auth_view_model.dart';
+import 'package:project_ai_chat/views/Login/login_screen.dart';
+import 'package:project_ai_chat/constants/colors.dart';
+import 'package:project_ai_chat/constants/sizes.dart';
+import 'package:project_ai_chat/constants/text_strings.dart';
+import 'package:project_ai_chat/viewmodels/auth_view_model.dart';
 import 'package:provider/provider.dart';
-import 'package:jarvis/utils/validators/register_validator.dart';
+import 'package:project_ai_chat/utils/validators/register_validator.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -36,10 +36,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   void _register() async {
     if (_formKey.currentState!.validate()) {
       final success = await context.read<AuthViewModel>().register(
-            username: _usernameController.text,
-            email: _emailController.text,
-            password: _passwordController.text,
-          );
+        username: _usernameController.text,
+        email: _emailController.text,
+        password: _passwordController.text,
+      );
 
       if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

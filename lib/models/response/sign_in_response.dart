@@ -1,4 +1,4 @@
-import 'package:jarvis/models/user_model.dart';
+import 'package:project_ai_chat/models/user_model.dart';
 
 class SignInResponse {
   final String token;

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:jarvis/views/Login/login_screen.dart';
-import 'package:jarvis/views/Register/register_screen.dart';
-import 'package:jarvis/constants/colors.dart';
-import 'package:jarvis/constants/image_strings.dart';
-import 'package:jarvis/constants/sizes.dart';
-import 'package:jarvis/constants/text_strings.dart';
-import 'package:jarvis/core/Widget/elevated_button.dart';
-import 'package:jarvis/core/Widget/outlined_button.dart';
+import 'package:project_ai_chat/views/Login/login_screen.dart';
+import 'package:project_ai_chat/views/Register/register_screen.dart';
+import 'package:project_ai_chat/constants/colors.dart';
+import 'package:project_ai_chat/constants/image_strings.dart';
+import 'package:project_ai_chat/constants/sizes.dart';
+import 'package:project_ai_chat/constants/text_strings.dart';
+import 'package:project_ai_chat/core/Widget/elevated_button.dart';
+import 'package:project_ai_chat/core/Widget/outlined_button.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});

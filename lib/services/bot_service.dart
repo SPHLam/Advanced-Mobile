@@ -1,11 +1,11 @@
 import 'package:dio/dio.dart';
-import 'package:jarvis/models/bot_request.dart';
-import 'package:jarvis/models/knowledge.dart';
-import 'package:jarvis/models/prompt_model.dart';
-import 'package:jarvis/models/response/my_aibot_message_response.dart';
-import 'package:jarvis/utils/dio/dio_jarvis.dart';
-import 'package:jarvis/models/prompt_list.dart';
-import 'package:jarvis/utils/dio/dio_knowledge_base.dart';
+import 'package:project_ai_chat/models/bot_request.dart';
+import 'package:project_ai_chat/models/knowledge.dart';
+import 'package:project_ai_chat/models/prompt_model.dart';
+import 'package:project_ai_chat/models/response/my_aibot_message_response.dart';
+import 'package:project_ai_chat/utils/dio/dio_jarvis.dart';
+import 'package:project_ai_chat/models/prompt_list.dart';
+import 'package:project_ai_chat/utils/dio/dio_knowledge_base.dart';
 
 import '../models/bot.dart';
 import '../models/bot_list.dart';

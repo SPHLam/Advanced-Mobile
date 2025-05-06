@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:jarvis/models/knowledge.dart';
+import 'package:project_ai_chat/models/knowledge.dart';
 
 class KnowledgeCard extends StatelessWidget {
   final Knowledge knowledge;

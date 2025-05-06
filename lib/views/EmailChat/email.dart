@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:jarvis/views/EmailChat/widgets/button_custom.dart';
-import 'package:jarvis/views/EmailChat/widgets/textformfield_custom.dart';
-import 'package:jarvis/core/Widget/dropdown_button.dart';
-import 'package:jarvis/viewmodels/emailchat_view_model.dart';
-import 'package:jarvis/viewmodels/homechat_view_model.dart';
+import 'package:project_ai_chat/views/EmailChat/widgets/button_custom.dart';
+import 'package:project_ai_chat/views/EmailChat/widgets/textformfield_custom.dart';
+import 'package:project_ai_chat/core/Widget/dropdown_button.dart';
+import 'package:project_ai_chat/viewmodels/emailchat_view_model.dart';
+import 'package:project_ai_chat/viewmodels/homechat_view_model.dart';
 import 'package:provider/provider.dart';
 import '../../viewmodels/aichat_list_view_model.dart';
 import '../../models/ai_logo.dart';
@@ -14,8 +14,7 @@ class EmailComposer extends StatefulWidget {
 }
 
 class _EmailComposerState extends State<EmailComposer> {
-  final TextEditingController _emailReceivedController =
-      TextEditingController();
+  final TextEditingController _emailReceivedController = TextEditingController();
   final TextEditingController _aiActionController = TextEditingController();
   final TextEditingController _subjectController = TextEditingController();
   final TextEditingController _senderController = TextEditingController();
@@ -30,8 +29,7 @@ class _EmailComposerState extends State<EmailComposer> {
   void initState() {
     super.initState();
     _listAIItem = Provider.of<AIChatList>(context, listen: false).aiItems;
-    int? maxtoken =
-        Provider.of<HomeChatViewModel>(context, listen: false).maxTokens;
+    int? maxtoken = Provider.of<HomeChatViewModel>(context, listen: false).maxTokens;
     if (maxtoken == 99999)
       _token = 99999;
     else {
@@ -69,12 +67,10 @@ class _EmailComposerState extends State<EmailComposer> {
       _aiActionController.text = draft;
     });
   }
-
   void _updateSelectedAIItem(String newValue) {
     setState(() {
       selectedAIItem = newValue;
-      AIItem aiItem =
-          _listAIItem.firstWhere((aiItem) => aiItem.name == newValue);
+      AIItem aiItem = _listAIItem.firstWhere((aiItem) => aiItem.name == newValue);
 
       // Cập nhật selectedAIItem trong AIChatList
       Provider.of<AIChatList>(context, listen: false).setSelectedAIItem(aiItem);
@@ -114,8 +110,7 @@ class _EmailComposerState extends State<EmailComposer> {
               color: const Color.fromARGB(255, 238, 240, 243),
               borderRadius: BorderRadius.circular(12.0),
             ),
-            child: Consumer<EmailChatViewModel>(
-                builder: (context, emailViewModel, _) {
+            child: Consumer<EmailChatViewModel>(builder: (context, emailViewModel, _) {
               int? tokenCount = emailViewModel.remainingUsage;
               return Row(
                 children: [
@@ -124,18 +119,18 @@ class _EmailComposerState extends State<EmailComposer> {
                     color: Colors.orange,
                   ),
                   _token == 99999
-                      ? const Text(
-                          "Unlimited",
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: Colors.orange,
-                          ),
-                        )
-                      : Text(
-                          '${tokenCount != null ? tokenCount : _token}',
-                          style: const TextStyle(
-                              color: Color.fromRGBO(119, 117, 117, 1.0)),
-                        ),
+                    ? const Text(
+                      "Unlimited",
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Colors.orange,
+                    ),
+                  )
+                    : Text(
+                      '${tokenCount != null ? tokenCount : _token}',
+                      style: const TextStyle(
+                          color: Color.fromRGBO(119, 117, 117, 1.0)),
+                    ),
                 ],
               );
             }),
@@ -152,8 +147,7 @@ class _EmailComposerState extends State<EmailComposer> {
           }
           return SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.only(
-                  top: 10.0, left: 16.0, right: 16.0, bottom: 10.0),
+              padding: const EdgeInsets.only(top: 10.0, left: 16.0, right: 16.0, bottom: 10.0),
               child: Form(
                 key: _formKey,
                 child: Column(
@@ -198,106 +192,107 @@ class _EmailComposerState extends State<EmailComposer> {
                         ),
                       ),
                     ),
-                    if (emailViewModel.ideas != null) ...[
-                      const SizedBox(height: 20),
-                      Column(
-                        children: [
-                          Text(
-                            'Please choose idea',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+
+                    if (emailViewModel.ideas != null)
+                      ...[
+                        const SizedBox(height: 20),
+                        Column(
+                          children: [
+                            Text(
+                              'Please choose idea',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Wrap(
-                            spacing: 10,
-                            runSpacing: 10,
-                            children: emailViewModel.ideas!.map((idea) {
-                              return ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: _selectedIdea == idea
-                                        ? Colors.blue[300]
-                                        : Colors.grey[200],
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Wrap(
+                              spacing: 10,
+                              runSpacing: 10,
+                              children: emailViewModel.ideas!.map((idea) {
+                                return ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: _selectedIdea == idea
+                                          ? Colors.blue[300]
+                                          : Colors.grey[200],
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
                                     ),
-                                  ),
-                                  onPressed: () async {
-                                    await Provider.of<EmailChatViewModel>(
-                                            context,
-                                            listen: false)
-                                        .fetchEmailResponse(
-                                            mainIdea: idea,
-                                            action: _aiActionController.text,
-                                            email:
-                                                _emailReceivedController.text,
-                                            subject: _subjectController.text,
-                                            sender: _senderController.text,
-                                            receiver: _receiverController.text,
-                                            language: _languageController.text);
-                                    setState(() {
-                                      _selectedIdea = idea;
-                                    });
-                                  },
-                                  child: Text(
-                                    idea,
-                                    style: TextStyle(
-                                      color: _selectedIdea == idea
-                                          ? Colors.white
-                                          : Colors.black87,
-                                      fontSize: 14,
-                                    ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ));
-                            }).toList(),
-                          ),
-                        ],
-                      ),
-                    ],
-                    if (emailViewModel.emailReply != null) ...[
-                      SizedBox(
-                        height: 15,
-                      ),
-                      Container(
-                        width: MediaQuery.of(context).size.width,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[100],
-                          border: Border.all(color: Colors.grey),
-                          borderRadius: BorderRadius.circular(20),
+                                    onPressed: () async {
+                                      await Provider.of<EmailChatViewModel>(
+                                          context,
+                                          listen: false)
+                                          .fetchEmailResponse(
+                                          mainIdea: idea,
+                                          action: _aiActionController.text,
+                                          email:
+                                          _emailReceivedController.text,
+                                          subject: _subjectController.text,
+                                          sender: _senderController.text,
+                                          receiver: _receiverController.text,
+                                          language: _languageController.text);
+                                      setState(() {
+                                        _selectedIdea = idea;
+                                      });
+                                    },
+                                    child: Text(
+                                      idea,
+                                      style: TextStyle(
+                                        color: _selectedIdea == idea
+                                            ? Colors.white
+                                            : Colors.black87,
+                                        fontSize: 14,
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ));
+                              }).toList(),
+                            ),
+                          ],
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                              top: 10.0, left: 16.0, right: 16.0, bottom: 10.0),
-                          child: Container(
-                            constraints: BoxConstraints(
-                              minHeight: 100,
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Reply Email',
-                                  style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                SizedBox(
-                                  height: 10,
-                                ),
-                                if (emailViewModel.emailReply != null)
+                      ],
+                    if(emailViewModel.emailReply != null)
+                      ...[
+                        SizedBox(
+                          height: 15,
+                        ),
+                        Container(
+                          width: MediaQuery.of(context).size.width,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[100],
+                            border: Border.all(color: Colors.grey),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 10.0, left: 16.0,right: 16.0,bottom: 10.0),
+                            child: Container(
+                              constraints: BoxConstraints(
+                                minHeight: 100,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
                                   Text(
-                                    '${emailViewModel.emailReply}',
+                                    'Reply Email',
+                                    style: TextStyle(
+                                        fontSize: 18, fontWeight: FontWeight.bold),
                                   ),
-                              ],
+                                  SizedBox(
+                                    height: 10,
+                                  ),
+                                  if (emailViewModel.emailReply != null)
+                                    Text(
+                                      '${emailViewModel.emailReply}',
+                                    ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
                     const SizedBox(height: 15),
                     Wrap(
                       spacing: 10,
@@ -307,10 +302,8 @@ class _EmailComposerState extends State<EmailComposer> {
                         buildButton('Sorry', () => _createDraft('Sorry')),
                         buildButton('Yes', () => _createDraft('Yes')),
                         buildButton('No', () => _createDraft('No')),
-                        buildButton(
-                            'Follow Up', () => _createDraft('Follow Up')),
-                        buildButton('Request for more information',
-                            () => _createDraft('Request for more information')),
+                        buildButton('Follow Up', () => _createDraft('Follow Up')),
+                        buildButton('Request for more information', () => _createDraft('Request for more information')),
                       ],
                     ),
                     const SizedBox(height: 20),
@@ -320,16 +313,14 @@ class _EmailComposerState extends State<EmailComposer> {
                           child: Container(
                             decoration: BoxDecoration(
                               color: Colors.grey[200],
-                              border:
-                                  Border.all(color: Colors.grey, width: 1.0),
+                              border: Border.all(color: Colors.grey, width: 1.0),
                               borderRadius: BorderRadius.circular(12.0),
                             ),
                             child: TextField(
                               decoration: InputDecoration(
                                 hintText: 'Enter your message...',
                                 border: InputBorder.none,
-                                contentPadding:
-                                    EdgeInsets.symmetric(horizontal: 10),
+                                contentPadding: EdgeInsets.symmetric(horizontal: 10),
                               ),
                             ),
                           ),
@@ -337,15 +328,13 @@ class _EmailComposerState extends State<EmailComposer> {
                         IconButton(
                           onPressed: () async {
                             if (_formKey.currentState!.validate()) {
-                              await Provider.of<EmailChatViewModel>(context,
-                                      listen: false)
-                                  .getEmailSuggestions(
-                                      action: _aiActionController.text,
-                                      email: _emailReceivedController.text,
-                                      subject: _subjectController.text,
-                                      sender: _senderController.text,
-                                      receiver: _receiverController.text,
-                                      language: _languageController.text);
+                              await Provider.of<EmailChatViewModel>(context, listen: false).getEmailSuggestions(
+                                action: _aiActionController.text,
+                                email: _emailReceivedController.text,
+                                subject: _subjectController.text,
+                                sender: _senderController.text,
+                                receiver: _receiverController.text,
+                                language: _languageController.text);
                             }
                           },
                           icon: Icon(Icons.send),

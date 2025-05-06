@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:jarvis/services/email_chat_service.dart';
-import 'package:jarvis/models/response/email_chat_response.dart';
+import 'package:project_ai_chat/services/email_chat_service.dart';
+import 'package:project_ai_chat/models/response/email_chat_response.dart';
 
 class EmailChatViewModel extends ChangeNotifier {
   final EmailChatService emailChatService;

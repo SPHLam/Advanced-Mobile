@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:jarvis/models/bot_request.dart';
+import 'package:project_ai_chat/models/bot_request.dart';
 
 class NewBot extends StatefulWidget {
   const NewBot({super.key, required this.addBot});
@@ -177,8 +177,7 @@ class _NewBotState extends State<NewBot> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                   elevation: 2,
                 ),
                 child: const Text(
@@ -210,8 +209,7 @@ class _NewBotState extends State<NewBot> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                     elevation: 2,
                   ),
                   child: const Text(

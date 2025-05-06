@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
-import 'package:jarvis/utils/dio/dio_jarvis.dart';
-import 'package:jarvis/utils/exceptions/chat_exception.dart';
-import 'package:jarvis/models/response/email_chat_response.dart';
+import 'package:project_ai_chat/utils/dio/dio_jarvis.dart';
+import 'package:project_ai_chat/utils/exceptions/chat_exception.dart';
+import 'package:project_ai_chat/models/response/email_chat_response.dart';
 
 class EmailChatService {
   late final Dio dio;

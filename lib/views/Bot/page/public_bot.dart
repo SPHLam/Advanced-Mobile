@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:jarvis/views/Bot/widgets/publish_platform.dart';
+import 'package:project_ai_chat/views/Bot/widgets/publish_platform.dart';
 
 class PublicBot extends StatelessWidget {
   const PublicBot({super.key});

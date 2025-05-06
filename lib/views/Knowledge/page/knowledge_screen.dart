@@ -1,14 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:jarvis/models/knowledge.dart';
-import 'package:jarvis/views/Knowledge/page/edit_knowledge.dart';
-import 'package:jarvis/views/Knowledge/page/new_knowledge.dart';
-import 'package:jarvis/views/Knowledge/widgets/knowledge_card.dart';
-import 'package:jarvis/services/analytics_service.dart';
-import 'package:jarvis/viewmodels/knowledge_base_view_model.dart';
+import 'package:project_ai_chat/models/knowledge.dart';
+import 'package:project_ai_chat/views/Knowledge/page/edit_knowledge.dart';
+import 'package:project_ai_chat/views/Knowledge/page/new_knowledge.dart';
+import 'package:project_ai_chat/views/Knowledge/widgets/knowledge_card.dart';
+import 'package:project_ai_chat/services/analytics_service.dart';
+import 'package:project_ai_chat/viewmodels/knowledge_base_view_model.dart';
 import 'package:provider/provider.dart';
-import 'package:jarvis/core/Widget/delete_confirm_dialog.dart';
+import 'package:project_ai_chat/core/Widget/delete_confirm_dialog.dart';
 
 class KnowledgeScreen extends StatefulWidget {
   const KnowledgeScreen({super.key});
@@ -47,8 +47,8 @@ class _KnowledgeScreenState extends State<KnowledgeScreen> {
 
   void _addKnowledge(String knowledgeName, String description) async {
     bool isSuccess =
-        await Provider.of<KnowledgeBaseProvider>(context, listen: false)
-            .addKnowledgeBase(knowledgeName, description);
+    await Provider.of<KnowledgeBaseProvider>(context, listen: false)
+        .addKnowledgeBase(knowledgeName, description);
 
     if (isSuccess) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -78,8 +78,8 @@ class _KnowledgeScreenState extends State<KnowledgeScreen> {
   void _editKnowledge(
       String id, int index, String knowledgeName, String description) async {
     bool isSuccess =
-        await Provider.of<KnowledgeBaseProvider>(context, listen: false)
-            .editKnowledgeBase(id, index, knowledgeName, description);
+    await Provider.of<KnowledgeBaseProvider>(context, listen: false)
+        .editKnowledgeBase(id, index, knowledgeName, description);
 
     if (isSuccess) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -140,8 +140,8 @@ class _KnowledgeScreenState extends State<KnowledgeScreen> {
 
   void _removeKnowledge(String id, int index) async {
     bool isSuccess =
-        await Provider.of<KnowledgeBaseProvider>(context, listen: false)
-            .deleteKnowledgeBase(id, index);
+    await Provider.of<KnowledgeBaseProvider>(context, listen: false)
+        .deleteKnowledgeBase(id, index);
 
     if (isSuccess) {
       ScaffoldMessenger.of(context).showSnackBar(

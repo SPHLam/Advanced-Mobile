@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:jarvis/models/response/my_aibot_message_response.dart';
-import 'package:jarvis/utils/exceptions/chat_exception.dart';
-import 'package:jarvis/viewmodels/bot_view_model.dart';
-import 'package:jarvis/viewmodels/auth_view_model.dart';
+import 'package:project_ai_chat/models/response/my_aibot_message_response.dart';
+import 'package:project_ai_chat/utils/exceptions/chat_exception.dart';
+import 'package:project_ai_chat/viewmodels/bot_view_model.dart';
+import 'package:project_ai_chat/viewmodels/auth_view_model.dart';
+
 
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 
 class ChatWidget extends StatefulWidget {
   final bool isPreview;
@@ -100,8 +102,10 @@ class _ChatWidgetState extends State<ChatWidget> {
                           fontSize: 14,
                         ),
                         border: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.grey, width: 1),
-                          borderRadius: BorderRadius.circular(20),
+                          borderSide: BorderSide(
+                              color: Colors.grey, width: 1),
+                          borderRadius:
+                              BorderRadius.circular(20),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderSide: BorderSide(
@@ -169,8 +173,7 @@ class _ChatWidgetState extends State<ChatWidget> {
 
     // Username và avatar
     final String username = authViewModel.user?.username ?? 'User';
-    final String firstLetter =
-        username.isNotEmpty ? username[0].toUpperCase() : '';
+    final String firstLetter = username.isNotEmpty ? username[0].toUpperCase() : '';
 
     // Tên assistant
     final String assistantName = botViewModel.currentChatBot.assistantName;
@@ -191,38 +194,36 @@ class _ChatWidgetState extends State<ChatWidget> {
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
         child: Column(
-          crossAxisAlignment:
-              isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          crossAxisAlignment: isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                isUser
-                    ? Container(
-                        width: 30,
-                        height: 30,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.blue,
-                        ),
-                        child: Center(
-                          child: Text(
-                            firstLetter,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                      )
-                    : ClipOval(
-                        child: Image.asset(
-                        'assets/logo/default-bot.png',
-                        width: 30,
-                        height: 30,
-                        fit: BoxFit.cover,
-                      )),
+                isUser ? Container(
+                  width: 30,
+                  height: 30,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.blue,
+                  ),
+                  child: Center(
+                    child: Text(
+                      firstLetter,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                )
+                : ClipOval(child: Image.asset(
+                    'assets/logo/default-bot.png',
+                    width: 30,
+                    height: 30,
+                    fit: BoxFit.cover,
+                  )
+                ),
                 const SizedBox(width: 8),
                 // Tên
                 Text(
@@ -247,9 +248,7 @@ class _ChatWidgetState extends State<ChatWidget> {
               child: Consumer<BotViewModel>(
                 builder: (context, messageModel, child) {
                   // Hiển thị loading nếu là tin nhắn model rỗng và đang trong trạng thái gửi
-                  if (!isUser &&
-                      message.content.isEmpty &&
-                      messageModel.isSending) {
+                  if (!isUser && message.content.isEmpty && messageModel.isSending) {
                     return Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -258,8 +257,7 @@ class _ChatWidgetState extends State<ChatWidget> {
                           height: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.blue),
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -278,32 +276,32 @@ class _ChatWidgetState extends State<ChatWidget> {
                     children: [
                       isUser
                           ? Text(
-                              message.content,
-                              style: TextStyle(
-                                color: isError ? Colors.red : Colors.black,
-                              ),
-                            )
+                        message.content,
+                        style: TextStyle(
+                          color: isError ? Colors.red : Colors.black,
+                        ),
+                      )
                           : MarkdownBody(
-                              data: message.content,
-                              styleSheet: MarkdownStyleSheet(
-                                p: TextStyle(
-                                  color: isError ? Colors.red : Colors.black,
-                                ),
-                                a: const TextStyle(
-                                  color: Colors.blue,
-                                  decoration: TextDecoration.underline,
-                                ),
-                                listBullet: TextStyle(
-                                  color: isError ? Colors.red : Colors.black,
-                                ),
-                              ),
-                              selectable: true,
-                              onTapLink: (text, href, title) {
-                                if (href != null) {
-                                  _launchURL(href);
-                                }
-                              },
-                            ),
+                        data: message.content,
+                        styleSheet: MarkdownStyleSheet(
+                          p: TextStyle(
+                            color: isError ? Colors.red : Colors.black,
+                          ),
+                          a: const TextStyle(
+                            color: Colors.blue,
+                            decoration: TextDecoration.underline,
+                          ),
+                          listBullet: TextStyle(
+                            color: isError ? Colors.red : Colors.black,
+                          ),
+                        ),
+                        selectable: true,
+                        onTapLink: (text, href, title) {
+                          if (href != null) {
+                            _launchURL(href);
+                          }
+                        },
+                      ),
                     ],
                   );
                 },

@@ -1,12 +1,12 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
-import 'package:jarvis/models/response/api_response.dart';
-import 'package:jarvis/utils/exceptions/chat_exception.dart';
-import 'package:jarvis/models/response/chat_response.dart';
-import 'package:jarvis/models/response/conversation_history_response.dart';
-import 'package:jarvis/models/response/message_response.dart';
-import 'package:jarvis/models/response/token_usage_response.dart';
-import 'package:jarvis/utils/dio/dio_jarvis.dart';
+import 'package:project_ai_chat/models/response/api_response.dart';
+import 'package:project_ai_chat/utils/exceptions/chat_exception.dart';
+import 'package:project_ai_chat/models/response/chat_response.dart';
+import 'package:project_ai_chat/models/response/conversation_history_response.dart';
+import 'package:project_ai_chat/models/response/message_response.dart';
+import 'package:project_ai_chat/models/response/token_usage_response.dart';
+import 'package:project_ai_chat/utils/dio/dio_jarvis.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
@@ -31,8 +31,7 @@ class ChatService {
         "metadata": {
           "conversation": {
             "id": conversationId ?? const Uuid().v4(),
-            "messages":
-                previousMessages?.map((msg) => msg.toJson()).toList() ?? [],
+            "messages": previousMessages?.map((msg) => msg.toJson()).toList() ?? [],
           }
         },
         "assistant": {
@@ -61,9 +60,7 @@ class ChatService {
       print('Message: ${e.message}');
 
       throw ChatException(
-        message: e.response?.data?['message'] ??
-            e.message ??
-            'Lỗi kết nối tới server',
+        message: e.response?.data?['message'] ?? e.message ?? 'Lỗi kết nối tới server',
         statusCode: e.response?.statusCode ?? 500,
       );
     }
@@ -79,7 +76,7 @@ class ChatService {
     try {
       // Tải file lên Firebase Storage và lấy download URL
       final requestFiles = [];
-      for (var file in files) {
+      for(var file in files){
         requestFiles.add(file);
       }
 
@@ -90,8 +87,7 @@ class ChatService {
         "metadata": {
           "conversation": {
             "id": conversationId ?? const Uuid().v4(),
-            "messages":
-                previousMessages?.map((msg) => msg.toJson()).toList() ?? [],
+            "messages": previousMessages?.map((msg) => msg.toJson()).toList() ?? [],
           }
         },
         "assistant": {
@@ -120,9 +116,7 @@ class ChatService {
       print('Message: ${e.message}');
 
       throw ChatException(
-        message: e.response?.data?['message'] ??
-            e.message ??
-            'Lỗi kết nối tới server',
+        message: e.response?.data?['message'] ?? e.message ?? 'Lỗi kết nối tới server',
         statusCode: e.response?.statusCode ?? 500,
       );
     }
@@ -137,7 +131,7 @@ class ChatService {
       // Tải file lên Firebase Storage và lấy download URL
       final requestFiles = <String>[];
       if (files != null && files.isNotEmpty) {
-        for (var file in files) {
+        for(var file in files){
           requestFiles.add(file);
         }
       }
@@ -179,9 +173,7 @@ class ChatService {
       print('Message: ${e.message}');
 
       throw ChatException(
-        message: e.response?.data?['message'] ??
-            e.message ??
-            'Lỗi kết nối tới server',
+        message: e.response?.data?['message'] ?? e.message ?? 'Lỗi kết nối tới server',
         statusCode: e.response?.statusCode ?? 500,
       );
     }
@@ -270,9 +262,7 @@ class ChatService {
       print('Message: ${e.message}');
 
       throw ChatException(
-        message: e.response?.data?['message'] ??
-            e.message ??
-            'Lỗi kết nối tới server',
+        message: e.response?.data?['message'] ?? e.message ?? 'Lỗi kết nối tới server',
         statusCode: e.response?.statusCode ?? 500,
       );
     }
@@ -294,9 +284,7 @@ class ChatService {
       }
     } on DioException catch (e) {
       throw ChatException(
-        message: e.response?.data?['message'] ??
-            e.message ??
-            'Lỗi kết nối tới server',
+        message: e.response?.data?['message'] ?? e.message ?? 'Lỗi kết nối tới server',
         statusCode: e.response?.statusCode ?? 500,
       );
     }
@@ -338,9 +326,7 @@ class ChatService {
       print('Message: ${e.message}');
 
       throw ChatException(
-        message: e.response?.data?['message'] ??
-            e.message ??
-            'Lỗi kết nối tới server',
+        message: e.response?.data?['message'] ?? e.message ?? 'Lỗi kết nối tới server',
         statusCode: e.response?.statusCode ?? 500,
       );
     }
@@ -389,9 +375,7 @@ class ChatService {
       print('Message: ${e.message}');
 
       throw ChatException(
-        message: e.response?.data?['message'] ??
-            e.message ??
-            'Lỗi kết nối tới server',
+        message: e.response?.data?['message'] ?? e.message ?? 'Lỗi kết nối tới server',
         statusCode: e.response?.statusCode ?? 500,
       );
     }

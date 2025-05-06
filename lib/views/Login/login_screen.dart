@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:jarvis/views/HomeChat/home.dart';
-import 'package:jarvis/views/Register/register_screen.dart';
-import 'package:jarvis/constants/colors.dart';
-import 'package:jarvis/constants/image_strings.dart';
-import 'package:jarvis/constants/sizes.dart';
-import 'package:jarvis/constants/text_strings.dart';
-import 'package:jarvis/core/Widget/elevated_button.dart';
-import 'package:jarvis/core/Widget/outlined_button.dart';
-import 'package:jarvis/services/analytics_service.dart';
-import 'package:jarvis/viewmodels/auth_view_model.dart';
+import 'package:project_ai_chat/views/HomeChat/home.dart';
+import 'package:project_ai_chat/views/Register/register_screen.dart';
+import 'package:project_ai_chat/constants/colors.dart';
+import 'package:project_ai_chat/constants/image_strings.dart';
+import 'package:project_ai_chat/constants/sizes.dart';
+import 'package:project_ai_chat/constants/text_strings.dart';
+import 'package:project_ai_chat/core/Widget/elevated_button.dart';
+import 'package:project_ai_chat/core/Widget/outlined_button.dart';
+import 'package:project_ai_chat/services/analytics_service.dart';
+import 'package:project_ai_chat/viewmodels/auth_view_model.dart';
 import 'package:provider/provider.dart';
 
 import '../ForgetPassword/forget_password.dart';
-import 'package:jarvis/utils/validators/login_validator.dart';
+import 'package:project_ai_chat/utils/validators/login_validator.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -180,8 +180,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) =>
-                                        ForgetPasswordScreen(),
+                                    builder: (context) => ForgetPasswordScreen(),
                                   ),
                                 );
                               },
@@ -203,10 +202,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                 padding: const EdgeInsets.symmetric(
                                     vertical: tButtonHeight),
                               ),
-                              onPressed:
-                                  context.watch<AuthViewModel>().isLoading
-                                      ? null
-                                      : _login,
+                              onPressed: context.watch<AuthViewModel>().isLoading
+                                  ? null
+                                  : _login,
                               child: context.watch<AuthViewModel>().isLoading
                                   ? const CircularProgressIndicator()
                                   : const Text('LOGIN'),

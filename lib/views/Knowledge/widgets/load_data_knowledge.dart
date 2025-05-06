@@ -1,10 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:jarvis/views/Knowledge/widgets/form_load_data.dart';
-import 'package:jarvis/views/Knowledge/widgets/form_load_data_confluence.dart';
-import 'package:jarvis/views/Knowledge/widgets/form_load_data_ggdrive.dart';
-import 'package:jarvis/views/Knowledge/widgets/form_load_data_slack.dart';
-import 'package:jarvis/views/Knowledge/widgets/form_load_data_web.dart';
+import 'package:project_ai_chat/views/Knowledge/widgets/form_load_data.dart';
+import 'package:project_ai_chat/views/Knowledge/widgets/form_load_data_confluence.dart';
+import 'package:project_ai_chat/views/Knowledge/widgets/form_load_data_ggdrive.dart';
+import 'package:project_ai_chat/views/Knowledge/widgets/form_load_data_slack.dart';
+import 'package:project_ai_chat/views/Knowledge/widgets/form_load_data_web.dart';
 
 class LoadDataKnowledge extends StatefulWidget {
   const LoadDataKnowledge({
@@ -28,13 +28,13 @@ class _LoadDataKnowledgeState extends State<LoadDataKnowledge> {
       'title': 'Local files',
       'subtitle': 'Upload pdf, docx, ...',
       'image':
-          'https://icon-library.com/images/files-icon-png/files-icon-png-10.jpg'
+      'https://icon-library.com/images/files-icon-png/files-icon-png-10.jpg'
     },
     {
       'title': 'Google drive',
       'subtitle': 'Connect Google drive to get data',
       'image':
-          'https://static-00.iconduck.com/assets.00/google-drive-icon-1024x1024-h7igbgsr.png'
+      'https://static-00.iconduck.com/assets.00/google-drive-icon-1024x1024-h7igbgsr.png'
     },
     {
       'title': 'Website',
@@ -45,13 +45,13 @@ class _LoadDataKnowledgeState extends State<LoadDataKnowledge> {
       'title': 'Slack',
       'subtitle': 'Connect Slack to get data',
       'image':
-          'https://static-00.iconduck.com/assets.00/slack-icon-2048x2048-vhdso1nk.png'
+      'https://static-00.iconduck.com/assets.00/slack-icon-2048x2048-vhdso1nk.png'
     },
     {
       'title': 'Confluence',
       'subtitle': 'Connect Confluence to get data',
       'image':
-          'https://static.wixstatic.com/media/f9d4ea_637d021d0e444d07bead34effcb15df1~mv2.png/v1/fill/w_340,h_340,al_c,lg_1,q_85,enc_auto/Apt-website-icon-confluence.png'
+      'https://static.wixstatic.com/media/f9d4ea_637d021d0e444d07bead34effcb15df1~mv2.png/v1/fill/w_340,h_340,al_c,lg_1,q_85,enc_auto/Apt-website-icon-confluence.png'
     },
   ];
 
@@ -78,29 +78,29 @@ class _LoadDataKnowledgeState extends State<LoadDataKnowledge> {
       showDialog(
           context: context,
           builder: (context) => FormLoadDataGGDrive(
-                addNewData: _addNewFile,
-              ));
+            addNewData: _addNewFile,
+          ));
     } else if (_selectedIndex == 2) {
       showDialog(
           context: context,
           builder: (context) => FormLoadDataWeb(
-                addNewData: _addNewFile,
-                knowledgeId: widget.knowledgeId,
-              ));
+            addNewData: _addNewFile,
+            knowledgeId: widget.knowledgeId,
+          ));
     } else if (_selectedIndex == 3) {
       showDialog(
           context: context,
           builder: (context) => FormLoadDataSlack(
-                addNewData: _addNewFile,
-                knowledgeId: widget.knowledgeId,
-              ));
+            addNewData: _addNewFile,
+            knowledgeId: widget.knowledgeId,
+          ));
     } else if (_selectedIndex == 4) {
       showDialog(
           context: context,
           builder: (context) => FormLoadDataConfluence(
-                addNewData: _addNewFile,
-                knowledgeId: widget.knowledgeId,
-              ));
+            addNewData: _addNewFile,
+            knowledgeId: widget.knowledgeId,
+          ));
     }
   }
 
@@ -125,8 +125,7 @@ class _LoadDataKnowledgeState extends State<LoadDataKnowledge> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
                 side: BorderSide(
-                  color:
-                      isSelected ? Colors.blue : Colors.grey.withOpacity(0.2),
+                  color: isSelected ? Colors.blue : Colors.grey.withOpacity(0.2),
                   width: isSelected ? 2 : 1,
                 ),
               ),
@@ -154,8 +153,7 @@ class _LoadDataKnowledgeState extends State<LoadDataKnowledge> {
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
-                                color:
-                                    isSelected ? Colors.blue : Colors.black87,
+                                color: isSelected ? Colors.blue : Colors.black87,
                               ),
                             ),
                             Text(
