@@ -207,7 +207,7 @@ class _MenuState extends State<Menu> {
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4, offset: const Offset(0, 2))],
                 ),
-                child: Image.asset("assets/logoAI.png", height: 48),
+                child: Image.asset("assets/ic_launcher.png", height: 48),
               ),
               const SizedBox(width: 16),
               const Flexible(
