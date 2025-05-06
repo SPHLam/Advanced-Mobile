@@ -34,6 +34,11 @@ class AIChatList extends ChangeNotifier {
       logoPath: 'assets/logo/claude-3-sonnet.png',
       id: 'claude-3-sonnet-20240229',
     ),
+    AIItem(
+      name: 'Deepseek Chat',
+      logoPath: 'assets/logo/deepseek.png',
+      id: 'deepseek',
+    ),
   ];
 
   late AIItem _selectedAIItem;
