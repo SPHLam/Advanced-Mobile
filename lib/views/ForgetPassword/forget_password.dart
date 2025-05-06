@@ -35,7 +35,8 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
             child: Form(
               key: _formKey,
               child: Column(
@@ -43,7 +44,7 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                 children: [
                   Center(
                     child: Image.asset(
-                      "assets/ic_launcher.png",
+                      "assets/logoAI.png",
                       height: 100,
                     ),
                   ),
@@ -92,7 +93,7 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                       errorBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide:
-                        const BorderSide(color: Colors.redAccent, width: 2),
+                            const BorderSide(color: Colors.redAccent, width: 2),
                       ),
                       contentPadding: const EdgeInsets.symmetric(vertical: 16),
                     ),
