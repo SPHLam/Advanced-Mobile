@@ -303,19 +303,14 @@ class _NewBotState extends State<EditBot> {
                               ),
                             ),
                             child: const Row(
-                              mainAxisSize: MainAxisSize
-                                  .min, // Đảm bảo nút không chiếm toàn bộ chiều ngang
+                              mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(
                                   Icons.add,
                                   color: Colors.blue,
                                 ),
-                                SizedBox(
-                                    width: 8), // Khoảng cách giữa icon và text
-                                Text(
-                                  'Add Knowledge',
-                                  style: TextStyle(color: Colors.blue),
-                                ),
+                                SizedBox(width: 8),
+                                Text('Add Knowledge', style: TextStyle(color: Colors.blue)),
                               ],
                             ),
                           ),

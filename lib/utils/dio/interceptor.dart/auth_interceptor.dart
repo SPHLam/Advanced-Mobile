@@ -75,11 +75,9 @@ class AuthInterceptor extends Interceptor {
           ),
         );
 
-        if (response.statusCode == 200) {
-          final newAccessToken = response.data['access_token'];
-          await prefs.setString('accessToken', newAccessToken);
-          return true;
-        }
+        final newAccessToken = response.data['access_token'];
+        await prefs.setString('accessToken', newAccessToken);
+        return true;
       } catch (e) {
         print('Lỗi làm mới token: $e');
         return false;

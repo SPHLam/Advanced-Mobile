@@ -21,14 +21,6 @@ class Knowledge {
       imageUrl: "assets/images/open-book.png",
     );
   }
-
-  // Map<String, dynamic> toJson() {
-  //   return {
-  //     'title': title,
-  //     'id': id,
-  //     'createdAt': createdAt,
-  //   };
-  // }
 }
 
 class Unit {

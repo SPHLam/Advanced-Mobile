@@ -38,14 +38,8 @@ class EmailChatService {
 
       print('✅ RESPONSE DATA: ${response.data}');
 
-      if (response.statusCode == 200) {
-        return List<String>.from(response.data['ideas']);
-      } else {
-        throw ChatException(
-          message: 'Lỗi không xác định từ server',
-          statusCode: response.statusCode ?? 500,
-        );
-      }
+
+      return List<String>.from(response.data['ideas']);
     } on DioException catch (e) {
       throw ChatException(
         message: e.response?.data?['message'] ??
@@ -93,14 +87,7 @@ class EmailChatService {
 
       print('✅ RESPONSE DATA: ${response.data}');
 
-      if (response.statusCode == 200) {
-        return EmailChatResponse.fromJson(response.data);
-      } else {
-        throw ChatException(
-          message: 'Lỗi không xác định từ server',
-          statusCode: response.statusCode ?? 500,
-        );
-      }
+      return EmailChatResponse.fromJson(response.data);
     } on DioException catch (e) {
       throw ChatException(
         message: e.response?.data?['message'] ??

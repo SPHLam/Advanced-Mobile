@@ -12,7 +12,7 @@ class KnowledgeBaseProvider with ChangeNotifier {
 
   // loadmore kb
   int? _offset = 0;
-  int? _limit = 8;
+  int? _limit = 10;
   bool _hasNext = true;
   String _query = '';
   // load more kb
@@ -20,8 +20,9 @@ class KnowledgeBaseProvider with ChangeNotifier {
 
   // loadmore unit
   int? _offsetUnit = 0;
-  int? _limitUnit = 5;
+  int? _limitUnit = 10;
   bool _hasNextUnit = true;
+  String _queryUnit = '';
   // load more kb
   bool get hasNextUnit => _hasNextUnit;
 
@@ -29,6 +30,14 @@ class KnowledgeBaseProvider with ChangeNotifier {
     if (_query != value) {
       _query = value;
       fetchAllKnowledgeBases(isLoadMore: false);
+      notifyListeners();
+    }
+  }
+
+  Future<void> queryUnit(String value, String knowledgeId) async {
+    if (_queryUnit != value) {
+      _queryUnit = value;
+      fetchUnitsOfKnowledge(false, knowledgeId);
       notifyListeners();
     }
   }
@@ -62,7 +71,7 @@ class KnowledgeBaseProvider with ChangeNotifier {
     }
 
     final response =
-        await _kbService.getAllKnowledgeBases(_query, _offset, _limit);
+        await _kbService.getAllKnowledgeBases(_offset, _limit, _query);
 
     if (response.success && response.data != null) {
       if (isLoadMore == false) {
@@ -182,32 +191,35 @@ class KnowledgeBaseProvider with ChangeNotifier {
     }
   }
 
-  Future<bool> uploadLocalFile(File selectedFile, String knowledgeId) async {
+  Future<bool> uploadLocalFiles(List<File> selectedFiles, String knowledgeId) async {
     isLoading = true;
     error = null;
     notifyListeners();
 
     try {
       final response =
-          await _kbService.uploadLocalFile(selectedFile, knowledgeId);
+      await _kbService.uploadLocalFiles(selectedFiles, knowledgeId);
 
       if (response.success) {
         final knowledgeIndex =
-            _knowledgeBases.indexWhere((kb) => kb.id == knowledgeId);
+        _knowledgeBases.indexWhere((kb) => kb.id == knowledgeId);
 
         if (knowledgeIndex != -1) {
-          _knowledgeBases[knowledgeIndex].listUnits.add(
-                Unit(
-                  unitName: response.data['name'],
-                  unitId: response.data['id'],
-                  unitType: response.data['type'],
-                  isActived: true,
-                ),
-              );
+          final datasources = response.data['datasources'] as List<dynamic>;
+          for (var data in datasources) {
+            _knowledgeBases[knowledgeIndex].listUnits.add(
+              Unit(
+                unitName: data['name'],
+                unitId: data['id'],
+                unitType: data['type'],
+                isActived: true,
+              ),
+            );
+          }
         }
         return true;
       } else {
-        error = response.message ?? 'Đăng ký thất bại';
+        error = response.message ?? 'Failed to upload';
         return false;
       }
     } catch (e) {
@@ -219,8 +231,7 @@ class KnowledgeBaseProvider with ChangeNotifier {
     }
   }
 
-  Future<void> fetchUnitsOfKnowledge(
-      bool isLoadMore, String knowledgeId) async {
+  Future<void> fetchUnitsOfKnowledge(bool isLoadMore, String knowledgeId) async {
     if (isLoadMore && _hasNextUnit == false) {
       return;
     }
@@ -234,7 +245,7 @@ class KnowledgeBaseProvider with ChangeNotifier {
     }
 
     final response = await _kbService.getUnitsOfKnowledge(
-        knowledgeId, _offsetUnit, _limitUnit);
+        knowledgeId, _offsetUnit, _limitUnit, _queryUnit);
 
     if (response.success && response.data != null) {
       final knowledgeIndex =
@@ -279,6 +290,7 @@ class KnowledgeBaseProvider with ChangeNotifier {
 
     try {
       final response = await _kbService.deleteUnit(unitId, knowledgeId);
+      print("Is success ${response.success}");
 
       if (response.success) {
         final knowledgeIndex =
@@ -295,7 +307,7 @@ class KnowledgeBaseProvider with ChangeNotifier {
         }
         return true;
       } else {
-        error = response.message ?? 'Đăng ký thất bại';
+        error = response.message ?? 'Delete unit failed';
         return false;
       }
     } catch (e) {
@@ -314,7 +326,7 @@ class KnowledgeBaseProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await _kbService.updateStatusUnit(unitId, isActived);
+      final response = await _kbService.updateStatusUnit(knowledgeId, unitId, isActived);
 
       if (response.success) {
         final knowledgeIndex =
@@ -359,14 +371,15 @@ class KnowledgeBaseProvider with ChangeNotifier {
             _knowledgeBases.indexWhere((kb) => kb.id == knowledgeId);
 
         if (knowledgeIndex != -1) {
+          final data = response.data['datasources'][0];
           _knowledgeBases[knowledgeIndex].listUnits.add(
-                Unit(
-                  unitName: response.data['name'],
-                  unitId: response.data['id'],
-                  unitType: response.data['type'],
-                  isActived: true,
-                ),
-              );
+            Unit(
+              unitName: data['name'],
+              unitId: data['id'],
+              unitType: data['type'],
+              isActived: true,
+            ),
+          );
         }
         return true;
       } else {
@@ -382,29 +395,29 @@ class KnowledgeBaseProvider with ChangeNotifier {
     }
   }
 
-  Future<bool> uploadSlack(String knowledgeId, String slackName,
-      String slackWorkspace, String slackBotToken) async {
+  Future<bool> uploadSlack(String knowledgeId, String slackName, String slackBotToken) async {
     isLoading = true;
     error = null;
     notifyListeners();
 
     try {
       final response = await _kbService.uploadSlack(
-          knowledgeId, slackName, slackWorkspace, slackBotToken);
+          knowledgeId, slackName, slackBotToken);
 
       if (response.success) {
         final knowledgeIndex =
             _knowledgeBases.indexWhere((kb) => kb.id == knowledgeId);
 
         if (knowledgeIndex != -1) {
+          final data = response.data['datasources'][0];
           _knowledgeBases[knowledgeIndex].listUnits.add(
-                Unit(
-                  unitName: response.data['name'],
-                  unitId: response.data['id'],
-                  unitType: response.data['type'],
-                  isActived: true,
-                ),
-              );
+            Unit(
+              unitName: data['name'],
+              unitId: data['id'],
+              unitType: data['type'],
+              isActived: true,
+            ),
+          );
         }
         return true;
       } else {
@@ -420,29 +433,29 @@ class KnowledgeBaseProvider with ChangeNotifier {
     }
   }
 
-  Future<bool> uploadConfluence(String knowledgeId, String confluenceName,
-      String wikiPageUrl, String username, String accessToken) async {
+  Future<bool> uploadConfluence(String knowledgeId, String confluenceName, String wikiPageUrl, String username, String confluenceToken) async {
     isLoading = true;
     error = null;
     notifyListeners();
 
     try {
       final response = await _kbService.uploadConfluence(
-          knowledgeId, confluenceName, wikiPageUrl, username, accessToken);
+          knowledgeId, confluenceName, wikiPageUrl, username, confluenceToken);
 
       if (response.success) {
         final knowledgeIndex =
             _knowledgeBases.indexWhere((kb) => kb.id == knowledgeId);
 
         if (knowledgeIndex != -1) {
+          final data = response.data['datasources'][0];
           _knowledgeBases[knowledgeIndex].listUnits.add(
-                Unit(
-                  unitName: response.data['name'],
-                  unitId: response.data['id'],
-                  unitType: response.data['type'],
-                  isActived: true,
-                ),
-              );
+            Unit(
+              unitName: data['name'],
+              unitId: data['id'],
+              unitType: data['type'],
+              isActived: true,
+            ),
+          );
         }
         return true;
       } else {

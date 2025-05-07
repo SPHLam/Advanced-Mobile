@@ -19,7 +19,6 @@ class FormLoadDataSlack extends StatefulWidget {
 class _FormLoadDataSlackState extends State<FormLoadDataSlack> {
   final _formKey = GlobalKey<FormState>();
   String _enteredName = "";
-  String _enteredSlackWorkspace = "";
   String _enteredSlackBotToken = "";
   final String url = 'https://jarvis.cx/help/knowledge-base/connectors/slack/';
 
@@ -28,21 +27,20 @@ class _FormLoadDataSlackState extends State<FormLoadDataSlack> {
       _formKey.currentState!.save();
 
       bool isSuccess =
-          await Provider.of<KnowledgeBaseProvider>(context, listen: false)
-              .uploadSlack(widget.knowledgeId, _enteredName,
-                  _enteredSlackWorkspace, _enteredSlackBotToken);
+      await Provider.of<KnowledgeBaseProvider>(context, listen: false)
+          .uploadSlack(widget.knowledgeId, _enteredName, _enteredSlackBotToken);
 
       if (isSuccess) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Successfully connected '),
+            content: Text('Successfully connected'),
             backgroundColor: Colors.green,
           ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Fail connected '),
+            content: Text('Failed to connect'),
             backgroundColor: Colors.red,
           ),
         );
@@ -110,7 +108,7 @@ class _FormLoadDataSlackState extends State<FormLoadDataSlack> {
                     onTap: _openLink,
                     child: Container(
                       padding:
-                          EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                       decoration: BoxDecoration(
                         color: Colors.blue,
                         borderRadius: BorderRadius.circular(8),
@@ -139,7 +137,7 @@ class _FormLoadDataSlackState extends State<FormLoadDataSlack> {
                           borderSide: BorderSide.none,
                         ),
                         prefixIcon:
-                            Icon(Icons.file_open, color: Colors.blue.shade600),
+                        Icon(Icons.file_open, color: Colors.blue.shade600),
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -154,30 +152,6 @@ class _FormLoadDataSlackState extends State<FormLoadDataSlack> {
                     const SizedBox(height: 16),
                     TextFormField(
                       decoration: InputDecoration(
-                        labelText: 'Slack Workspace',
-                        hintText: 'Enter Slack Workspace',
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
-                        prefixIcon:
-                            Icon(Icons.work, color: Colors.blue.shade600),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please input slack workspace';
-                        }
-                        return null;
-                      },
-                      onSaved: (value) {
-                        _enteredSlackWorkspace = value!;
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      decoration: InputDecoration(
                         labelText: 'Slack Bot Token',
                         hintText: 'Enter Slack Bot Token',
                         filled: true,
@@ -187,8 +161,9 @@ class _FormLoadDataSlackState extends State<FormLoadDataSlack> {
                           borderSide: BorderSide.none,
                         ),
                         prefixIcon:
-                            Icon(Icons.vpn_key, color: Colors.blue.shade600),
+                        Icon(Icons.vpn_key, color: Colors.blue.shade600),
                       ),
+                      obscureText: true, // Che nội dung Slack Bot Token
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please input slack bot token';
@@ -242,20 +217,20 @@ class _FormLoadDataSlackState extends State<FormLoadDataSlack> {
                       builder: (context, kbProvider, child) {
                         return kbProvider.isLoading
                             ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                ),
-                              )
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                          ),
+                        )
                             : const Text(
-                                "Save",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              );
+                          "Save",
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        );
                       },
                     ),
                   ),

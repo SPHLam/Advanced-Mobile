@@ -29,16 +29,23 @@ class _BotScreenState extends State<BotScreen> {
     bool isCreated = await viewModel.createBot(newBot);
     if (isCreated) {
       viewModel.fetchBots();
-
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Create bot successful',
+            style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.green,
+        ),
+      );
     } else {
-      // Hiển thị thông báo lỗi nếu tạo bot không thành công
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
             'Create bot failed',
             style: TextStyle(color: Colors.white),
           ),
-          backgroundColor: Colors.blue[600],
+          backgroundColor: Colors.red,
         ),
       );
     }

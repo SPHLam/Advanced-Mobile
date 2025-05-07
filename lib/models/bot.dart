@@ -10,8 +10,6 @@ class Bot {
   final String openAiAssistantId;
   final String instructions;
   final String description;
-  final String openAiThreadIdPlay;
-  final String openAiVectorStoreId;
 
   Bot({
     required this.createdAt,
@@ -23,8 +21,7 @@ class Bot {
     required this.openAiAssistantId,
     required this.instructions,
     required this.description,
-    required this.openAiThreadIdPlay,
-    required this.openAiVectorStoreId,
+    // required this.openAiThreadIdPlay,
   });
 
   factory Bot.empty() {
@@ -38,8 +35,7 @@ class Bot {
       openAiAssistantId: '',
       instructions: '',
       description: '',
-      openAiThreadIdPlay: '',
-      openAiVectorStoreId: '',
+      // openAiThreadIdPlay: '',
     );
   }
 
@@ -54,8 +50,7 @@ class Bot {
       openAiAssistantId: json['openAiAssistantId'] ?? '',
       instructions: json['instructions'] ?? '',
       description: json['description'] ?? '',
-      openAiThreadIdPlay: json['openAiThreadIdPlay'] ?? '',
-      openAiVectorStoreId: json['openAiVectorStoreId'] ?? '',
+      // openAiThreadIdPlay: json['openAiThreadIdPlay'] ?? '',
     );
   }
 }

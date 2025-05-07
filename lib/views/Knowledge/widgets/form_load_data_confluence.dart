@@ -21,7 +21,7 @@ class _FormLoadDataConfluenceState extends State<FormLoadDataConfluence> {
   String _enteredName = "";
   String _enteredWikiPageUrl = "";
   String _enteredUsername = "";
-  String _enteredAccessToken = "";
+  String _enteredConfluenceToken = "";
   final String url = 'https://jarvis.cx/help/knowledge-base/connectors/confluence';
 
   void _saveFile() async {
@@ -29,9 +29,8 @@ class _FormLoadDataConfluenceState extends State<FormLoadDataConfluence> {
       _formKey.currentState!.save();
 
       bool isSuccess =
-          await Provider.of<KnowledgeBaseProvider>(context, listen: false)
-              .uploadConfluence(widget.knowledgeId, _enteredName,
-                  _enteredWikiPageUrl, _enteredUsername, _enteredAccessToken);
+      await Provider.of<KnowledgeBaseProvider>(context, listen: false)
+          .uploadConfluence(widget.knowledgeId, _enteredName, _enteredWikiPageUrl, _enteredUsername, _enteredConfluenceToken);
 
       if (isSuccess) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -111,7 +110,7 @@ class _FormLoadDataConfluenceState extends State<FormLoadDataConfluence> {
                     onTap: _openLink,
                     child: Container(
                       padding:
-                          EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                       decoration: BoxDecoration(
                         color: Colors.blue,
                         borderRadius: BorderRadius.circular(8),
@@ -140,7 +139,7 @@ class _FormLoadDataConfluenceState extends State<FormLoadDataConfluence> {
                           borderSide: BorderSide.none,
                         ),
                         prefixIcon:
-                            Icon(Icons.file_open, color: Colors.blue.shade600),
+                        Icon(Icons.file_open, color: Colors.blue.shade600),
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -156,7 +155,7 @@ class _FormLoadDataConfluenceState extends State<FormLoadDataConfluence> {
                     TextFormField(
                       decoration: InputDecoration(
                         labelText: 'Wiki Page URL',
-                        hintText: 'Enter Wiki Page URL',
+                        hintText: 'https://your-domain.atlassian.net',
                         filled: true,
                         fillColor: Colors.white,
                         border: OutlineInputBorder(
@@ -164,7 +163,7 @@ class _FormLoadDataConfluenceState extends State<FormLoadDataConfluence> {
                           borderSide: BorderSide.none,
                         ),
                         prefixIcon:
-                            Icon(Icons.link, color: Colors.blue.shade600),
+                        Icon(Icons.link, color: Colors.blue.shade600),
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -180,7 +179,7 @@ class _FormLoadDataConfluenceState extends State<FormLoadDataConfluence> {
                     TextFormField(
                       decoration: InputDecoration(
                         labelText: 'Confluence Username',
-                        hintText: 'Enter username',
+                        hintText: 'Enter confluence username',
                         filled: true,
                         fillColor: Colors.white,
                         border: OutlineInputBorder(
@@ -204,7 +203,7 @@ class _FormLoadDataConfluenceState extends State<FormLoadDataConfluence> {
                     TextFormField(
                       decoration: InputDecoration(
                         labelText: 'Confluence Access Token',
-                        hintText: 'Enter access token',
+                        hintText: 'Enter confluence token',
                         filled: true,
                         fillColor: Colors.white,
                         border: OutlineInputBorder(
@@ -212,7 +211,7 @@ class _FormLoadDataConfluenceState extends State<FormLoadDataConfluence> {
                           borderSide: BorderSide.none,
                         ),
                         prefixIcon:
-                            Icon(Icons.vpn_key, color: Colors.blue.shade600),
+                        Icon(Icons.vpn_key, color: Colors.blue.shade600),
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -221,7 +220,7 @@ class _FormLoadDataConfluenceState extends State<FormLoadDataConfluence> {
                         return null;
                       },
                       onSaved: (value) {
-                        _enteredAccessToken = value!;
+                        _enteredConfluenceToken = value!;
                       },
                     ),
                   ],
@@ -267,20 +266,20 @@ class _FormLoadDataConfluenceState extends State<FormLoadDataConfluence> {
                       builder: (context, kbProvider, child) {
                         return kbProvider.isLoading
                             ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                ),
-                              )
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                          ),
+                        )
                             : const Text(
-                                "Save",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              );
+                          "Save",
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        );
                       },
                     ),
                   ),
