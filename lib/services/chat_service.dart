@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:project_ai_chat/models/response/api_response.dart';
 import 'package:project_ai_chat/utils/exceptions/chat_exception.dart';
@@ -7,14 +6,12 @@ import 'package:project_ai_chat/models/response/conversation_history_response.da
 import 'package:project_ai_chat/models/response/message_response.dart';
 import 'package:project_ai_chat/models/response/token_usage_response.dart';
 import 'package:project_ai_chat/utils/dio/dio_jarvis.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
 class ChatService {
-  final SharedPreferences prefs;
   late final Dio dio;
 
-  ChatService({required this.prefs}) {
+  ChatService() {
     dio = DioJarvis().dio;
   }
 
@@ -154,18 +151,11 @@ class ChatService {
 
       print('✅ RESPONSE DATA: ${response.data}');
 
-      if (response.statusCode == 200) {
-        return ChatResponse(
-          conversationId: response.data['conversationId'],
-          message: response.data['message'],
-          remainingUsage: response.data['remainingUsage'],
-        );
-      } else {
-        throw ChatException(
-          message: 'Lỗi không xác định từ server',
-          statusCode: response.statusCode ?? 500,
-        );
-      }
+      return ChatResponse(
+        conversationId: response.data['conversationId'],
+        message: response.data['message'],
+        remainingUsage: response.data['remainingUsage'],
+      );
     } on DioException catch (e) {
       print('❌ DioException:');
       print('Status: ${e.response?.statusCode}');
@@ -191,20 +181,13 @@ class ChatService {
           'assistantModel': assistantModel,
         },
       );
-      if (response.statusCode == 200) {
-        return ApiResponse(
-          success: true,
-          data: response.data,
-          message: 'Lấy thông tin user thành công',
-          statusCode: response.statusCode ?? 200,
-        );
-      } else {
-        return ApiResponse(
-          success: false,
-          message: 'Lấy thông tin user thất bại',
-          statusCode: response.statusCode ?? 400,
-        );
-      }
+
+      return ApiResponse(
+        success: true,
+        data: response.data,
+        message: 'Lấy thông tin user thành công',
+        statusCode: response.statusCode ?? 200,
+      );
     } on DioException catch (e) {
       String errorMessage = '';
       if (e.response != null) {
@@ -274,14 +257,7 @@ class ChatService {
         '/tokens/usage',
       );
 
-      if (response.statusCode == 200) {
-        return TokenUsageResponse.fromJson(response.data);
-      } else {
-        throw ChatException(
-          message: 'Lỗi không xác định từ server',
-          statusCode: response.statusCode ?? 500,
-        );
-      }
+      return TokenUsageResponse.fromJson(response.data);
     } on DioException catch (e) {
       throw ChatException(
         message: e.response?.data?['message'] ?? e.message ?? 'Lỗi kết nối tới server',

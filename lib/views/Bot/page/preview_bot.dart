@@ -13,27 +13,17 @@ class PreviewScreen extends StatefulWidget {
 class _PreviewScreenState extends State<PreviewScreen> {
   void _handleRefreshChat() {
     // Thực hiện logic xóa dữ liệu hoặc làm mới chat
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Refresh Chat'),
-        content: const Text('Do you want to clear all chat data?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context), // Đóng dialog
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Provider.of<BotViewModel>(context, listen: false).updateAiBotWithThreadPlayGround();
-              Navigator.pop(context); // Đóng dialog
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Chat has been refreshed!')),
-              );
-            },
-            child: const Text('Confirm'),
-          ),
-        ],
+    // Provider.of<BotViewModel>(context, listen: false).updateAiBotWithThreadPlayGround();
+    Provider.of<BotViewModel>(context, listen: false).clearMessage();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Thread has been refreshed!'),
+        backgroundColor: Colors.green,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        margin: const EdgeInsets.all(10),
       ),
     );
   }

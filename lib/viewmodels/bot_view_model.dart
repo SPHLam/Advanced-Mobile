@@ -98,15 +98,6 @@ class BotViewModel extends ChangeNotifier {
     description: 'A test bot for demonstration.',
   );
 
-  // BotViewModel() {
-  //   init();
-  // }
-  //
-  // Future<void> init() async {
-  //   await fetchBots(); // Gọi phương thức fetch dữ liệu khi khởi tạo
-  //   notifyListeners();
-  // }
-
   Future<bool> fetchBots() async {
     if (_isLoading) return false;
 
@@ -200,17 +191,12 @@ class BotViewModel extends ChangeNotifier {
 
       String processedMessage;
       if (_isPreview) {
-        _currentOpenAiThreadId = _currentBot.openAiThreadIdPlay;
-        processedMessage = await _service.askAssistant(
-            _currentBot.id, _currentOpenAiThreadId, message);
+        // _currentOpenAiThreadId = _currentBot.openAiThreadIdPlay;
+        processedMessage = await _service.askAssistant(_currentBot.id, message);
       } else {
-        _currentOpenAiThreadId = await _service.getThread(_currentChatBot.id);
-        processedMessage = await _service.askAssistant(
-            _currentChatBot.id, _currentOpenAiThreadId, message);
+        // _currentOpenAiThreadId = await _service.getThread(_currentChatBot.id);
+        processedMessage = await _service.askAssistant(_currentChatBot.id, message);
       }
-
-      // Xử lý response.message để thêm bullet points và format markdown
-      //String processedMessage = response.message;
 
       // Xử lý pattern dạng "1. Tên - URL\nMô tả"
       final RegExp pattern =
@@ -221,10 +207,7 @@ class BotViewModel extends ChangeNotifier {
         final url = _removeHttpPrefix(match[3]!); // URL
         final desc = match[4]; // Mô tả
 
-        return '''$number$name- $url
-  • $desc
-
-''';
+        return '''$number$name- $url • $desc''';
       });
 
       _myAiBotMessages.removeLast(); // Xóa tin nhắn tạm
@@ -262,27 +245,27 @@ class BotViewModel extends ChangeNotifier {
     try {
       _isLoading = true;
       notifyListeners();
-      if (_isPreview) {
-        _currentOpenAiThreadId = _currentBot.openAiThreadIdPlay;
-      } else {
-        _currentOpenAiThreadId = await _service.getThread(_currentChatBot.id);
-      }
-      List<MyAiBotMessage>? response =
-          await _service.retrieveMessageOfThread(_currentOpenAiThreadId);
+      // if (_isPreview) {
+      //   _currentOpenAiThreadId = _currentBot.openAiThreadIdPlay;
+      // } else {
+      //   _currentOpenAiThreadId = await _service.getThread(_currentChatBot.id);
+      // }
+      // List<MyAiBotMessage>? response =
+      //     await _service.retrieveMessageOfThread(_currentOpenAiThreadId);
 
       _myAiBotMessages.clear(); // Xóa tin nhn cũ trước khi thêm lịch sử mới
 
-      if (response != null) {
-        // Xử lý messages nhận được
-        for (int i = response.length - 1; i >= 0; i--) {
-          var message = response[i];
-          _myAiBotMessages.add(MyAiBotMessage(
-            role: message.role,
-            content: message.content,
-            isErrored: false,
-          ));
-        }
-      }
+      // if (response != null) {
+      //   // Xử lý messages nhận được
+      //   for (int i = response.length - 1; i >= 0; i--) {
+      //     var message = response[i];
+      //     _myAiBotMessages.add(MyAiBotMessage(
+      //       role: message.role,
+      //       content: message.content,
+      //       isErrored: false,
+      //     ));
+      //   }
+      // }
     } catch (e) {
       print('❌ Error loading conversation history: $e');
       // Xử lý lỗi tương tự như các method khác
@@ -318,15 +301,20 @@ class BotViewModel extends ChangeNotifier {
     return false;
   }
 
-  Future<bool> updateAiBotWithThreadPlayGround() async {
-    Bot response =
-        await _service.updateAiBotWithThreadPlayGround(currentBot.id);
-    if (response.id != '') {
-      currentBot = response;
-      _myAiBotMessages.clear();
-      notifyListeners();
-      return true;
-    }
-    return false;
+  // Future<bool> updateAiBotWithThreadPlayGround() async {
+  //   Bot response =
+  //       await _service.updateAiBotWithThreadPlayGround(currentBot.id);
+  //   if (response.id != '') {
+  //     currentBot = response;
+  //     _myAiBotMessages.clear();
+  //     notifyListeners();
+  //     return true;
+  //   }
+  //   return false;
+  // }
+
+  void clearMessage() {
+    _myAiBotMessages.clear();
+    notifyListeners();
   }
 }

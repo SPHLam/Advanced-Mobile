@@ -37,24 +37,16 @@ void main() async {
     MultiProvider(
       providers: [
         Provider<ChatService>(
-          create: (_) => ChatService(
-            prefs: prefs,
-          ),
+          create: (_) => ChatService(),
         ),
         Provider<EmailChatService>(
           create: (_) => EmailChatService(),
         ),
         Provider<PromptService>(
-          create: (_) => PromptService(
-              // dio: dio,
-              // prefs: pre
-              ),
+          create: (_) => PromptService(),
         ),
         Provider<BotService>(
-          create: (_) => BotService(
-              // dio: dio,
-              // prefs: prefs,
-              ),
+          create: (_) => BotService(),
         ),
         ChangeNotifierProvider(
           create: (context) => HomeChatViewModel(

@@ -16,7 +16,7 @@ class NewKnowledge extends StatefulWidget {
 class _NewKnowledgeState extends State<NewKnowledge> {
   final _formKey = GlobalKey<FormState>();
   String _enteredName = "";
-  String _enteredPrompt = "";
+  String _enteredDescription = "";
 
   void _saveKnowledgeBase() {
     if (_formKey.currentState!.validate()) {
@@ -24,7 +24,7 @@ class _NewKnowledgeState extends State<NewKnowledge> {
 
       widget.addNewKnowledge(
         _enteredName,
-        _enteredPrompt,
+        _enteredDescription,
       );
 
       Navigator.pop(context);
@@ -130,14 +130,8 @@ class _NewKnowledgeState extends State<NewKnowledge> {
                     borderSide: const BorderSide(color: Colors.blue, width: 2),
                   ),
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please input the description';
-                  }
-                  return null;
-                },
                 onSaved: (value) {
-                  _enteredPrompt = value!;
+                  _enteredDescription = value ?? "";
                 },
               ),
               const SizedBox(height: 8),

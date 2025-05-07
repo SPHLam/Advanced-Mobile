@@ -69,11 +69,7 @@ class PromptService {
 
       print('✅ TOGGLE FAVORITE RESPONSE: ${response.statusCode}');
 
-      if (response.statusCode == 201 || response.statusCode == 200) {
-        return true;
-      } else {
-        return false;
-      }
+      return true;
     } on DioException catch (e) {
       print('❌ DioException khi toggle favorite:');
       print('Status: ${e.response?.statusCode}');
@@ -94,10 +90,7 @@ class PromptService {
 
       print('✅ DELETE PROMPT RESPONSE CODE: ${response.statusCode}');
 
-      if (response.statusCode == 201 || response.statusCode == 200) {
-        return true;
-      }
-      return false;
+      return true;
     } on DioException catch (e) {
       print('❌ DioException khi xóa prompt:');
       print('Status: ${e.response?.statusCode}');
@@ -123,11 +116,7 @@ class PromptService {
 
       print('✅ CREATE PROMPT RESPONSE: ${response.data}');
 
-      if (response.statusCode == 201 || response.statusCode == 200) {
-        return true;
-      } else {
-        return false;
-      }
+      return true;
     } on DioException catch (e) {
       print('❌ DioException:');
       print('Status: ${e.response?.statusCode}');
@@ -153,11 +142,7 @@ class PromptService {
 
       print('✅ UPDATE PROMPT RESPONSE: ${response.data}');
 
-      if (response.statusCode == 201 || response.statusCode == 200) {
-        return true;
-      } else {
-        return false;
-      }
+      return true;
     } on DioException catch (e) {
       print('❌ DioException:');
       print('Status: ${e.response?.statusCode}');

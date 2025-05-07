@@ -28,8 +28,6 @@ class _ChatWidgetState extends State<ChatWidget> {
   void initState() {
     super.initState();
 
-    //Provider.of<BotViewModel>(context, listen: false).isPreview = widget.isPreview;
-
     //Lắng nghe ô nhập dữ liệu
     _controller.addListener(() {
       setState(() {
@@ -40,12 +38,6 @@ class _ChatWidgetState extends State<ChatWidget> {
       });
     });
   }
-
-  // @override
-  // void didChangeDependencies() {
-  //   super.didChangeDependencies();
-  //   Provider.of<BotViewModel>(context, listen: false).isPreview = widget.isPreview;
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -154,7 +146,7 @@ class _ChatWidgetState extends State<ChatWidget> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            e is ChatException ? e.message : 'Có lỗi xảy ra khi gửi tin nhắn',
+            e is ChatException ? e.message : 'Error occurred when sending the message.',
           ),
           backgroundColor: Colors.red,
         ),

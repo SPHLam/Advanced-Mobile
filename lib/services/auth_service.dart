@@ -31,21 +31,13 @@ class AuthService {
         },
       );
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        return ApiResponse(
-          success: true,
-          message: 'Sign up successful',
-          data: response.data,
-          statusCode: response.statusCode ?? 200,
-        );
-      } else {
-        log('data: ${response.data}');
-        return ApiResponse(
-          success: false,
-          message: 'Sign up failed: ${response.data}',
-          statusCode: response.statusCode ?? 400,
-        );
-      }
+
+      return ApiResponse(
+        success: true,
+        message: 'Sign up successful',
+        data: response.data,
+        statusCode: response.statusCode ?? 200,
+      );
     } on DioException catch (e) {
       if (e.response != null) {
         final errorData = e.response!.data['error'];
@@ -86,20 +78,12 @@ class AuthService {
         },
       );
 
-      if (response.statusCode == 200) {
-        return ApiResponse(
-          success: true,
-          data: response.data,
-          message: 'Login successful',
-          statusCode: response.statusCode ?? 200,
-        );
-      } else {
-        return ApiResponse(
-          success: false,
-          message: 'Login failed',
-          statusCode: response.statusCode ?? 400,
-        );
-      }
+      return ApiResponse(
+        success: true,
+        data: response.data,
+        message: 'Login successful',
+        statusCode: response.statusCode ?? 200,
+      );
     } on DioException catch (e) {
       String errorMessage = 'Login failed';
       if (e.response != null) {
@@ -129,20 +113,13 @@ class AuthService {
   Future<ApiResponse> getCurrentUser(String accessToken) async {
     try {
       final response = await dio.get('/auth/me');
-      if (response.statusCode == 200) {
-        return ApiResponse(
-          success: true,
-          data: response.data,
-          message: 'Get user information successful',
-          statusCode: response.statusCode ?? 200,
-        );
-      } else {
-        return ApiResponse(
-          success: false,
-          message: 'Get user information failed',
-          statusCode: response.statusCode ?? 400,
-        );
-      }
+
+      return ApiResponse(
+        success: true,
+        data: response.data,
+        message: 'Get user information successful',
+        statusCode: response.statusCode ?? 200,
+      );
     } on DioException catch (e) {
       String errorMessage = 'Unauthorized';
       if (e.response != null) {
@@ -191,20 +168,13 @@ class AuthService {
         data: {},
       );
 
-      if (response.statusCode == 200) {
-        return ApiResponse(
-          success: true,
-          data: response.data,
-          message: 'Logout successful',
-          statusCode: response.statusCode ?? 200,
-        );
-      } else {
-        return ApiResponse(
-          success: false,
-          message: 'Logout failed',
-          statusCode: response.statusCode ?? 400,
-        );
-      }
+
+      return ApiResponse(
+        success: true,
+        data: response.data,
+        message: 'Logout successful',
+        statusCode: response.statusCode ?? 200,
+      );
     } on DioException catch (e) {
       String errorMessage = 'Unauthorized';
       if (e.response != null) {
@@ -228,14 +198,8 @@ class AuthService {
     try {
       final response = await dio.get('/subscriptions/me');
       print('✅ RESPONSE DATA SUBSCRIPTION: ${response.data}');
-      if (response.statusCode == 200) {
-        return SubscriptionResponse.fromJson(response.data);
-      } else {
-        throw ChatException(
-          message: 'Lỗi không xác định từ server',
-          statusCode: response.statusCode ?? 500,
-        );
-      }
+
+      return SubscriptionResponse.fromJson(response.data);
     } on DioException catch (e) {
       throw ChatException(
         message: e.response?.data?['message'] ??
@@ -252,14 +216,7 @@ class AuthService {
         '/tokens/usage',
       );
 
-      if (response.statusCode == 200) {
-        return TokenUsageResponse.fromJson(response.data);
-      } else {
-        throw ChatException(
-          message: 'Lỗi không xác định từ server',
-          statusCode: response.statusCode ?? 500,
-        );
-      }
+      return TokenUsageResponse.fromJson(response.data);
     } on DioException catch (e) {
       throw ChatException(
         message: e.response?.data?['message'] ??

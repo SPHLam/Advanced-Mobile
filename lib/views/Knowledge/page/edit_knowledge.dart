@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:project_ai_chat/views/Knowledge/widgets/load_data_knowledge.dart';
 import 'package:project_ai_chat/models/knowledge.dart';
 import 'package:project_ai_chat/viewmodels/knowledge_base_view_model.dart';
 import 'package:provider/provider.dart';
+import 'package:project_ai_chat/core/Widget/delete_confirm_dialog.dart';
 
 class EditKnowledge extends StatefulWidget {
   const EditKnowledge(
@@ -18,7 +18,7 @@ class EditKnowledge extends StatefulWidget {
 class _NewKnowledgeState extends State<EditKnowledge> {
   final _formKey = GlobalKey<FormState>();
   late ScrollController _scrollController;
-
+  final TextEditingController _searchController = TextEditingController();
   String _enteredName = "";
   String _enteredPrompt = "";
 
@@ -40,6 +40,13 @@ class _NewKnowledgeState extends State<EditKnowledge> {
               .fetchUnitsOfKnowledge(true, widget.knowledge.id);
         }
       });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _searchController.dispose();
+    super.dispose();
   }
 
   void _saveKnowledgeBase() {
@@ -79,22 +86,35 @@ class _NewKnowledgeState extends State<EditKnowledge> {
 
   void _removeFile(String newData) {}
 
+  void _showDeleteUnitDialog(BuildContext context, String unitId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return DeleteConfirmationDialog(
+          title: 'Delete Unit',
+          message: 'Are you sure you want to delete this unit?',
+          onConfirm: () => _removeUnit(unitId),
+        );
+      },
+    );
+  }
+
   void _removeUnit(String unitId) async {
     bool isSuccess =
-        await Provider.of<KnowledgeBaseProvider>(context, listen: false)
-            .deleteUnit(unitId, widget.knowledge.id);
+    await Provider.of<KnowledgeBaseProvider>(context, listen: false)
+        .deleteUnit(unitId, widget.knowledge.id);
 
     if (isSuccess) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Successfully deleted '),
+          content: Text('Delete unit successful'),
           backgroundColor: Colors.green,
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Fail deleted '),
+          content: Text('Delete unit failed'),
           backgroundColor: Colors.red,
         ),
       );
@@ -104,6 +124,59 @@ class _NewKnowledgeState extends State<EditKnowledge> {
   void _toggleUnitStatus(String unitId, bool isActive) async {
     await Provider.of<KnowledgeBaseProvider>(context, listen: false)
         .updateStatusUnit(widget.knowledge.id, unitId, isActive);
+  }
+
+  void _onSearch(String query) {
+    Provider.of<KnowledgeBaseProvider>(context, listen: false)
+        .queryUnit(query.trim(), widget.knowledge.id);
+  }
+
+  void _showAddUnitsDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Add Knowledge Unit',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      icon: const Icon(Icons.close, color: Colors.black87),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                LoadDataKnowledge(
+                  addNewData: _addNewFile,
+                  removeData: _removeFile,
+                  knowledgeId: widget.knowledge.id,
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -200,28 +273,48 @@ class _NewKnowledgeState extends State<EditKnowledge> {
                             },
                           ),
                           const SizedBox(height: 24),
-                          const Text(
-                            'Add Units',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                'List Units',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                              ElevatedButton.icon(
+                                onPressed: _showAddUnitsDialog,
+                                icon: const Icon(Icons.add, size: 18, color: Colors.white),
+                                label: const Text('Add Unit'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.indigo,
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          TextField(
+                            controller: _searchController,
+                            decoration: InputDecoration(
+                              hintText: 'Search units...',
+                              filled: true,
+                              fillColor: Colors.grey[200],
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide.none,
+                              ),
+                              prefixIcon:
+                              const Icon(Icons.search, color: Colors.grey),
                             ),
+                            onChanged: _onSearch,
                           ),
-                          LoadDataKnowledge(
-                            addNewData: _addNewFile,
-                            removeData: _removeFile,
-                            knowledgeId: widget.knowledge.id,
-                          ),
-                          const SizedBox(height: 16),
-                          const Text(
-                            'List Units',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
-                            ),
-                          ),
+                          const SizedBox(height: 8),
                           Consumer<KnowledgeBaseProvider>(
                             builder: (context, kbProvider, child) {
                               Knowledge kb = kbProvider
@@ -257,70 +350,55 @@ class _NewKnowledgeState extends State<EditKnowledge> {
                                         return const Padding(
                                           padding: EdgeInsets.all(16.0),
                                           child: Center(
-                                              child:
-                                                  CircularProgressIndicator()),
+                                              child: CircularProgressIndicator()),
                                         );
                                       } else {
                                         return const SizedBox.shrink();
                                       }
                                     }
-                                    return Slidable(
-                                      endActionPane: ActionPane(
-                                        motion: const StretchMotion(),
-                                        children: [
-                                          SlidableAction(
-                                            onPressed: kbProvider.isLoading
-                                                ? null
-                                                : (context) {
-                                                    _removeUnit(kb
-                                                        .listUnits[index]
-                                                        .unitId);
+                                    return Card(
+                                      color: Colors.white,
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Row(
+                                          children: [
+                                            Image.network(
+                                              getImageByUnitType(
+                                                  kb.listUnits[index].unitType),
+                                              width: 34,
+                                              errorBuilder:
+                                                  (context, error, stackTrace) {
+                                                return const Icon(Icons.storage);
+                                              },
+                                            ),
+                                            const SizedBox(width: 10),
+                                            Expanded(
+                                              child: Text(
+                                                kb.listUnits[index].unitName,
+                                                style: const TextStyle(
+                                                    fontSize: 16),
+                                              ),
+                                            ),
+                                            Row(
+                                              children: [
+                                                Switch(
+                                                  value: kb.listUnits[index].isActived,
+                                                  onChanged: (bool value) {
+                                                    _toggleUnitStatus(kb.listUnits[index].unitId, value);
                                                   },
-                                            icon: Icons.delete,
-                                            backgroundColor: Colors.red,
-                                          ),
-                                        ],
-                                      ),
-                                      child: Card(
-                                        color: Colors.white,
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Row(
-                                            children: [
-                                              Image.network(
-                                                getImageByUnitType(kb
-                                                    .listUnits[index].unitType),
-                                                width: 34,
-                                                errorBuilder: (context, error,
-                                                    stackTrace) {
-                                                  return const Icon(
-                                                      Icons.storage);
-                                                },
-                                              ),
-                                              const SizedBox(width: 10),
-                                              Expanded(
-                                                child: Text(
-                                                  kb.listUnits[index].unitName,
-                                                  style: const TextStyle(
-                                                      fontSize: 16),
                                                 ),
-                                              ),
-                                              Row(
-                                                children: [
-                                                  Switch(
-                                                    value: kb.listUnits[index]
-                                                        .isActived,
-                                                    onChanged: (bool value) {
-                                                      _toggleUnitStatus(
-                                                          kb.listUnits[index]
-                                                              .unitId,
-                                                          value);
-                                                    },
+                                                IconButton(
+                                                  icon: Icon(
+                                                    Icons.delete,
+                                                    color: Colors.red.shade600,
                                                   ),
-                                                ],
-                                              )
-                                            ],
-                                          ),
+                                                  onPressed: kbProvider.isLoading ? null : () {
+                                                    _showDeleteUnitDialog(context, kb.listUnits[index].unitId);
+                                                  },
+                                                ),
+                                              ],
+                                            ),
+                                          ],
                                         ),
                                       ),
                                     );
