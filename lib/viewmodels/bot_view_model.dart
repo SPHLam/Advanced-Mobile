@@ -4,11 +4,13 @@ import 'package:project_ai_chat/models/bot_request.dart';
 import 'package:project_ai_chat/models/knowledge.dart';
 import 'package:project_ai_chat/models/response/my_aibot_message_response.dart';
 import 'package:project_ai_chat/services/bot_service.dart';
+import 'package:project_ai_chat/services/chat_service.dart';
 import 'package:project_ai_chat/utils/exceptions/chat_exception.dart';
 import '../models/bot_list.dart';
 
 class BotViewModel extends ChangeNotifier {
   final BotService _service = BotService();
+  final ChatService _chatService = ChatService();
   BotList _botList = BotList.empty();
 
 ////  Chat with My AI-BOT
@@ -21,19 +23,15 @@ class BotViewModel extends ChangeNotifier {
   bool _isSending = false;
   List<Knowledge> _knowledgeList = [];
   bool _isPreview = false;
+  int _remainingUsage = 50;
 
   bool get isChatWithMyBot => _isChatWithMyBot;
-
+  int get remainingUsage => _remainingUsage;
   List<MyAiBotMessage> get myAiBotMessages => _myAiBotMessages;
-
   Bot get currentBot => _currentBot;
-
   Bot get currentChatBot => _currentChatBot;
-
   bool get isSending => _isSending;
-
   List<Knowledge> get knowledgeList => _knowledgeList;
-
   bool get isPreview => _isPreview;
 
   set isChatWithMyBot(bool value) {
@@ -71,17 +69,11 @@ class BotViewModel extends ChangeNotifier {
   bool _isCreated = false;
 
   BotList get botList => _botList;
-
   bool get isLoading => _isLoading;
-
   bool get isLoadingMore => _isLoadingMore;
-
   bool get hasError => error != null;
-
   bool get hasNext => _hasNext;
-
   String get query => _query;
-
   bool get isCreated => _isCreated;
 
   set query(String value) {
@@ -170,7 +162,7 @@ class BotViewModel extends ChangeNotifier {
     return url.replaceAll(RegExp(r'^(https?:\/\/)?(www\.)?'), '');
   }
 
-  Future<void> askAssistant(String message) async {
+  Future<void> askAssistant(String message, {List<String>? files}) async {
     try {
       _isSending = true;
 
@@ -178,6 +170,7 @@ class BotViewModel extends ChangeNotifier {
       _myAiBotMessages.add(MyAiBotMessage(
         role: 'user',
         content: message,
+        files: files,
         isErrored: false,
       ));
 
@@ -195,7 +188,14 @@ class BotViewModel extends ChangeNotifier {
         processedMessage = await _service.askAssistant(_currentBot.id, message);
       } else {
         // _currentOpenAiThreadId = await _service.getThread(_currentChatBot.id);
-        processedMessage = await _service.askAssistant(_currentChatBot.id, message);
+        final response = await _chatService.sendMessage(
+          content: message,
+          files: files,
+          assistantId: _currentChatBot.id,
+          model: "knowledge-base",
+        );
+        processedMessage = response.message;
+        _remainingUsage = response.remainingUsage;
       }
 
       // Xử lý pattern dạng "1. Tên - URL\nMô tả"
@@ -312,9 +312,4 @@ class BotViewModel extends ChangeNotifier {
   //   }
   //   return false;
   // }
-
-  void clearMessage() {
-    _myAiBotMessages.clear();
-    notifyListeners();
-  }
 }

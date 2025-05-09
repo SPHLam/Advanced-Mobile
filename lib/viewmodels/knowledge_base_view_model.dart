@@ -433,14 +433,14 @@ class KnowledgeBaseProvider with ChangeNotifier {
     }
   }
 
-  Future<bool> uploadConfluence(String knowledgeId, String confluenceName, String wikiPageUrl, String username, String confluenceToken) async {
+  Future<bool> uploadConfluence(String knowledgeId, String confluenceName, String wikiPageUrl, String confluenceEmail, String confluenceToken) async {
     isLoading = true;
     error = null;
     notifyListeners();
 
     try {
       final response = await _kbService.uploadConfluence(
-          knowledgeId, confluenceName, wikiPageUrl, username, confluenceToken);
+          knowledgeId, confluenceName, wikiPageUrl, confluenceEmail, confluenceToken);
 
       if (response.success) {
         final knowledgeIndex =

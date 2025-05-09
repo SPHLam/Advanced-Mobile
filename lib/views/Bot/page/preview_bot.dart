@@ -14,7 +14,7 @@ class _PreviewScreenState extends State<PreviewScreen> {
   void _handleRefreshChat() {
     // Thực hiện logic xóa dữ liệu hoặc làm mới chat
     // Provider.of<BotViewModel>(context, listen: false).updateAiBotWithThreadPlayGround();
-    Provider.of<BotViewModel>(context, listen: false).clearMessage();
+    Provider.of<BotViewModel>(context, listen: false).loadConversationHistory();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: const Text('Thread has been refreshed!'),

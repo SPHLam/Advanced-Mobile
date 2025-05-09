@@ -20,7 +20,7 @@ class _FormLoadDataConfluenceState extends State<FormLoadDataConfluence> {
   final _formKey = GlobalKey<FormState>();
   String _enteredName = "";
   String _enteredWikiPageUrl = "";
-  String _enteredUsername = "";
+  String _enteredConfluenceEmail = "";
   String _enteredConfluenceToken = "";
   final String url = 'https://jarvis.cx/help/knowledge-base/connectors/confluence';
 
@@ -30,19 +30,19 @@ class _FormLoadDataConfluenceState extends State<FormLoadDataConfluence> {
 
       bool isSuccess =
       await Provider.of<KnowledgeBaseProvider>(context, listen: false)
-          .uploadConfluence(widget.knowledgeId, _enteredName, _enteredWikiPageUrl, _enteredUsername, _enteredConfluenceToken);
+          .uploadConfluence(widget.knowledgeId, _enteredName, _enteredWikiPageUrl, _enteredConfluenceEmail, _enteredConfluenceToken);
 
       if (isSuccess) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Successfully connected '),
+            content: Text('Successfully connected'),
             backgroundColor: Colors.green,
           ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Fail connected '),
+            content: Text('Fail connected'),
             backgroundColor: Colors.red,
           ),
         );
@@ -178,8 +178,8 @@ class _FormLoadDataConfluenceState extends State<FormLoadDataConfluence> {
                     const SizedBox(height: 16),
                     TextFormField(
                       decoration: InputDecoration(
-                        labelText: 'Confluence Username',
-                        hintText: 'Enter confluence username',
+                        labelText: 'Confluence Email',
+                        hintText: 'Enter confluence email',
                         filled: true,
                         fillColor: Colors.white,
                         border: OutlineInputBorder(
@@ -191,12 +191,12 @@ class _FormLoadDataConfluenceState extends State<FormLoadDataConfluence> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please input confluence username';
+                          return 'Please input confluence email';
                         }
                         return null;
                       },
                       onSaved: (value) {
-                        _enteredUsername = value!;
+                        _enteredConfluenceEmail = value!;
                       },
                     ),
                     const SizedBox(height: 16),

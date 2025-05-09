@@ -179,4 +179,44 @@ class AuthViewModel extends ChangeNotifier {
       print('❌ Error fetching token usage: $e');
     }
   }
+
+  Future<bool> loginGoogle({
+    required String code,
+    required String codeVerifier,
+  }) async {
+    isLoading = true;
+    error = null;
+    notifyListeners();
+
+    try {
+      final response = await _authService.loginGoogle(code, codeVerifier);
+
+      if (response.success && response.data != null) {
+        final prefs = await SharedPreferences.getInstance();
+        // Lưu access token
+        if (response.data['access_token'] != null) {
+          await prefs.setString('accessToken', response.data['access_token']);
+        }
+        // Lưu refresh token
+        if (response.data['refresh_token'] != null) {
+          await prefs.setString('refreshToken', response.data['refresh_token']);
+        }
+
+        isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        error = response.message ?? 'Login Google failed';
+        isLoading = false;
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      print('Login Google error: $e');
+      error = e.toString();
+      isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
 }
