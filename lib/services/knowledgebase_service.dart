@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:project_ai_chat/models/response/api_response.dart';
 import 'package:project_ai_chat/utils/dio/dio_knowledge_base.dart';
+import 'package:mime/mime.dart';
 
 class KnowledgebaseService {
   final dioKB = DioKnowledgeBase().dio;
@@ -166,11 +167,16 @@ class KnowledgebaseService {
       // Step 1: Upload all files to get identifiers
       final formData = FormData.fromMap({
         'files': await Future.wait(
-          selectedFiles.map((file) async => await MultipartFile.fromFile(
-            file.path,
-            filename: file.path.split('/').last,
-            contentType: DioMediaType('application', 'pdf'),
-          )),
+          selectedFiles.asMap().entries.map((entry) async {
+            final file = entry.value;
+            final fileName = file.path.split('/').last;
+            final binaryData = await file.readAsBytes();
+            return MultipartFile.fromBytes(
+              binaryData,
+              filename: fileName,
+              contentType: DioMediaType.parse(lookupMimeType(fileName) ?? 'application/octet-stream'),
+            );
+          }).toList(),
         ),
       });
 
@@ -183,14 +189,6 @@ class KnowledgebaseService {
           },
         ),
       );
-
-      if (uploadResponse.statusCode != 200 && uploadResponse.statusCode != 201) {
-        return ApiResponse(
-          success: false,
-          message: 'Failed to upload files: ${uploadResponse.data}',
-          statusCode: uploadResponse.statusCode ?? 400,
-        );
-      }
 
       final fileIds = (uploadResponse.data['files'] as List<dynamic>)
           .map((file) => file['id'])
@@ -466,7 +464,7 @@ class KnowledgebaseService {
   }
 
   Future<ApiResponse> uploadConfluence(
-      String knowledgeId, String confluenceName, String wikiPageUrl, String username, String confluenceToken) async {
+      String knowledgeId, String confluenceName, String wikiPageUrl, String confluenceEmail, String confluenceToken) async {
     try {
       final payload = {
         'datasources': [{
@@ -475,7 +473,7 @@ class KnowledgebaseService {
           'credentials': {
             'token': confluenceToken,
             'url': wikiPageUrl,
-            'username': username,
+            'username': confluenceEmail,
           },
         }],
       };

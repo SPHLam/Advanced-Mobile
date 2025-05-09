@@ -1,5 +1,8 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:project_ai_chat/viewmodels/emailchat_view_model.dart';
 import 'package:project_ai_chat/views/Account/pages/account_screen.dart';
 import 'package:project_ai_chat/views/Bot/page/bot_screen.dart';
 import 'package:project_ai_chat/core/Widget/chat_widget.dart';
@@ -292,6 +295,7 @@ class _HomeChatState extends State<HomeChat> {
   @override
   Widget build(BuildContext context) {
     final botModel = context.watch<BotViewModel>();
+    final emailModel = context.watch<EmailChatViewModel>();
     return Screenshot(
       controller: _screenshotController,
       child: Scaffold(
@@ -316,16 +320,13 @@ class _HomeChatState extends State<HomeChat> {
                         ),
                         const Spacer(),
                         !botModel.isChatWithMyBot
-                        ? SizedBox(
-                          width: 155,
-                          child: AIDropdown(
-                            listAIItems: _listAIItem,
-                            onChanged: (String? newValue) {
-                              if (newValue != null) {
-                                _updateSelectedAIItem(newValue);
-                              }
-                            },
-                          ),
+                        ? AIDropdown(
+                          listAIItems: _listAIItem,
+                          onChanged: (String? newValue) {
+                            if (newValue != null) {
+                              _updateSelectedAIItem(newValue);
+                            }
+                          },
                         ) : Expanded(
                           child: Container(
                             decoration: BoxDecoration(
@@ -335,43 +336,62 @@ class _HomeChatState extends State<HomeChat> {
                             height: 30,
                             padding: const EdgeInsets.symmetric(horizontal: 10),
                             child: Center(
-                              child: Text(
-                                botModel.currentChatBot.assistantName,
-                                style: const TextStyle(fontSize: 12, overflow: TextOverflow.ellipsis,),
-                                maxLines: 1,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Flexible(
+                                    child: Text(
+                                      botModel.currentChatBot.assistantName,
+                                      style: const TextStyle(fontSize: 12),
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
+                                    ),
+                                  ),
+                                  Row(children: [
+                                    const Icon(
+                                      Icons.flash_on,
+                                      color: Colors.orange,
+                                      size: 16,
+                                    ),
+                                    const Text(
+                                      '5',
+                                      style: TextStyle(fontSize: 12),
+                                    ),
+                                  ])
+                                ],
                               ),
                             ),
                           ),
                         ),
                         const Spacer(),
-                        if (!botModel.isChatWithMyBot)
-                          Container(
-                            padding: EdgeInsets.all(5),
-                            decoration: BoxDecoration(
-                              color: const Color.fromARGB(255, 238, 240, 243),
-                              borderRadius: BorderRadius.circular(12.0),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  Icons.flash_on,
+                        Container(
+                          padding: EdgeInsets.all(5),
+                          decoration: BoxDecoration(
+                            color: const Color.fromARGB(255, 238, 240, 243),
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.flash_on,
+                                color: Colors.orange,
+                                size: 20,
+                              ),
+                              messageModel.maxTokens == 99999 && messageModel.maxTokens != null
+                              ? const Text(
+                                "Unlimited",
+                                style: TextStyle(
+                                  fontSize: 10,
                                   color: Colors.orange,
                                 ),
-                                messageModel.maxTokens == 99999 && messageModel.maxTokens != null
-                                ? const Text(
-                                  "Unlimited",
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color: Colors.orange,
-                                  ),
-                                )
-                                : Text(
-                                    '${messageModel.remainingUsage}',
-                                    style: const TextStyle(color: Color.fromRGBO(119, 117, 117, 1.0)),
-                                  ),
-                              ],
-                            ),
+                              )
+                              : Text(
+                                  '${[messageModel.remainingUsage, botModel.remainingUsage, emailModel.remainingUsage ?? 99999].reduce((a, b) => a < b ? a : b)}',
+                                  style: const TextStyle(color: Color.fromRGBO(119, 117, 117, 1.0)),
+                                ),
+                            ],
                           ),
+                        ),
                         IconButton(
                           icon: const Icon(Icons.add_circle_outline),
                           onPressed: () {
@@ -465,8 +485,7 @@ class _HomeChatState extends State<HomeChat> {
                                 ),
                                 const SizedBox(height: 5),
                               ],
-                            )
-                            : ChatWidget(),
+                            ) : ChatWidget()
                           ),
                         ),
                       ],

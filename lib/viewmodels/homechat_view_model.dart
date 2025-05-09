@@ -12,7 +12,7 @@ class HomeChatViewModel extends ChangeNotifier {
   final List<Conversation> _conversations = [];
   final ChatService _chatService;
   String? _currentConversationId;
-  int _remainingUsage = 30;
+  int _remainingUsage = 50;
   int? _maxTokens;
   bool _isLoading = false;
   String? _errorMessage;
@@ -230,23 +230,16 @@ class HomeChatViewModel extends ChangeNotifier {
       ));
       notifyListeners();
       ChatResponse response;
-      // Gửi tin nhắn hoặc hình ảnh
-      if (files != null && files.isNotEmpty) {
-        response = await _chatService.sendImageMessages(
-          content: content,
-          files: files,
-          assistantId: assistant.id,
-          conversationId: _currentConversationId,
-          previousMessages: _messages,
-        );
-      } else {
-        response = await _chatService.sendMessage(
-          content: content,
-          assistantId: assistant.id,
-          conversationId: _currentConversationId,
-          previousMessages: _messages,
-        );
-      }
+      // Gửi tin nhắn
+      response = await _chatService.sendMessage(
+        content: content,
+        files: files,
+        assistantId: assistant.id,
+        model: "dify",
+        conversationId: _currentConversationId,
+        previousMessages: _messages,
+      );
+
       // Xử lý response.message để thêm bullet points và format markdown
       String processedMessage = response.message;
 
