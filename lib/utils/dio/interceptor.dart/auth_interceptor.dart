@@ -64,26 +64,23 @@ class AuthInterceptor extends Interceptor {
     final prefs = await SharedPreferences.getInstance();
     final refreshToken = prefs.getString('refreshToken');
 
-    if (refreshToken != null) {
-      try {
-        final response = await dioAuth.post(
-          '/auth/sessions/current/refresh',
-          options: Options(
-            headers: {
-              'X-Stack-Refresh-Token': refreshToken,
-            },
-          ),
-        );
+    try {
+      final response = await dioAuth.post(
+        '/auth/sessions/current/refresh',
+        options: Options(
+          headers: {
+            'X-Stack-Refresh-Token': refreshToken,
+          },
+        ),
+      );
 
-        final newAccessToken = response.data['access_token'];
-        await prefs.setString('accessToken', newAccessToken);
-        return true;
-      } catch (e) {
-        print('Lỗi làm mới token: $e');
-        return false;
-      }
+      final newAccessToken = response.data['access_token'];
+      await prefs.setString('accessToken', newAccessToken);
+      return true;
+    } catch (e) {
+      print('Lỗi làm mới token: $e');
+      return false;
     }
-    return false;
   }
 
   Future<void> _logout() async {

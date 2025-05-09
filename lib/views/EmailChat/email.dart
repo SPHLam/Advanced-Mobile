@@ -14,21 +14,25 @@ class EmailComposer extends StatefulWidget {
 }
 
 class _EmailComposerState extends State<EmailComposer> {
-  final TextEditingController _emailReceivedController = TextEditingController();
+  final TextEditingController _emailContentController = TextEditingController();
   final TextEditingController _aiActionController = TextEditingController();
   final TextEditingController _subjectController = TextEditingController();
   final TextEditingController _senderController = TextEditingController();
   final TextEditingController _receiverController = TextEditingController();
   final TextEditingController _languageController = TextEditingController();
-  late String selectedAIItem;
+  late String _selectedAIItem;
   late List<AIItem> _listAIItem;
   int? _token;
   final _formKey = GlobalKey<FormState>();
   String? _selectedIdea;
+
   @override
   void initState() {
     super.initState();
-    _listAIItem = Provider.of<AIChatList>(context, listen: false).aiItems;
+    final aiChatList = Provider.of<AIChatList>(context, listen: false);
+    _listAIItem = aiChatList.aiItems;
+    _selectedAIItem = aiChatList.selectedAIItem.name;
+
     int? maxtoken = Provider.of<HomeChatViewModel>(context, listen: false).maxTokens;
     if (maxtoken == 99999)
       _token = 99999;
@@ -67,9 +71,10 @@ class _EmailComposerState extends State<EmailComposer> {
       _aiActionController.text = draft;
     });
   }
+
   void _updateSelectedAIItem(String newValue) {
     setState(() {
-      selectedAIItem = newValue;
+      _selectedAIItem = newValue;
       AIItem aiItem = _listAIItem.firstWhere((aiItem) => aiItem.name == newValue);
 
       // Cập nhật selectedAIItem trong AIChatList
@@ -117,6 +122,7 @@ class _EmailComposerState extends State<EmailComposer> {
                   const Icon(
                     Icons.flash_on,
                     color: Colors.orange,
+                    size: 20,
                   ),
                   _token == 99999
                     ? const Text(
@@ -165,17 +171,37 @@ class _EmailComposerState extends State<EmailComposer> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              'Received Email',
-                              style: TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.bold),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Received Email',
+                                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                ),
+                                IconButton(
+                                  onPressed: () async {
+                                    if (_formKey.currentState!.validate()) {
+                                      final aiItem = _listAIItem.firstWhere((aiItem) => aiItem.name == _selectedAIItem);
+                                      await Provider.of<EmailChatViewModel>(context, listen: false).getEmailSuggestions(
+                                          action: _aiActionController.text,
+                                          email: _emailContentController.text,
+                                          subject: _subjectController.text,
+                                          sender: _senderController.text,
+                                          receiver: _receiverController.text,
+                                          language: _languageController.text);
+                                    }
+                                  },
+                                  icon: Icon(Icons.reply),
+                                  color: Colors.black87,
+                                ),
+                              ],
                             ),
                             SizedBox(height: 10),
                             buildTextFormField(
                                 'Action', _aiActionController, 1),
                             const SizedBox(height: 10),
                             buildTextFormField(
-                                'Email content', _emailReceivedController, 5),
+                                'Email content', _emailContentController, 5),
                             const SizedBox(height: 10),
                             buildTextFormField(
                                 'Subject', _subjectController, 1),
@@ -222,14 +248,10 @@ class _EmailComposerState extends State<EmailComposer> {
                                       ),
                                     ),
                                     onPressed: () async {
-                                      await Provider.of<EmailChatViewModel>(
-                                          context,
-                                          listen: false)
-                                          .fetchEmailResponse(
+                                      await Provider.of<EmailChatViewModel>(context, listen: false).fetchEmailResponse(
                                           mainIdea: idea,
                                           action: _aiActionController.text,
-                                          email:
-                                          _emailReceivedController.text,
+                                          email: _emailContentController.text,
                                           subject: _subjectController.text,
                                           sender: _senderController.text,
                                           receiver: _receiverController.text,
@@ -305,45 +327,6 @@ class _EmailComposerState extends State<EmailComposer> {
                         buildButton('Follow Up', () => _createDraft('Follow Up')),
                         buildButton('Request for more information', () => _createDraft('Request for more information')),
                       ],
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.grey[200],
-                              border: Border.all(color: Colors.grey, width: 1.0),
-                              borderRadius: BorderRadius.circular(12.0),
-                            ),
-                            child: TextField(
-                              decoration: InputDecoration(
-                                hintText: 'Enter your message...',
-                                border: InputBorder.none,
-                                contentPadding: EdgeInsets.symmetric(horizontal: 10),
-                              ),
-                            ),
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: () async {
-                            if (_formKey.currentState!.validate()) {
-                              await Provider.of<EmailChatViewModel>(context, listen: false).getEmailSuggestions(
-                                action: _aiActionController.text,
-                                email: _emailReceivedController.text,
-                                subject: _subjectController.text,
-                                sender: _senderController.text,
-                                receiver: _receiverController.text,
-                                language: _languageController.text);
-                            }
-                          },
-                          icon: Icon(Icons.send),
-                          color: Colors.black87,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 30,
                     ),
                   ],
                 ),

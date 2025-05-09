@@ -7,6 +7,7 @@ import 'package:project_ai_chat/models/response/message_response.dart';
 import 'package:project_ai_chat/models/response/token_usage_response.dart';
 import 'package:project_ai_chat/utils/dio/dio_jarvis.dart';
 import 'package:uuid/uuid.dart';
+import 'package:mime/mime.dart';
 
 class ChatService {
   late final Dio dio;
@@ -15,47 +16,31 @@ class ChatService {
     dio = DioJarvis().dio;
   }
 
-  Future<ChatResponse> sendMessage({
-    required String content,
-    required String assistantId,
-    String? conversationId,
-    List<Message>? previousMessages,
-  }) async {
+  Future<List<String>> uploadFiles(List<String> files) async {
     try {
-      // Log request data
-      final requestData = {
-        "content": content,
-        "metadata": {
-          "conversation": {
-            "id": conversationId ?? const Uuid().v4(),
-            "messages": previousMessages?.map((msg) => msg.toJson()).toList() ?? [],
-          }
-        },
-        "assistant": {
-          "id": assistantId,
-          "model": "dify",
-        }
-      };
+      final uploadedFiles = <String>[];
 
-      print('🚀 REQUEST DATA:');
-      print('URL: ${dio.options.baseUrl}/api/v1/ai-chat/messages');
-      print('Headers: ${dio.options.headers}');
-      print('Body: $requestData');
+      for (final file in files) {
+        final filename = file.split('/').last;
+        final mimeType = lookupMimeType(file) ?? 'application/octet-stream';
 
-      final response = await dio.post(
-        '/ai-chat/messages',
-        data: requestData,
-      );
+        // Upload file
+        final uploadResponse = await dio.post('/files/upload', data: {
+          'filename': filename,
+          'mimetype': mimeType,
+        });
 
-      print('✅ RESPONSE DATA: ${response.data}');
+        // Confirm upload
+        final successResponse = await dio.post('/files/upload/success', data: {
+          'filename': uploadResponse.data['path'],
+          'mimetype': mimeType,
+        });
 
-      return ChatResponse.fromJson(response.data);
+        uploadedFiles.add(successResponse.data['url']);
+      }
+
+      return uploadedFiles;
     } on DioException catch (e) {
-      print('❌ DioException:');
-      print('Status: ${e.response?.statusCode}');
-      print('Data: ${e.response?.data}');
-      print('Message: ${e.message}');
-
       throw ChatException(
         message: e.response?.data?['message'] ?? e.message ?? 'Lỗi kết nối tới server',
         statusCode: e.response?.statusCode ?? 500,
@@ -63,19 +48,19 @@ class ChatService {
     }
   }
 
-  Future<ChatResponse> sendImageMessages({
+  Future<ChatResponse> sendMessage({
     required String content,
-    required List<String> files,
+    List<String>? files,
     required String assistantId,
+    required String model,
     String? conversationId,
     List<Message>? previousMessages,
   }) async {
     try {
-      // Tải file lên Firebase Storage và lấy download URL
-      final requestFiles = [];
-      for(var file in files){
-        requestFiles.add(file);
-      }
+      // Restructure file paths
+      final requestFiles = files != null && files.isNotEmpty
+          ? await uploadFiles(files)
+          : [];
 
       // Log request data
       final requestData = {
@@ -83,13 +68,13 @@ class ChatService {
         "files": requestFiles,
         "metadata": {
           "conversation": {
-            "id": conversationId ?? const Uuid().v4(),
+            "id": conversationId,
             "messages": previousMessages?.map((msg) => msg.toJson()).toList() ?? [],
           }
         },
         "assistant": {
           "id": assistantId,
-          "model": "dify",
+          "model": model,
         }
       };
 
@@ -125,13 +110,10 @@ class ChatService {
     List<String>? files,
   }) async {
     try {
-      // Tải file lên Firebase Storage và lấy download URL
-      final requestFiles = <String>[];
-      if (files != null && files.isNotEmpty) {
-        for(var file in files){
-          requestFiles.add(file);
-        }
-      }
+      // Restructure file paths
+      final requestFiles = files != null && files.isNotEmpty
+          ? await uploadFiles(files)
+          : [];
 
       final requestData = {
         "assistant": {"id": assistantId, "model": "dify"},

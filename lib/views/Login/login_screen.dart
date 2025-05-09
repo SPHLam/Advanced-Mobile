@@ -92,19 +92,77 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _logInGoogle() async {
-    final GoogleSignIn googleSignIn = GoogleSignIn(
-      scopes: <String>[
-        'email',
-        'openid',
-      ],
-    );
+    try {
+      final GoogleSignIn googleSignIn = GoogleSignIn(
+        scopes: <String>[
+          'email',
+          'openid',
+        ],
+      );
 
-    // Get the user after successful sign in
-    final GoogleSignInAccount? googleAccount = await googleSignIn.signIn();
-    final GoogleSignInAuthentication googleAuthentication =
-        await googleAccount!.authentication;
-    print("token1: ${googleAuthentication.accessToken}");
-    print("token2: ${googleAuthentication.idToken}");
+      // Get the user after successful sign in
+      final GoogleSignInAccount? googleAccount = await googleSignIn.signIn();
+      if (googleAccount == null) {
+        // User cancelled the sign-in
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Đăng nhập Google bị hủy'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+
+      final GoogleSignInAuthentication googleAuthentication = await googleAccount.authentication;
+
+      print("GG access token: ${googleAuthentication.accessToken}");
+      print("GG id token: ${googleAuthentication.idToken}");
+
+      // Call the Google login method from AuthViewModel
+      final success = await Provider.of<AuthViewModel>(context, listen: false)
+          .loginGoogle(
+        code: googleAuthentication.idToken ?? '',
+        codeVerifier: googleAuthentication.accessToken ?? '',
+      );
+
+      // Log analytics event
+      AnalyticsService().logEvent(
+        "google_login",
+        {
+          "email": googleAccount.email,
+        },
+      );
+
+      if (success && mounted) {
+        // Navigate to HomeChat screen
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeChat()),
+        );
+      } else if (mounted) {
+        // Show error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                Provider.of<AuthViewModel>(context, listen: false).error ??
+                    'Đăng nhập Google thất bại'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        // Handle any unexpected errors
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override

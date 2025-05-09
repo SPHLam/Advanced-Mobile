@@ -65,7 +65,13 @@ class _FormLoadDataState extends State<FormLoadData> {
 
   Future<void> _pickFiles() async {
     final result = await FilePicker.platform.pickFiles(
-      type: FileType.any,
+      type: FileType.custom,
+      allowedExtensions: [
+        'c', 'cpp', 'csv', 'doc', 'docx', 'epub', 'gif', 'htm', 'html', 'java',
+        'jpeg', 'jpg', 'js', 'json', 'log', 'md', 'odp', 'ods', 'odt', 'pdf',
+        'php', 'png', 'ppt', 'pptx', 'py', 'rb', 'rtf', 'svg', 'tex', 'tif',
+        'tiff', 'tsv', 'txt', 'xls', 'xlsx', 'xml', 'yaml', 'yml'
+      ],
     );
 
     if (result != null && result.files.isNotEmpty && result.files.single.path != null) {
@@ -293,15 +299,13 @@ class _FormLoadDataState extends State<FormLoadData> {
                   ),
                   child: Consumer<KnowledgeBaseProvider>(
                     builder: (context, kbProvider, child) {
-                      return kbProvider.isLoading
-                          ? const SizedBox(
+                      return kbProvider.isLoading ? const SizedBox(
                         height: 20,
                         width: 20,
                         child: CircularProgressIndicator(
                           color: Colors.white,
                         ),
-                      )
-                          : const Text(
+                      ) : const Text(
                         "Save",
                         style: TextStyle(
                           fontSize: 16,

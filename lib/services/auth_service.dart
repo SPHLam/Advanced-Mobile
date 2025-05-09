@@ -226,4 +226,57 @@ class AuthService {
       );
     }
   }
+
+  Future<ApiResponse> loginGoogle(String code, String codeVerifier) async {
+    try {
+      final formData = {
+      'redirect_uri': 'https://dev.jarvis.cx/auth/handler/oauth-callback',
+      'code_verifier': codeVerifier,
+      'code': code,
+      'grant_type': 'authorization_code',
+      'client_id': 'a914f06b-5e46-4966-8693-80e4b9f4f409',
+      'client_secret': 'pck_tqsy29b64a585km2g4wnpc57ypjprzzdch8xzpq0xhayr',
+      };
+
+      final response = await dioAuth.post(
+        '/auth/oauth/token',
+        options: Options(
+            headers: {
+              'Content-Type': 'application/json',
+            }
+        ),
+        data: formData,
+      );
+
+      return ApiResponse(
+        success: true,
+        data: response.data,
+        message: 'Login successful',
+        statusCode: response.statusCode ?? 200,
+      );
+    } on DioException catch (e) {
+      String errorMessage = 'Login failed';
+      if (e.response != null) {
+        final errorData = e.response!.data['error'];
+
+        // Check for custom error messages in the response data
+        if (errorData.isNotEmpty) {
+          log('errorData: $errorData');
+          errorMessage = errorData;
+        }
+
+        return ApiResponse(
+          success: false,
+          message: errorMessage,
+          statusCode: e.response!.statusCode ?? 400,
+        );
+      }
+
+      return ApiResponse(
+        success: false,
+        message: errorMessage,
+        statusCode: e.response?.statusCode ?? 500,
+      );
+    }
+  }
 }
