@@ -14,6 +14,7 @@ class InputWidget extends StatefulWidget {
   final Function onTextChanged;
   final bool hasText;
   final Function(List<String>?) updateImagePaths;
+  final ScreenshotController screenshotController; // Nhận controller từ HomeChat
 
   InputWidget({
     Key? key,
@@ -25,6 +26,7 @@ class InputWidget extends StatefulWidget {
     required this.onTextChanged,
     required this.hasText,
     required this.updateImagePaths,
+    required this.screenshotController,
   }) : super(key: key);
 
   @override
@@ -32,7 +34,6 @@ class InputWidget extends StatefulWidget {
 }
 
 class _InputWidgetState extends State<InputWidget> {
-  final ScreenshotController _screenshotController = ScreenshotController();
   List<String>? imagePaths;
 
   Future<void> _openGallery() async {
@@ -68,16 +69,26 @@ class _InputWidgetState extends State<InputWidget> {
   }
 
   void _takeScreenshot() async {
-    final image = await _screenshotController.capture();
-    if (image != null) {
-      final directory = await getTemporaryDirectory();
-      final file = File('${directory.path}/screenshot.png');
-      await file.writeAsBytes(image);
-      setState(() {
-        imagePaths = [...(imagePaths ?? []), file.path];
-        widget.updateImagePaths(imagePaths);
-        widget.toggleDeviceVisibility();
-      });
+    try {
+      final image = await widget.screenshotController.capture();
+      if (image != null) {
+        final directory = await getTemporaryDirectory();
+        final file = File('${directory.path}/screenshot_${DateTime.now().millisecondsSinceEpoch}.png');
+        await file.writeAsBytes(image);
+        setState(() {
+          imagePaths = [...(imagePaths ?? []), file.path];
+          widget.updateImagePaths(imagePaths);
+          widget.toggleDeviceVisibility();
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Cannot take the screenshot')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error when taking the screenshot: $e')),
+      );
     }
   }
 
@@ -217,13 +228,15 @@ class _InputWidgetState extends State<InputWidget> {
         ),
         IconButton(
           icon: const Icon(Icons.send),
-          onPressed: widget.hasText ? () {
+          onPressed: widget.hasText || (imagePaths != null && imagePaths!.isNotEmpty)
+              ? () {
             widget.sendMessage();
             setState(() {
               imagePaths = null;
               widget.updateImagePaths(null);
             });
-          } : null,
+          }
+              : null,
           style: IconButton.styleFrom(
             foregroundColor: widget.hasText || (imagePaths != null && imagePaths!.isNotEmpty)
                 ? Colors.black

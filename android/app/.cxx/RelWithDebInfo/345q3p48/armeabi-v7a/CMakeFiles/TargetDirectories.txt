@@ -1,0 +1,2 @@
+D:/University/Fourth year/PTUDCTBDDNC/Advanced-Mobile/android/app/.cxx/RelWithDebInfo/345q3p48/armeabi-v7a/CMakeFiles/edit_cache.dir
+D:/University/Fourth year/PTUDCTBDDNC/Advanced-Mobile/android/app/.cxx/RelWithDebInfo/345q3p48/armeabi-v7a/CMakeFiles/rebuild_cache.dir

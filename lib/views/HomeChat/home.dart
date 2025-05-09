@@ -482,6 +482,7 @@ class _HomeChatState extends State<HomeChat> {
                                       _files = paths;
                                     });
                                   },
+                                  screenshotController: _screenshotController,
                                 ),
                                 const SizedBox(height: 5),
                               ],
