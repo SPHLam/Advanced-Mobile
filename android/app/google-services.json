@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:230147337499:android:0bb8ea72afbea50ab937be",
+        "mobilesdk_app_id": "1:230147337499:android:d932ed82901b3b62b937be",
         "android_client_info": {
-          "package_name": "com.group14.ai_chat"
+          "package_name": "com.chat.jarvis_copi"
         }
       },
       "oauth_client": [],
