@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:project_ai_chat/models/bot.dart';
 import 'package:project_ai_chat/models/bot_request.dart';
 import 'package:project_ai_chat/models/knowledge.dart';
@@ -312,4 +313,73 @@ class BotViewModel extends ChangeNotifier {
   //   }
   //   return false;
   // }
+
+  Future<bool> publishToSlack(String assistantId, String botToken, String clientId, String clientSecret, String signingSecret) async {
+    _isLoading = true;
+    error = null;
+    notifyListeners();
+
+    try {
+      final response = await _service.publishToSlack(assistantId, botToken, clientId, clientSecret, signingSecret);
+      if (response.success) {
+        await Clipboard.setData(ClipboardData(text: response.data['redirect']));
+        return true;
+      } else {
+        error = response.message;
+        return false;
+      }
+    } catch (e) {
+      error = e.toString();
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> publishToTelegram(String assistantId, String botToken) async {
+    _isLoading = true;
+    error = null;
+    notifyListeners();
+
+    try {
+      final response = await _service.publishToTelegram(assistantId, botToken);
+      if (response.success) {
+        await Clipboard.setData(ClipboardData(text: response.data['redirect']));
+        return true;
+      } else {
+        error = response.message;
+        return false;
+      }
+    } catch (e) {
+      error = e.toString();
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> publishToMessenger(String assistantId, String botToken, String pageId, String appSecret) async {
+    _isLoading = true;
+    error = null;
+    notifyListeners();
+
+    try {
+      final response = await _service.publishToMessenger(assistantId, botToken, pageId, appSecret);
+      if (response.success) {
+        await Clipboard.setData(ClipboardData(text: response.data['redirect']));
+        return true;
+      } else {
+        error = response.message;
+        return false;
+      }
+    } catch (e) {
+      error = e.toString();
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }

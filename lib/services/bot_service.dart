@@ -7,6 +7,7 @@ import 'package:project_ai_chat/utils/dio/dio_knowledge_base.dart';
 
 import '../models/bot.dart';
 import '../models/bot_list.dart';
+import '../models/response/api_response.dart';
 
 class BotService {
   final dioKB = DioKnowledgeBase().dio;
@@ -361,6 +362,98 @@ class BotService {
       );
 
       return knowledgeList;
+    } on DioException catch (e) {
+      // Log chi tiết lỗi
+      print('❌ DioException:');
+      print('Status: ${e.response?.statusCode}');
+      print('Data: ${e.response?.data}');
+      print('Message: ${e.message}');
+
+      // Ném ra ngoại lệ với thông điệp phù hợp
+      throw Exception(
+        e.response?.data?['message'] ?? e.message ?? 'Lỗi kết nối tới server',
+      );
+    }
+  }
+
+  Future<ApiResponse> publishToSlack(String assistantId, String botToken, String clientId, String clientSecret, String signingSecret) async {
+    try {
+      final response = await dioKB.post(
+        '/bot-integration/slack/publish/$assistantId',
+        data: {
+          "botToken": botToken,
+          "clientId": clientId,
+          "clientSecret": clientSecret,
+          "signingSecret": signingSecret,
+        }
+      );
+
+      return ApiResponse(
+        success: true,
+        message: 'Publish slack successfully',
+        data: response.data,
+        statusCode: response.statusCode ?? 200,
+      );
+    } on DioException catch (e) {
+      // Log chi tiết lỗi
+      print('❌ DioException:');
+      print('Status: ${e.response?.statusCode}');
+      print('Data: ${e.response?.data}');
+      print('Message: ${e.message}');
+
+      // Ném ra ngoại lệ với thông điệp phù hợp
+      throw Exception(
+        e.response?.data?['message'] ?? e.message ?? 'Lỗi kết nối tới server',
+      );
+    }
+  }
+
+  Future<ApiResponse> publishToTelegram(String assistantId, String botToken) async {
+    try {
+      final response = await dioKB.post(
+          '/bot-integration/telegram/publish/$assistantId',
+          data: {
+            "botToken": botToken,
+          }
+      );
+
+      return ApiResponse(
+        success: true,
+        message: 'Publish slack successfully',
+        data: response.data,
+        statusCode: response.statusCode ?? 200,
+      );
+    } on DioException catch (e) {
+      // Log chi tiết lỗi
+      print('❌ DioException:');
+      print('Status: ${e.response?.statusCode}');
+      print('Data: ${e.response?.data}');
+      print('Message: ${e.message}');
+
+      // Ném ra ngoại lệ với thông điệp phù hợp
+      throw Exception(
+        e.response?.data?['message'] ?? e.message ?? 'Lỗi kết nối tới server',
+      );
+    }
+  }
+
+  Future<ApiResponse> publishToMessenger(String assistantId, String botToken, String pageId, String appSecret) async {
+    try {
+      final response = await dioKB.post(
+          '/bot-integration/messenger/publish/$assistantId',
+          data: {
+            "botToken": botToken,
+            "pageId": pageId,
+            "appSecret": appSecret,
+          }
+      );
+
+      return ApiResponse(
+        success: true,
+        message: 'Publish slack successfully',
+        data: response.data,
+        statusCode: response.statusCode ?? 200,
+      );
     } on DioException catch (e) {
       // Log chi tiết lỗi
       print('❌ DioException:');

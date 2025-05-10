@@ -4,7 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:project_ai_chat/models/knowledge.dart';
 import 'package:project_ai_chat/services/knowledgebase_service.dart';
 
-class KnowledgeBaseProvider with ChangeNotifier {
+class KnowledgeBaseViewModel with ChangeNotifier {
   final KnowledgebaseService _kbService = KnowledgebaseService();
   final List<Knowledge> _knowledgeBases = [];
   bool isLoading = false;
@@ -116,7 +116,7 @@ class KnowledgeBaseProvider with ChangeNotifier {
         notifyListeners();
         return true;
       } else {
-        error = response.message ?? 'Đăng ký thất bại';
+        error = response.message;
         return false;
       }
     } catch (e) {
@@ -151,7 +151,7 @@ class KnowledgeBaseProvider with ChangeNotifier {
         notifyListeners();
         return true;
       } else {
-        error = response.message ?? 'Đăng ký thất bại';
+        error = response.message;
         return false;
       }
     } catch (e) {
@@ -179,7 +179,7 @@ class KnowledgeBaseProvider with ChangeNotifier {
         notifyListeners();
         return true;
       } else {
-        error = response.message ?? 'Đăng ký thất bại';
+        error = response.message;
         return false;
       }
     } catch (e) {
@@ -219,7 +219,7 @@ class KnowledgeBaseProvider with ChangeNotifier {
         }
         return true;
       } else {
-        error = response.message ?? 'Failed to upload';
+        error = response.message;
         return false;
       }
     } catch (e) {
@@ -344,7 +344,7 @@ class KnowledgeBaseProvider with ChangeNotifier {
         }
         return true;
       } else {
-        error = response.message ?? 'Đăng ký thất bại';
+        error = response.message;
         return false;
       }
     } catch (e) {
@@ -383,7 +383,7 @@ class KnowledgeBaseProvider with ChangeNotifier {
         }
         return true;
       } else {
-        error = response.message ?? 'Đăng ký thất bại';
+        error = response.message;
         return false;
       }
     } catch (e) {
@@ -421,7 +421,7 @@ class KnowledgeBaseProvider with ChangeNotifier {
         }
         return true;
       } else {
-        error = response.message ?? 'Đăng ký thất bại';
+        error = response.message;
         return false;
       }
     } catch (e) {
@@ -459,7 +459,7 @@ class KnowledgeBaseProvider with ChangeNotifier {
         }
         return true;
       } else {
-        error = response.message ?? 'Đăng ký thất bại';
+        error = response.message;
         return false;
       }
     } catch (e) {

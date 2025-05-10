@@ -12,6 +12,7 @@ import 'package:project_ai_chat/viewmodels/aichat_list_view_model.dart';
 import 'package:project_ai_chat/viewmodels/auth_view_model.dart';
 import 'package:project_ai_chat/views/Login/login_screen.dart';
 import 'package:project_ai_chat/core/Widget/delete_confirm_dialog.dart';
+import 'package:project_ai_chat/services/iap_service.dart';
 
 class Menu extends StatefulWidget {
   const Menu({super.key});
@@ -54,7 +55,7 @@ class _MenuState extends State<Menu> {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (_) => const LoginScreen()),
-        (_) => false,
+            (_) => false,
       );
     }
   }
@@ -89,7 +90,7 @@ class _MenuState extends State<Menu> {
     try {
       await Provider.of<HomeChatViewModel>(context, listen: false)
           .deleteConversationHistory(
-              conversationId: conversationId, assistantId: currentAI.id);
+          conversationId: conversationId, assistantId: currentAI.id);
       if (mounted)
         _showSnackBar('Conversation deleted successfully', Colors.green);
     } catch (e) {
@@ -102,9 +103,9 @@ class _MenuState extends State<Menu> {
     try {
       await Provider.of<HomeChatViewModel>(context, listen: false)
           .updateConversationTitle(
-              conversationId: conversationId,
-              assistantId: currentAI.id,
-              title: title);
+          conversationId: conversationId,
+          assistantId: currentAI.id,
+          title: title);
       if (mounted)
         _showSnackBar('Conversation renamed successfully', Colors.green);
     } catch (e) {
@@ -154,7 +155,7 @@ class _MenuState extends State<Menu> {
                     onPressed: () => Navigator.pop(context),
                     child: Text('Cancel',
                         style:
-                            TextStyle(fontSize: 16, color: Colors.grey[600])),
+                        TextStyle(fontSize: 16, color: Colors.grey[600])),
                   ),
                   ElevatedButton(
                     onPressed: () {
@@ -170,7 +171,7 @@ class _MenuState extends State<Menu> {
                     ),
                     child: Text(confirmText,
                         style:
-                            const TextStyle(fontSize: 16, color: Colors.white)),
+                        const TextStyle(fontSize: 16, color: Colors.white)),
                   ),
                 ],
               ),
@@ -179,6 +180,19 @@ class _MenuState extends State<Menu> {
         ),
       ),
     );
+  }
+
+  Future<void> _purchaseProUpgrade() async {
+    try {
+      final iapManager = Provider.of<IAPManager>(context, listen: false);
+      if (iapManager.canPurchase) {
+        await iapManager.buyProUpgrade();
+      } else {
+        _showSnackBar('PRO subscription is still active', Colors.grey);
+      }
+    } catch (e) {
+      _showSnackBar('Purchase error: $e', Colors.red);
+    }
   }
 
   @override
@@ -272,31 +286,43 @@ class _MenuState extends State<Menu> {
   }
 
   Widget _buildMainMenuSection() {
-    return Column(
-      children: [
-        _buildMenuItemCard(
-          icon: Icons.play_lesson,
-          title: "Knowledge Bases",
-          index: 1,
-          color: Colors.indigo,
-          onTap: () => Navigator.push(context,
-              MaterialPageRoute(builder: (_) => const KnowledgeScreen())),
-        ),
-        _buildMenuItemCard(
-          icon: Icons.verified_sharp,
-          title: "Upgrade Version",
-          index: 2,
-          color: Colors.amber[700]!,
-          onTap: () async {
-            final url = Uri.parse(linkUpgrade);
-            if (await canLaunchUrl(url)) {
-              await launchUrl(url);
-            } else {
-              _showSnackBar('Cannot open link!', Colors.red);
-            }
-          },
-        ),
-      ],
+    return Consumer<IAPManager>(
+      builder: (context, iapManager, _) {
+        return Column(
+          children: [
+            _buildMenuItemCard(
+              icon: Icons.play_lesson,
+              title: "Knowledge Bases",
+              index: 1,
+              color: Colors.indigo,
+              onTap: () => Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => const KnowledgeScreen())),
+            ),
+            _buildMenuItemCard(
+              icon: Icons.verified_sharp,
+              title: "Upgrade Version",
+              index: 2,
+              color: Colors.amber[700]!,
+              onTap: () async {
+                final url = Uri.parse(linkUpgrade);
+                if (await canLaunchUrl(url)) {
+                  await launchUrl(url);
+                } else {
+                  _showSnackBar('Cannot open link!', Colors.red);
+                }
+              },
+            ),
+            _buildMenuItemCard(
+              icon: Icons.payment,
+              title: "In-app Purchase",
+              index: 3,
+              color: Colors.green,
+              onTap: iapManager.canPurchase ? _purchaseProUpgrade : () {},
+              isEnabled: iapManager.canPurchase,
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -311,26 +337,26 @@ class _MenuState extends State<Menu> {
               Expanded(
                 child: _isSearching
                     ? TextField(
-                        controller: _searchController,
-                        decoration: InputDecoration(
-                          hintText: 'Search...',
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12)),
-                          suffixIcon: IconButton(
-                            icon: const Icon(Icons.clear),
-                            onPressed: () {
-                              setState(() {
-                                _searchController.clear();
-                                _isSearching = false;
-                              });
-                            },
-                          ),
-                        ),
-                        autofocus: true,
-                      )
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Search...',
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        setState(() {
+                          _searchController.clear();
+                          _isSearching = false;
+                        });
+                      },
+                    ),
+                  ),
+                  autofocus: true,
+                )
                     : const Text('All Conversations',
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold)),
+                    style: TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold)),
               ),
               IconButton(
                 icon: Icon(_isSearching ? Icons.search_off : Icons.search,
@@ -353,16 +379,16 @@ class _MenuState extends State<Menu> {
                 return Center(
                     child: Text(model.errorMessage ?? 'Server error',
                         style:
-                            const TextStyle(color: Colors.red, fontSize: 16)));
+                        const TextStyle(color: Colors.red, fontSize: 16)));
               }
 
               final conversations = _searchController.text.isEmpty
                   ? model.conversations
                   : model.conversations
-                      .where((c) => c.title
-                          .toLowerCase()
-                          .contains(_searchController.text.toLowerCase()))
-                      .toList();
+                  .where((c) => c.title
+                  .toLowerCase()
+                  .contains(_searchController.text.toLowerCase()))
+                  .toList();
 
               return ListView.builder(
                 controller: _scrollController,
@@ -380,7 +406,7 @@ class _MenuState extends State<Menu> {
 
                   return Card(
                     margin:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                     elevation: 2,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
@@ -392,11 +418,11 @@ class _MenuState extends State<Menu> {
                             child: GestureDetector(
                               onTap: () async {
                                 await Provider.of<HomeChatViewModel>(context,
-                                        listen: false)
+                                    listen: false)
                                     .loadConversationHistory(
-                                        currentAI.id, conversation.id);
+                                    currentAI.id, conversation.id);
                                 Provider.of<BotViewModel>(context,
-                                        listen: false)
+                                    listen: false)
                                     .isChatWithMyBot = false;
                                 Navigator.pop(context);
                               },
@@ -451,6 +477,7 @@ class _MenuState extends State<Menu> {
     required int index,
     required Color color,
     required VoidCallback onTap,
+    bool isEnabled = true,
   }) {
     final isSelected = index == _selectedIndex;
     return Padding(
@@ -463,10 +490,12 @@ class _MenuState extends State<Menu> {
               color: isSelected ? color : Colors.transparent, width: 2),
         ),
         child: InkWell(
-          onTap: () {
+          onTap: isEnabled
+              ? () {
             setState(() => _selectedIndex = index);
             onTap();
-          },
+          }
+              : null,
           borderRadius: BorderRadius.circular(12),
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
@@ -475,19 +504,23 @@ class _MenuState extends State<Menu> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                      color: color.withOpacity(0.1),
+                      color: color.withOpacity(isEnabled ? 0.1 : 0.05),
                       borderRadius: BorderRadius.circular(8)),
-                  child: Icon(icon, color: color),
+                  child: Icon(icon, color: isEnabled ? color : Colors.grey),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                    child: Text(title,
-                        style: TextStyle(
-                            fontWeight: isSelected
-                                ? FontWeight.bold
-                                : FontWeight.normal,
-                            fontSize: 16))),
-                Icon(Icons.chevron_right, color: Colors.grey[400], size: 20),
+                    child: Text(
+                      title,
+                      style: TextStyle(
+                          fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.normal,
+                          fontSize: 16,
+                          color: isEnabled ? null : Colors.grey),
+                    )),
+                Icon(Icons.chevron_right,
+                    color: isEnabled ? Colors.grey[400] : Colors.grey[200],
+                    size: 20),
               ],
             ),
           ),
@@ -509,11 +542,12 @@ class RenameDialog extends StatefulWidget {
   final String currentName;
   final Future<void> Function(String, String) onRename;
 
-  const RenameDialog(
-      {super.key,
-      required this.diaryId,
-      required this.currentName,
-      required this.onRename});
+  const RenameDialog({
+    super.key,
+    required this.diaryId,
+    required this.currentName,
+    required this.onRename,
+  });
 
   @override
   State<RenameDialog> createState() => _RenameDialogState();
@@ -571,7 +605,7 @@ class _RenameDialogState extends State<RenameDialog> {
                     onPressed: () => Navigator.pop(context),
                     child: Text('Cancel',
                         style:
-                            TextStyle(fontSize: 16, color: Colors.grey[600])),
+                        TextStyle(fontSize: 16, color: Colors.grey[600])),
                   ),
                   ElevatedButton(
                     onPressed: () async {
@@ -582,7 +616,7 @@ class _RenameDialogState extends State<RenameDialog> {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                               content:
-                                  Text('Conversation name cannot be empty'),
+                              Text('Conversation name cannot be empty'),
                               backgroundColor: Colors.red),
                         );
                       }

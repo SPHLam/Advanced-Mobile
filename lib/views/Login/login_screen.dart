@@ -107,7 +107,7 @@ class _LoginScreenState extends State<LoginScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Đăng nhập Google bị hủy'),
+              content: Text('Login with Google canceled'),
               backgroundColor: Colors.red,
             ),
           );

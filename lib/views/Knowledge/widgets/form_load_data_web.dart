@@ -27,7 +27,7 @@ class _FormLoadDataWebState extends State<FormLoadDataWeb> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
       bool isSuccess =
-          await Provider.of<KnowledgeBaseProvider>(context, listen: false)
+          await Provider.of<KnowledgeBaseViewModel>(context, listen: false)
               .uploadWebUrl(widget.knowledgeId, _enteredName, _enteredWebUrl);
 
       if (isSuccess) {
@@ -217,7 +217,7 @@ class _FormLoadDataWebState extends State<FormLoadDataWeb> {
                       ),
                       elevation: 3,
                     ),
-                    child: Consumer<KnowledgeBaseProvider>(
+                    child: Consumer<KnowledgeBaseViewModel>(
                       builder: (context, kbProvider, child) {
                         return kbProvider.isLoading
                             ? const SizedBox(

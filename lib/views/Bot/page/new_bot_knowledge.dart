@@ -24,7 +24,7 @@ class _NewBotKnowledgeState extends State<NewBotKnowledge> {
         // Khi cuộn đến cuối danh sách
         if (_scrollController.position.pixels ==
             _scrollController.position.maxScrollExtent) {
-          Provider.of<KnowledgeBaseProvider>(context, listen: false)
+          Provider.of<KnowledgeBaseViewModel>(context, listen: false)
               .fetchAllKnowledgeBases(isLoadMore: true);
         }
       });
@@ -79,7 +79,7 @@ class _NewBotKnowledgeState extends State<NewBotKnowledge> {
           ),
           const SizedBox(height: 20),
           Expanded(
-            child: Consumer<KnowledgeBaseProvider>(
+            child: Consumer<KnowledgeBaseViewModel>(
               builder: (context, kbProvider, child) {
                 if (kbProvider.isLoading && kbProvider.knowledgeBases.isEmpty) {
                   // Display loading indicator while fetching conversations

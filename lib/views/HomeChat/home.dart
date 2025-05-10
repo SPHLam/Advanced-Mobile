@@ -1,5 +1,4 @@
 import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:project_ai_chat/viewmodels/emailchat_view_model.dart';
@@ -11,6 +10,7 @@ import 'package:project_ai_chat/viewmodels/auth_view_model.dart';
 import 'package:project_ai_chat/viewmodels/bot_view_model.dart';
 import 'package:project_ai_chat/viewmodels/knowledge_base_view_model.dart';
 import 'package:project_ai_chat/viewmodels/prompt_list_view_model.dart';
+import 'package:project_ai_chat/services/iap_service.dart';
 import '../../core/Widget/dropdown_button.dart';
 import '../../models/prompt.dart';
 import '../../utils/helpers/ads/ads_helper.dart';
@@ -23,7 +23,6 @@ import '../Prompt/widgets/prompt_details.dart';
 import 'Widgets/bottom_navigation.dart';
 import 'Widgets/menu.dart';
 import '../../models/ai_logo.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:screenshot/screenshot.dart';
 import 'Widgets/build_message.dart';
 import 'Widgets/input_message.dart';
@@ -36,10 +35,7 @@ class HomeChat extends StatefulWidget {
 }
 
 class _HomeChatState extends State<HomeChat> {
-  // AdMob
   InterstitialAd? _interstitialAd;
-
-  // Controller
   final TextEditingController _controller = TextEditingController();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final ScrollController _scrollController = ScrollController();
@@ -57,10 +53,8 @@ class _HomeChatState extends State<HomeChat> {
   @override
   void initState() {
     super.initState();
-    // Load interstitial ad when open app
     _loadInterstitialAd();
 
-    // Bắt sự kiện thay đổi text trong ô nhập dữ liệu
     _controller.addListener(() {
       setState(() {
         _hasText = _controller.text.isNotEmpty;
@@ -70,7 +64,6 @@ class _HomeChatState extends State<HomeChat> {
       });
     });
 
-    // Bắt sự lắng nghe khi focus vào ô nhập dữ liệu
     _focusNode.addListener(() {
       if (_focusNode.hasFocus) {
         setState(() {
@@ -79,24 +72,20 @@ class _HomeChatState extends State<HomeChat> {
       }
     });
 
-    // Lấy thông tin user
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadUserInfo();
       _loadConversation();
       _loadAllPrompt();
     });
 
-    // Lấy danh sách AI
     final aiChatList = Provider.of<AIChatList>(context, listen: false);
     _listAIItem = aiChatList.aiItems;
     _selectedAIItem = aiChatList.selectedAIItem.name;
 
-    // Hiển thị token
     Provider.of<HomeChatViewModel>(context, listen: false).updateRemainingUsage();
 
-    // Lấy danh sách Knowledgebase
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<KnowledgeBaseProvider>(context, listen: false)
+      Provider.of<KnowledgeBaseViewModel>(context, listen: false)
           .fetchAllKnowledgeBases(isLoadMore: false);
     });
   }
@@ -104,7 +93,7 @@ class _HomeChatState extends State<HomeChat> {
   void _loadInterstitialAd() {
     InterstitialAd.load(
       adUnitId: AdHelper.interstitialAdUnitId,
-      request: AdRequest(),
+      request: const AdRequest(),
       adLoadCallback: InterstitialAdLoadCallback(
         onAdLoaded: (InterstitialAd ad) {
           setState(() {
@@ -112,16 +101,16 @@ class _HomeChatState extends State<HomeChat> {
           });
           _interstitialAd?.show();
           _interstitialAd?.fullScreenContentCallback =
-            FullScreenContentCallback(
-              onAdDismissedFullScreenContent: (InterstitialAd ad) {
-                ad.dispose();
-                print("Interstitial Ad dismissed.");
-              },
-              onAdFailedToShowFullScreenContent: (InterstitialAd ad, AdError error) {
-                ad.dispose();
-                print("Failed to show Interstitial Ad: ${error.message}");
-              },
-            );
+              FullScreenContentCallback(
+                onAdDismissedFullScreenContent: (InterstitialAd ad) {
+                  ad.dispose();
+                  print("Interstitial Ad dismissed.");
+                },
+                onAdFailedToShowFullScreenContent: (InterstitialAd ad, AdError error) {
+                  ad.dispose();
+                  print("Failed to show Interstitial Ad: ${error.message}");
+                },
+              );
         },
         onAdFailedToLoad: (error) {
           print('Interstitial ad failed to load: $error');
@@ -140,7 +129,7 @@ class _HomeChatState extends State<HomeChat> {
 
   Future<void> _loadConversation() async {
     final aiItem =
-        _listAIItem.firstWhere((aiItem) => aiItem.name == _selectedAIItem);
+    _listAIItem.firstWhere((aiItem) => aiItem.name == _selectedAIItem);
     try {
       Provider.of<HomeChatViewModel>(context, listen: false)
           .fetchAllConversations(aiItem.id, 'dify')
@@ -155,7 +144,6 @@ class _HomeChatState extends State<HomeChat> {
 
   Future<void> _loadAllPrompt() async {
     try {
-      // Lấy danh sách prompts
       Provider.of<PromptListViewModel>(context, listen: false)
           .fetchAllPrompts()
           .then((_) {
@@ -221,7 +209,8 @@ class _HomeChatState extends State<HomeChat> {
     if (_files == null && _controller.text.isEmpty) return;
 
     try {
-      final aiItem = _listAIItem.firstWhere((aiItem) => aiItem.name == _selectedAIItem);
+      final aiItem =
+      _listAIItem.firstWhere((aiItem) => aiItem.name == _selectedAIItem);
 
       await Provider.of<HomeChatViewModel>(context, listen: false).sendMessage(
         _controller.text.isEmpty ? '' : _controller.text,
@@ -231,7 +220,7 @@ class _HomeChatState extends State<HomeChat> {
 
       _controller.clear();
       setState(() {
-        _files = null; // Clear image paths after sending
+        _files = null;
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -250,10 +239,8 @@ class _HomeChatState extends State<HomeChat> {
       _selectedAIItem = newValue;
       AIItem aiItem = _listAIItem.firstWhere((aiItem) => aiItem.name == newValue);
 
-      // Cập nhật selectedAIItem trong AIChatList
       Provider.of<AIChatList>(context, listen: false).setSelectedAIItem(aiItem);
 
-      // Di chuyển item được chọn lên đầu danh sách
       _listAIItem.removeWhere((aiItem) => aiItem.name == newValue);
       _listAIItem.insert(0, aiItem);
     });
@@ -300,44 +287,47 @@ class _HomeChatState extends State<HomeChat> {
       controller: _screenshotController,
       child: Scaffold(
         key: _scaffoldKey,
-        drawer: Menu(),
-        body: Consumer<HomeChatViewModel>(
-          builder: (context, messageModel, child) {
+        drawer: const Menu(),
+        body: Consumer2<HomeChatViewModel, IAPManager>(
+          builder: (context, messageModel, iapManager, child) {
             return Column(
               children: [
                 SafeArea(
                   child: Padding(
-                    padding: EdgeInsets.all(10.0),
+                    padding: const EdgeInsets.all(10.0),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         IconButton(
                           onPressed: () {
-                            // Open menu
                             _scaffoldKey.currentState?.openDrawer();
                           },
                           icon: const Icon(Icons.menu),
                         ),
                         const Spacer(),
                         !botModel.isChatWithMyBot
-                        ? AIDropdown(
+                            ? AIDropdown(
                           listAIItems: _listAIItem,
                           onChanged: (String? newValue) {
                             if (newValue != null) {
                               _updateSelectedAIItem(newValue);
                             }
                           },
-                        ) : Expanded(
+                        )
+                            : Expanded(
                           child: Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(20),
-                              color: const Color.fromARGB(255, 238, 240, 243),
+                              color:
+                              const Color.fromARGB(255, 238, 240, 243),
                             ),
                             height: 30,
-                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            padding:
+                            const EdgeInsets.symmetric(horizontal: 10),
                             child: Center(
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                MainAxisAlignment.spaceBetween,
                                 children: [
                                   Flexible(
                                     child: Text(
@@ -347,13 +337,13 @@ class _HomeChatState extends State<HomeChat> {
                                       maxLines: 1,
                                     ),
                                   ),
-                                  Row(children: [
-                                    const Icon(
+                                  const Row(children: [
+                                    Icon(
                                       Icons.flash_on,
                                       color: Colors.orange,
                                       size: 16,
                                     ),
-                                    const Text(
+                                    Text(
                                       '5',
                                       style: TextStyle(fontSize: 12),
                                     ),
@@ -365,7 +355,7 @@ class _HomeChatState extends State<HomeChat> {
                         ),
                         const Spacer(),
                         Container(
-                          padding: EdgeInsets.all(5),
+                          padding: const EdgeInsets.all(5),
                           decoration: BoxDecoration(
                             color: const Color.fromARGB(255, 238, 240, 243),
                             borderRadius: BorderRadius.circular(12.0),
@@ -377,18 +367,25 @@ class _HomeChatState extends State<HomeChat> {
                                 color: Colors.orange,
                                 size: 20,
                               ),
-                              messageModel.maxTokens == 99999 && messageModel.maxTokens != null
-                              ? const Text(
+                              messageModel.maxTokens == 99999 &&
+                                  messageModel.maxTokens != null
+                                  ? const Text(
                                 "Unlimited",
                                 style: TextStyle(
                                   fontSize: 10,
                                   color: Colors.orange,
                                 ),
                               )
-                              : Text(
-                                  '${[messageModel.remainingUsage, botModel.remainingUsage, emailModel.remainingUsage ?? 99999].reduce((a, b) => a < b ? a : b)}',
-                                  style: const TextStyle(color: Color.fromRGBO(119, 117, 117, 1.0)),
-                                ),
+                                  : Text(
+                                '${[
+                                  messageModel.remainingUsage,
+                                  botModel.remainingUsage,
+                                  emailModel.remainingUsage ?? 99999
+                                ].reduce((a, b) => a < b ? a : b)}',
+                                style: const TextStyle(
+                                    color:
+                                    Color.fromRGBO(119, 117, 117, 1.0)),
+                              ),
                             ],
                           ),
                         ),
@@ -416,18 +413,35 @@ class _HomeChatState extends State<HomeChat> {
                       children: [
                         Expanded(
                           child: Padding(
-                            padding: EdgeInsets.only(left: 10, bottom: 10, right: 10),
-                            child: !botModel.isChatWithMyBot
-                              ? Column(children: [
+                            padding: const EdgeInsets.only(
+                                left: 10, bottom: 10, right: 10),
+                            child: Column(
+                              children: [
+                                // Hiển thị trạng thái PRO/Free
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 8),
+                                  child: Text(
+                                    iapManager.isPro ? 'PRO User' : 'Free User',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: iapManager.isPro
+                                          ? Colors.green
+                                          : Colors.grey,
+                                    ),
+                                  ),
+                                ),
                                 Expanded(
-                                  child: ListView.builder(
+                                  child: !botModel.isChatWithMyBot
+                                      ? ListView.builder(
                                     controller: _scrollController,
                                     itemCount: messageModel.messages.length,
                                     itemBuilder: (context, index) {
-                                      final message = messageModel.messages[index];
+                                      final message =
+                                      messageModel.messages[index];
                                       return BuildMessage(message: message);
                                     },
-                                  ),
+                                  )
+                                      : const ChatWidget(),
                                 ),
                                 if (_showSlash)
                                   Consumer<PromptListViewModel>(
@@ -435,31 +449,47 @@ class _HomeChatState extends State<HomeChat> {
                                       if (promptList.isLoading) {
                                         return const CircularProgressIndicator();
                                       } else if (promptList.hasError) {
-                                        return Text('Error occur: ${promptList.error}');
+                                        return Text(
+                                            'Error occur: ${promptList.error}');
                                       } else {
                                         return Padding(
                                           padding: const EdgeInsets.all(5),
                                           child: Container(
-                                            width: MediaQuery.of(context).size.width / 3 * 2,
+                                            width:
+                                            MediaQuery.of(context).size.width /
+                                                3 *
+                                                2,
                                             decoration: BoxDecoration(
                                               border: Border.all(
-                                                color: const Color.fromARGB(255, 158, 198, 232),
+                                                color: const Color.fromARGB(
+                                                    255, 158, 198, 232),
                                                 width: 1.0,
                                               ),
-                                              borderRadius: BorderRadius.circular(20.0),
+                                              borderRadius:
+                                              BorderRadius.circular(20.0),
                                             ),
                                             constraints: BoxConstraints(
-                                              maxHeight: MediaQuery.of(context).size.height / 3,
+                                              maxHeight: MediaQuery.of(context)
+                                                  .size
+                                                  .height /
+                                                  3,
                                             ),
                                             child: ListView.builder(
-                                              itemCount: promptList.allPrompts.items.length,
+                                              itemCount: promptList
+                                                  .allPrompts.items.length,
                                               itemBuilder: (context, index) {
                                                 return ListTile(
-                                                  title: Text(promptList.allPrompts.items[index].title),
+                                                  title: Text(promptList
+                                                      .allPrompts
+                                                      .items[index]
+                                                      .title),
                                                   onTap: () {
                                                     _controller.text = "";
                                                     _showSlash = false;
-                                                    _openPromptDetailsDialog(context, promptList.allPrompts.items[index]);
+                                                    _openPromptDetailsDialog(
+                                                        context,
+                                                        promptList.allPrompts
+                                                            .items[index]);
                                                   },
                                                 );
                                               },
@@ -486,7 +516,7 @@ class _HomeChatState extends State<HomeChat> {
                                 ),
                                 const SizedBox(height: 5),
                               ],
-                            ) : ChatWidget()
+                            ),
                           ),
                         ),
                       ],
