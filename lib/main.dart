@@ -55,7 +55,7 @@ void main() async {
         ChangeNotifierProvider(create: (context) => EmailChatViewModel()),
         ChangeNotifierProvider(create: (context) => PromptListViewModel()),
         ChangeNotifierProvider(create: (context) => BotViewModel()),
-        ChangeNotifierProvider(create: (context) => KnowledgeBaseProvider()),
+        ChangeNotifierProvider(create: (context) => KnowledgeBaseViewModel()),
         ChangeNotifierProvider(create: (context) => AIChatList()),
         ChangeNotifierProvider(create: (_) => AuthViewModel()),
         ChangeNotifierProvider(create: (_) => IAPManager()..initialize()),

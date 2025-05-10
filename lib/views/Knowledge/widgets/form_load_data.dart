@@ -34,7 +34,7 @@ class _FormLoadDataState extends State<FormLoadData> {
       return;
     }
 
-    bool isSuccess = await Provider.of<KnowledgeBaseProvider>(context, listen: false)
+    bool isSuccess = await Provider.of<KnowledgeBaseViewModel>(context, listen: false)
         .uploadLocalFiles(_selectedFiles, widget.knowledgeId);
 
     if (isSuccess) {
@@ -297,7 +297,7 @@ class _FormLoadDataState extends State<FormLoadData> {
                     ),
                     elevation: 2,
                   ),
-                  child: Consumer<KnowledgeBaseProvider>(
+                  child: Consumer<KnowledgeBaseViewModel>(
                     builder: (context, kbProvider, child) {
                       return kbProvider.isLoading ? const SizedBox(
                         height: 20,

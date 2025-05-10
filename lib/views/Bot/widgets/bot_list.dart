@@ -95,7 +95,7 @@ class _BotListWidgetState extends State<BotListWidget> {
                   ),
                   SlidableAction(
                     onPressed: (context) {
-                      _openPublishBotDialog(context);
+                      _openPublishBotDialog(context, bots.data[index].id);
                     },
                     icon: Icons.publish,
                     backgroundColor: Colors.blue,
@@ -220,14 +220,14 @@ class _BotListWidgetState extends State<BotListWidget> {
     );
   }
 
-  void _openPublishBotDialog(BuildContext context) {
+  void _openPublishBotDialog(BuildContext context, String id) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (context) => const PublicBot(),
+      builder: (context) => PublicBot(assistantId: id),
     );
   }
 }

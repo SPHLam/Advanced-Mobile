@@ -27,7 +27,7 @@ class _FormLoadDataSlackState extends State<FormLoadDataSlack> {
       _formKey.currentState!.save();
 
       bool isSuccess =
-      await Provider.of<KnowledgeBaseProvider>(context, listen: false)
+      await Provider.of<KnowledgeBaseViewModel>(context, listen: false)
           .uploadSlack(widget.knowledgeId, _enteredName, _enteredSlackBotToken);
 
       if (isSuccess) {
@@ -213,7 +213,7 @@ class _FormLoadDataSlackState extends State<FormLoadDataSlack> {
                       ),
                       elevation: 3,
                     ),
-                    child: Consumer<KnowledgeBaseProvider>(
+                    child: Consumer<KnowledgeBaseViewModel>(
                       builder: (context, kbProvider, child) {
                         return kbProvider.isLoading
                             ? const SizedBox(

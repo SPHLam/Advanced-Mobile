@@ -85,7 +85,7 @@ class _HomeChatState extends State<HomeChat> {
     Provider.of<HomeChatViewModel>(context, listen: false).updateRemainingUsage();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<KnowledgeBaseProvider>(context, listen: false)
+      Provider.of<KnowledgeBaseViewModel>(context, listen: false)
           .fetchAllKnowledgeBases(isLoadMore: false);
     });
   }

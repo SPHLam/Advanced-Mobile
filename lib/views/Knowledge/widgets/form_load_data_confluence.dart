@@ -29,7 +29,7 @@ class _FormLoadDataConfluenceState extends State<FormLoadDataConfluence> {
       _formKey.currentState!.save();
 
       bool isSuccess =
-      await Provider.of<KnowledgeBaseProvider>(context, listen: false)
+      await Provider.of<KnowledgeBaseViewModel>(context, listen: false)
           .uploadConfluence(widget.knowledgeId, _enteredName, _enteredWikiPageUrl, _enteredConfluenceEmail, _enteredConfluenceToken);
 
       if (isSuccess) {
@@ -262,7 +262,7 @@ class _FormLoadDataConfluenceState extends State<FormLoadDataConfluence> {
                       ),
                       elevation: 3,
                     ),
-                    child: Consumer<KnowledgeBaseProvider>(
+                    child: Consumer<KnowledgeBaseViewModel>(
                       builder: (context, kbProvider, child) {
                         return kbProvider.isLoading
                             ? const SizedBox(

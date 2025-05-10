@@ -175,7 +175,7 @@ class _NewKnowledgeState extends State<NewKnowledge> {
                         ),
                         elevation: 2,
                       ),
-                      child: Consumer<KnowledgeBaseProvider>(
+                      child: Consumer<KnowledgeBaseViewModel>(
                         builder: (context, kbProvider, child) {
                           return kbProvider.isLoading
                               ? const SizedBox(

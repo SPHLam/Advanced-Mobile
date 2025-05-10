@@ -25,14 +25,14 @@ class _KnowledgeScreenState extends State<KnowledgeScreen> {
   void initState() {
     super.initState();
 
-    Provider.of<KnowledgeBaseProvider>(context, listen: false)
+    Provider.of<KnowledgeBaseViewModel>(context, listen: false)
         .fetchAllKnowledgeBases();
 
     _scrollController = ScrollController()
       ..addListener(() {
         if (_scrollController.position.pixels ==
             _scrollController.position.maxScrollExtent) {
-          Provider.of<KnowledgeBaseProvider>(context, listen: false)
+          Provider.of<KnowledgeBaseViewModel>(context, listen: false)
               .fetchAllKnowledgeBases(isLoadMore: true);
         }
       });
@@ -47,7 +47,7 @@ class _KnowledgeScreenState extends State<KnowledgeScreen> {
 
   void _addKnowledge(String knowledgeName, String description) async {
     bool isSuccess =
-    await Provider.of<KnowledgeBaseProvider>(context, listen: false)
+    await Provider.of<KnowledgeBaseViewModel>(context, listen: false)
         .addKnowledgeBase(knowledgeName, description);
 
     if (isSuccess) {
@@ -78,7 +78,7 @@ class _KnowledgeScreenState extends State<KnowledgeScreen> {
   void _editKnowledge(
       String id, int index, String knowledgeName, String description) async {
     bool isSuccess =
-    await Provider.of<KnowledgeBaseProvider>(context, listen: false)
+    await Provider.of<KnowledgeBaseViewModel>(context, listen: false)
         .editKnowledgeBase(id, index, knowledgeName, description);
 
     if (isSuccess) {
@@ -140,7 +140,7 @@ class _KnowledgeScreenState extends State<KnowledgeScreen> {
 
   void _removeKnowledge(String id, int index) async {
     bool isSuccess =
-    await Provider.of<KnowledgeBaseProvider>(context, listen: false)
+    await Provider.of<KnowledgeBaseViewModel>(context, listen: false)
         .deleteKnowledgeBase(id, index);
 
     if (isSuccess) {
@@ -162,7 +162,7 @@ class _KnowledgeScreenState extends State<KnowledgeScreen> {
 
   void _onSearch() {
     final query = _searchController.text.trim();
-    Provider.of<KnowledgeBaseProvider>(context, listen: false).query(query);
+    Provider.of<KnowledgeBaseViewModel>(context, listen: false).query(query);
   }
 
   @override
@@ -225,7 +225,7 @@ class _KnowledgeScreenState extends State<KnowledgeScreen> {
             ),
             const SizedBox(height: 20),
             Expanded(
-              child: Consumer<KnowledgeBaseProvider>(
+              child: Consumer<KnowledgeBaseViewModel>(
                 builder: (context, kbProvider, child) {
                   if (kbProvider.isLoading &&
                       kbProvider.knowledgeBases.isEmpty) {

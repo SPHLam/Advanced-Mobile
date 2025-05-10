@@ -28,7 +28,7 @@ class _NewKnowledgeState extends State<EditKnowledge> {
     _enteredName = widget.knowledge.name;
     _enteredPrompt = widget.knowledge.description;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<KnowledgeBaseProvider>(context, listen: false)
+      Provider.of<KnowledgeBaseViewModel>(context, listen: false)
           .fetchUnitsOfKnowledge(false, widget.knowledge.id);
     });
 
@@ -36,7 +36,7 @@ class _NewKnowledgeState extends State<EditKnowledge> {
       ..addListener(() {
         if (_scrollController.position.pixels ==
             _scrollController.position.maxScrollExtent) {
-          Provider.of<KnowledgeBaseProvider>(context, listen: false)
+          Provider.of<KnowledgeBaseViewModel>(context, listen: false)
               .fetchUnitsOfKnowledge(true, widget.knowledge.id);
         }
       });
@@ -101,7 +101,7 @@ class _NewKnowledgeState extends State<EditKnowledge> {
 
   void _removeUnit(String unitId) async {
     bool isSuccess =
-    await Provider.of<KnowledgeBaseProvider>(context, listen: false)
+    await Provider.of<KnowledgeBaseViewModel>(context, listen: false)
         .deleteUnit(unitId, widget.knowledge.id);
 
     if (isSuccess) {
@@ -122,12 +122,12 @@ class _NewKnowledgeState extends State<EditKnowledge> {
   }
 
   void _toggleUnitStatus(String unitId, bool isActive) async {
-    await Provider.of<KnowledgeBaseProvider>(context, listen: false)
+    await Provider.of<KnowledgeBaseViewModel>(context, listen: false)
         .updateStatusUnit(widget.knowledge.id, unitId, isActive);
   }
 
   void _onSearch(String query) {
-    Provider.of<KnowledgeBaseProvider>(context, listen: false)
+    Provider.of<KnowledgeBaseViewModel>(context, listen: false)
         .queryUnit(query.trim(), widget.knowledge.id);
   }
 
@@ -315,7 +315,7 @@ class _NewKnowledgeState extends State<EditKnowledge> {
                             onChanged: _onSearch,
                           ),
                           const SizedBox(height: 8),
-                          Consumer<KnowledgeBaseProvider>(
+                          Consumer<KnowledgeBaseViewModel>(
                             builder: (context, kbProvider, child) {
                               Knowledge kb = kbProvider
                                   .getKnowledgeById(widget.knowledge.id);
