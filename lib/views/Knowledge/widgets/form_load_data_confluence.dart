@@ -189,6 +189,7 @@ class _FormLoadDataConfluenceState extends State<FormLoadDataConfluence> {
                         prefixIcon: Icon(Icons.account_circle,
                             color: Colors.blue.shade600),
                       ),
+                      obscureText: true,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please input confluence email';
@@ -264,15 +265,13 @@ class _FormLoadDataConfluenceState extends State<FormLoadDataConfluence> {
                     ),
                     child: Consumer<KnowledgeBaseViewModel>(
                       builder: (context, kbProvider, child) {
-                        return kbProvider.isLoading
-                            ? const SizedBox(
+                        return kbProvider.isLoading ? const SizedBox(
                           height: 20,
                           width: 20,
                           child: CircularProgressIndicator(
                             color: Colors.white,
                           ),
-                        )
-                            : const Text(
+                        ) : const Text(
                           "Save",
                           style: TextStyle(
                             fontSize: 16,

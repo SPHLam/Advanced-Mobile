@@ -319,8 +319,7 @@ class KnowledgeBaseViewModel with ChangeNotifier {
     }
   }
 
-  Future<bool> updateStatusUnit(
-      String knowledgeId, String unitId, bool isActived) async {
+  Future<bool> updateStatusUnit(String knowledgeId, String unitId, bool isActived) async {
     isLoading = true;
     error = null;
     notifyListeners();

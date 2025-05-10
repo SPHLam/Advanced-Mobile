@@ -163,7 +163,7 @@ class _FormLoadDataSlackState extends State<FormLoadDataSlack> {
                         prefixIcon:
                         Icon(Icons.vpn_key, color: Colors.blue.shade600),
                       ),
-                      obscureText: true, // Che nội dung Slack Bot Token
+                      obscureText: true,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please input slack bot token';
