@@ -14,7 +14,7 @@ class DioKnowledgeBase {
       BaseOptions(
         baseUrl: 'https://knowledge-api.dev.jarvis.cx/kb-core/v1',
         connectTimeout: const Duration(seconds: 30),
-        receiveTimeout: const Duration(seconds: 30),
+        receiveTimeout: const Duration(seconds: 90),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
