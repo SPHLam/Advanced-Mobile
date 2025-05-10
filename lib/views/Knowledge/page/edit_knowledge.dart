@@ -100,9 +100,7 @@ class _NewKnowledgeState extends State<EditKnowledge> {
   }
 
   void _removeUnit(String unitId) async {
-    bool isSuccess =
-    await Provider.of<KnowledgeBaseViewModel>(context, listen: false)
-        .deleteUnit(unitId, widget.knowledge.id);
+    bool isSuccess = await Provider.of<KnowledgeBaseViewModel>(context, listen: false).deleteUnit(unitId, widget.knowledge.id);
 
     if (isSuccess) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -122,8 +120,22 @@ class _NewKnowledgeState extends State<EditKnowledge> {
   }
 
   void _toggleUnitStatus(String unitId, bool isActive) async {
-    await Provider.of<KnowledgeBaseViewModel>(context, listen: false)
-        .updateStatusUnit(widget.knowledge.id, unitId, isActive);
+    bool isSuccess = await Provider.of<KnowledgeBaseViewModel>(context, listen: false).updateStatusUnit(widget.knowledge.id, unitId, isActive);
+    if (isSuccess) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${isActive ? 'Enable' : 'Disable'} unit successful'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Update status failed'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   void _onSearch(String query) {
