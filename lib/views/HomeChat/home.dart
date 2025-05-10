@@ -415,9 +415,8 @@ class _HomeChatState extends State<HomeChat> {
                           child: Padding(
                             padding: const EdgeInsets.only(
                                 left: 10, bottom: 10, right: 10),
-                            child: Column(
+                            child: !botModel.isChatWithMyBot ? Column(
                               children: [
-                                // Hiển thị trạng thái PRO/Free
                                 Padding(
                                   padding: const EdgeInsets.symmetric(vertical: 8),
                                   child: Text(
@@ -431,8 +430,7 @@ class _HomeChatState extends State<HomeChat> {
                                   ),
                                 ),
                                 Expanded(
-                                  child: !botModel.isChatWithMyBot
-                                      ? ListView.builder(
+                                  child: ListView.builder(
                                     controller: _scrollController,
                                     itemCount: messageModel.messages.length,
                                     itemBuilder: (context, index) {
@@ -441,7 +439,6 @@ class _HomeChatState extends State<HomeChat> {
                                       return BuildMessage(message: message);
                                     },
                                   )
-                                      : const ChatWidget(),
                                 ),
                                 if (_showSlash)
                                   Consumer<PromptListViewModel>(
@@ -516,7 +513,7 @@ class _HomeChatState extends State<HomeChat> {
                                 ),
                                 const SizedBox(height: 5),
                               ],
-                            ),
+                            ) : ChatWidget(),
                           ),
                         ),
                       ],
