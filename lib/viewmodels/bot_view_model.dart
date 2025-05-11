@@ -77,6 +77,11 @@ class BotViewModel extends ChangeNotifier {
   String get query => _query;
   bool get isCreated => _isCreated;
 
+  void resetChatWithMyBot() {
+    _isChatWithMyBot = false;
+    notifyListeners();
+  }
+
   set query(String value) {
     if (_query != value) {
       _query = value;
@@ -152,10 +157,12 @@ class BotViewModel extends ChangeNotifier {
   }
 
   Future<bool> deleteBot(String id) {
+    _isChatWithMyBot = false;
     return _service.deleteBot(id);
   }
 
   Future<bool> updateBot(BotRequest newBot, String id) {
+    _isChatWithMyBot = false;
     return _service.updateBot(newBot, id);
   }
 

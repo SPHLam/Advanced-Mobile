@@ -209,15 +209,23 @@ class _HomeChatState extends State<HomeChat> {
     if (_files == null && _controller.text.isEmpty) return;
 
     try {
-      final aiItem =
-      _listAIItem.firstWhere((aiItem) => aiItem.name == _selectedAIItem);
-
-      await Provider.of<HomeChatViewModel>(context, listen: false).sendMessage(
-        _controller.text.isEmpty ? '' : _controller.text,
-        aiItem,
-        files: _files ?? [],
-      );
-
+      final botModel = Provider.of<BotViewModel>(context, listen: false);
+      if (botModel.isChatWithMyBot) {
+        // Gửi tin nhắn cho AI Bot
+        await botModel.askAssistant(
+          _controller.text.isEmpty ? '' : _controller.text,
+          files: _files,
+        );
+      } else {
+        // Gửi tin nhắn cho AI Item
+        final aiItem =
+        _listAIItem.firstWhere((aiItem) => aiItem.name == _selectedAIItem);
+        await Provider.of<HomeChatViewModel>(context, listen: false).sendMessage(
+          _controller.text.isEmpty ? '' : _controller.text,
+          aiItem,
+          files: _files ?? [],
+        );
+      }
       _controller.clear();
       setState(() {
         _files = null;
@@ -247,11 +255,10 @@ class _HomeChatState extends State<HomeChat> {
   }
 
   void _onTextChanged(String input) {
-    if (input.isNotEmpty) {
+    setState(() {
+      _hasText = input.isNotEmpty;
       _showSlash = input.startsWith('/');
-    } else {
-      _showSlash = false;
-    }
+    });
   }
 
   void _openPromptDetailsDialog(BuildContext context, Prompt prompt) {
@@ -271,6 +278,7 @@ class _HomeChatState extends State<HomeChat> {
           setState(() {
             _controller.text = result['content'];
             _sendMessage();
+            _showSlash = false;
           });
         } else if (result['action'] == 'update') {
           _loadAllPrompt();
@@ -305,39 +313,37 @@ class _HomeChatState extends State<HomeChat> {
                           icon: const Icon(Icons.menu),
                         ),
                         const Spacer(),
-                        !botModel.isChatWithMyBot
-                            ? AIDropdown(
+                        !botModel.isChatWithMyBot ? AIDropdown(
                           listAIItems: _listAIItem,
                           onChanged: (String? newValue) {
                             if (newValue != null) {
                               _updateSelectedAIItem(newValue);
                             }
                           },
-                        )
-                            : Expanded(
+                        ) : IntrinsicWidth(
                           child: Container(
+                            constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.6),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(20),
-                              color:
-                              const Color.fromARGB(255, 238, 240, 243),
+                              color: const Color.fromARGB(255, 238, 240, 243),
                             ),
                             height: 30,
-                            padding:
-                            const EdgeInsets.symmetric(horizontal: 10),
-                            child: Center(
-                              child: Row(
-                                mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Flexible(
-                                    child: Text(
-                                      botModel.currentChatBot.assistantName,
-                                      style: const TextStyle(fontSize: 12),
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 1,
-                                    ),
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    botModel.currentChatBot.assistantName,
+                                    style: const TextStyle(fontSize: 12),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
                                   ),
-                                  const Row(children: [
+                                ),
+                                const SizedBox(width: 8),
+                                Row(
+                                  children: const [
                                     Icon(
                                       Icons.flash_on,
                                       color: Colors.orange,
@@ -347,9 +353,9 @@ class _HomeChatState extends State<HomeChat> {
                                       '5',
                                       style: TextStyle(fontSize: 12),
                                     ),
-                                  ])
-                                ],
-                              ),
+                                  ],
+                                ),
+                              ],
                             ),
                           ),
                         ),
@@ -367,24 +373,20 @@ class _HomeChatState extends State<HomeChat> {
                                 color: Colors.orange,
                                 size: 20,
                               ),
-                              messageModel.maxTokens == 99999 &&
-                                  messageModel.maxTokens != null
-                                  ? const Text(
+                              messageModel.maxTokens == 99999 && messageModel.maxTokens != null
+                              ? const Text(
                                 "Unlimited",
                                 style: TextStyle(
                                   fontSize: 10,
                                   color: Colors.orange,
                                 ),
-                              )
-                                  : Text(
+                              ) : Text(
                                 '${[
                                   messageModel.remainingUsage,
                                   botModel.remainingUsage,
                                   emailModel.remainingUsage ?? 99999
                                 ].reduce((a, b) => a < b ? a : b)}',
-                                style: const TextStyle(
-                                    color:
-                                    Color.fromRGBO(119, 117, 117, 1.0)),
+                                style: const TextStyle(color: Color.fromRGBO(119, 117, 117, 1.0)),
                               ),
                             ],
                           ),
@@ -413,8 +415,7 @@ class _HomeChatState extends State<HomeChat> {
                       children: [
                         Expanded(
                           child: Padding(
-                            padding: const EdgeInsets.only(
-                                left: 10, bottom: 10, right: 10),
+                            padding: const EdgeInsets.only(left: 10, bottom: 10, right: 10),
                             child: !botModel.isChatWithMyBot ? Column(
                               children: [
                                 Padding(
@@ -438,7 +439,7 @@ class _HomeChatState extends State<HomeChat> {
                                       messageModel.messages[index];
                                       return BuildMessage(message: message);
                                     },
-                                  )
+                                  ),
                                 ),
                                 if (_showSlash)
                                   Consumer<PromptListViewModel>(
@@ -452,14 +453,10 @@ class _HomeChatState extends State<HomeChat> {
                                         return Padding(
                                           padding: const EdgeInsets.all(5),
                                           child: Container(
-                                            width:
-                                            MediaQuery.of(context).size.width /
-                                                3 *
-                                                2,
+                                            width: MediaQuery.of(context).size.width / 3 * 2,
                                             decoration: BoxDecoration(
                                               border: Border.all(
-                                                color: const Color.fromARGB(
-                                                    255, 158, 198, 232),
+                                                color: const Color.fromARGB(255, 158, 198, 232),
                                                 width: 1.0,
                                               ),
                                               borderRadius:
@@ -500,7 +497,13 @@ class _HomeChatState extends State<HomeChat> {
                                   focusNode: _focusNode,
                                   controller: _controller,
                                   onTextChanged: _onTextChanged,
-                                  sendMessage: _sendMessage,
+                                  sendMessage: (String content, List<String>? files) {
+                                    setState(() {
+                                      _files = files;
+                                      _controller.text = content;
+                                      _sendMessage();
+                                    });
+                                  },
                                   isOpenDeviceWidget: _isOpenDeviceWidget,
                                   toggleDeviceVisibility: _toggleDeviceVisibility,
                                   hasText: _hasText,
