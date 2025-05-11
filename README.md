@@ -9,12 +9,12 @@
 
 - Link Widget Tree: https://drive.google.com/file/d/1cFEh9j5UI-_DT-EFour0mVkPGp12_dgG/view?usp=sharing
 - Link Video Demo Milestone 1 - Mock UI: https://www.youtube.com/watch?v=L1deHl-FxM0
-- Link Video Demo Milestone 2 - Basic Features: https://youtu.be/RZsW-AoCyQI
+- Link Video Demo Milestone 2 - Basic Features: https://youtu.be/0S5WFeRdsVM
 - Link Video Demo Milestone 3 - Advance Features: https://youtu.be/Ng3Iv1RmXw0
 
 ## Các chức năng đã thực hiện
 
-### 2. Xác thực và phân quyền
+### 1. Xác thực và phân quyền
 
 - Trang chủ
 - Đăng ký tài khoản
@@ -22,7 +22,7 @@
 - Kiểm tra các ràng buộc khi người dùng nhập tên đăng nhập, mật khẩu
 - Đăng xuất tài khoản
 
-### 3. AI Chat
+### 2. AI Chat
 
 - Hiển thị nội dung chat
 - Chat với AI Chat box
@@ -32,7 +32,7 @@
 - Xem danh sách lịch sử thread chat
 - Mở lịch sử chat
 
-### 6. Quản lý và sử dụng prompt
+### 3. Quản lý và sử dụng prompt
 
 - Hiển thị và tìm kiếm public prompt
 - Lọc prompt theo category
