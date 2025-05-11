@@ -39,6 +39,7 @@ class _PreviewScreenState extends State<PreviewScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => {
             Provider.of<BotViewModel>(context, listen: false).isPreview = false,
+            Provider.of<BotViewModel>(context, listen: false).loadConversationHistory(),
             Navigator.pop(context)
           },
         ),

@@ -10,13 +10,13 @@ class InputWidget extends StatefulWidget {
   final FocusNode focusNode;
   final bool isOpenDeviceWidget;
   final Function toggleDeviceVisibility;
-  final Function sendMessage;
-  final Function onTextChanged;
+  final Function(String, List<String>?) sendMessage;
+  final Function(String) onTextChanged;
   final bool hasText;
   final Function(List<String>?) updateImagePaths;
-  final ScreenshotController screenshotController; // Nhận controller từ HomeChat
+  final ScreenshotController screenshotController;
 
-  InputWidget({
+  const InputWidget({
     Key? key,
     required this.controller,
     required this.focusNode,
@@ -37,8 +37,8 @@ class _InputWidgetState extends State<InputWidget> {
   List<String>? imagePaths;
 
   Future<void> _openGallery() async {
-    final ImagePicker _picker = ImagePicker();
-    final List<XFile>? images = await _picker.pickMultiImage();
+    final ImagePicker picker = ImagePicker();
+    final List<XFile>? images = await picker.pickMultiImage();
     if (images != null && images.isNotEmpty) {
       setState(() {
         imagePaths = [...(imagePaths ?? []), ...images.map((e) => e.path).toList()];
@@ -57,8 +57,8 @@ class _InputWidgetState extends State<InputWidget> {
 
   Future<void> _openCamera() async {
     await _requestCameraPermission();
-    final ImagePicker _picker = ImagePicker();
-    final XFile? image = await _picker.pickImage(source: ImageSource.camera);
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.camera);
     if (image != null) {
       setState(() {
         imagePaths = [...(imagePaths ?? []), image.path];
@@ -68,7 +68,7 @@ class _InputWidgetState extends State<InputWidget> {
     }
   }
 
-  void _takeScreenshot() async {
+  Future<void> _takeScreenshot() async {
     try {
       final image = await widget.screenshotController.capture();
       if (image != null) {
@@ -82,7 +82,7 @@ class _InputWidgetState extends State<InputWidget> {
         });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Cannot take the screenshot')),
+          const SnackBar(content: Text('Cannot take the screenshot')),
         );
       }
     } catch (e) {
@@ -97,6 +97,16 @@ class _InputWidgetState extends State<InputWidget> {
       imagePaths?.remove(path);
       widget.updateImagePaths(imagePaths);
     });
+  }
+
+  void _handleSendMessage() {
+    if (widget.hasText || (imagePaths != null && imagePaths!.isNotEmpty)) {
+      widget.sendMessage(widget.controller.text, imagePaths);
+      setState(() {
+        imagePaths = null;
+        widget.updateImagePaths(null);
+      });
+    }
   }
 
   @override
@@ -139,7 +149,7 @@ class _InputWidgetState extends State<InputWidget> {
                   color: Colors.grey.withOpacity(0.2),
                   spreadRadius: 1,
                   blurRadius: 2,
-                  offset: Offset(0, 1),
+                  offset: const Offset(0, 1),
                 ),
               ],
             ),
@@ -188,7 +198,7 @@ class _InputWidgetState extends State<InputWidget> {
                 TextField(
                   focusNode: widget.focusNode,
                   controller: widget.controller,
-                  onChanged: (input) => widget.onTextChanged(input),
+                  onChanged: widget.onTextChanged,
                   maxLines: null,
                   decoration: InputDecoration(
                     contentPadding: const EdgeInsets.symmetric(
@@ -203,7 +213,7 @@ class _InputWidgetState extends State<InputWidget> {
                       fontSize: 14,
                     ),
                     border: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.grey, width: 1),
+                      borderSide: const BorderSide(color: Colors.grey, width: 1),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     enabledBorder: OutlineInputBorder(
@@ -214,7 +224,7 @@ class _InputWidgetState extends State<InputWidget> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
+                      borderSide: const BorderSide(
                         color: Colors.blue,
                         width: 0.5,
                       ),
@@ -229,13 +239,7 @@ class _InputWidgetState extends State<InputWidget> {
         IconButton(
           icon: const Icon(Icons.send),
           onPressed: widget.hasText || (imagePaths != null && imagePaths!.isNotEmpty)
-              ? () {
-            widget.sendMessage();
-            setState(() {
-              imagePaths = null;
-              widget.updateImagePaths(null);
-            });
-          }
+              ? _handleSendMessage
               : null,
           style: IconButton.styleFrom(
             foregroundColor: widget.hasText || (imagePaths != null && imagePaths!.isNotEmpty)

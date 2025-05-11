@@ -12,6 +12,7 @@ import 'package:project_ai_chat/services/analytics_service.dart';
 import 'package:project_ai_chat/viewmodels/auth_view_model.dart';
 import 'package:provider/provider.dart';
 
+import '../../viewmodels/bot_view_model.dart';
 import '../ForgetPassword/forget_password.dart';
 import 'package:project_ai_chat/utils/validators/login_validator.dart';
 
@@ -72,6 +73,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (success && mounted) {
+        context.read<BotViewModel>().resetChatWithMyBot();
         // Chuyển sang màn hình HomeChat
         Navigator.pushReplacement(
           context,
@@ -136,6 +138,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (success && mounted) {
+        context.read<BotViewModel>().resetChatWithMyBot();
         // Navigate to HomeChat screen
         Navigator.pushReplacement(
           context,
