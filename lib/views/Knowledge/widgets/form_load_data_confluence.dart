@@ -189,7 +189,6 @@ class _FormLoadDataConfluenceState extends State<FormLoadDataConfluence> {
                         prefixIcon: Icon(Icons.account_circle,
                             color: Colors.blue.shade600),
                       ),
-                      obscureText: true,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please input confluence email';
@@ -214,6 +213,7 @@ class _FormLoadDataConfluenceState extends State<FormLoadDataConfluence> {
                         prefixIcon:
                         Icon(Icons.vpn_key, color: Colors.blue.shade600),
                       ),
+                      obscureText: true,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please input confluence access token';
